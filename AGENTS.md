@@ -4,6 +4,8 @@
 
 EnvIO is a desktop app for researchers: tasks, deadline planning, research ideas and machine monitoring. It is built on the dannysmith/tauri-template starter. The product plan is in `docs/PLAN.md`.
 
+Code style follows `.claude/skills/code-style/SKILL.md` (single files written like karpathy/nanochat, modules split like LokiSharp). Commit messages follow `.claude/skills/git-comment/SKILL.md`.
+
 ## Core Rules
 
 ### New Sessions

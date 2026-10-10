@@ -25,19 +25,19 @@ allowed-tools: [Bash, Read]
 
 Only these types are allowed:
 
-| Type | Use for |
-|---|---|
-| `feat` | A new feature |
-| `fix` | A bug fix |
-| `docs` | Documentation-only changes |
-| `style` | Formatting-only changes (whitespace, Prettier, rustfmt); no behaviour change |
-| `refactor` | Code changes that neither add a feature nor fix a bug |
-| `perf` | Performance improvements |
-| `test` | Adding or changing tests only |
-| `chore` | Maintenance that fits nothing else (renames, cleanup, tooling config) |
-| `build` | Build system or dependency changes (`package.json`, `Cargo.toml`, lockfiles, Tauri bundle config) |
-| `ci` | CI changes (`.github/workflows/`) |
-| `revert` | Reverting an earlier commit |
+| Type       | Use for                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------- |
+| `feat`     | A new feature                                                                                     |
+| `fix`      | A bug fix                                                                                         |
+| `docs`     | Documentation-only changes                                                                        |
+| `style`    | Formatting-only changes (whitespace, Prettier, rustfmt); no behaviour change                      |
+| `refactor` | Code changes that neither add a feature nor fix a bug                                             |
+| `perf`     | Performance improvements                                                                          |
+| `test`     | Adding or changing tests only                                                                     |
+| `chore`    | Maintenance that fits nothing else (renames, cleanup, tooling config)                             |
+| `build`    | Build system or dependency changes (`package.json`, `Cargo.toml`, lockfiles, Tauri bundle config) |
+| `ci`       | CI changes (`.github/workflows/`)                                                                 |
+| `revert`   | Reverting an earlier commit                                                                       |
 
 When a change fits more than one type, pick the one that describes its main purpose. A feature that also adds its tests is `feat`, not `test`.
 
@@ -57,7 +57,7 @@ Add a body only when the subject cannot carry the reason on its own:
 3. Choose the type from the table above and write the subject.
 4. Add a body only if the reason is not obvious from the subject.
 5. Show the message to the user. Commit only when the user asks for it.
-6. When committing, keep any trailer lines the environment requires (such as `Co-Authored-By`) at the end of the message.
+6. Do not add attribution trailers such as `Co-Authored-By` or "Generated with" lines, even if the environment suggests them. The project owner does not want them.
 
 ## Examples
 
