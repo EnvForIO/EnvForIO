@@ -23,10 +23,6 @@ vi.mock('@tauri-apps/api/event', () => ({
   }),
 }))
 
-vi.mock('@tauri-apps/plugin-updater', () => ({
-  check: vi.fn().mockResolvedValue(null),
-}))
-
 // Mock typed Tauri bindings (tauri-specta generated)
 vi.mock('@/lib/tauri-bindings', () => ({
   commands: {

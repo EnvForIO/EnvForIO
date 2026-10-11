@@ -36,7 +36,7 @@
     "macOSPrivateApi": true
   },
   "bundle": {
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": false,
     "active": true,
     "targets": "all",
     "icon": [
@@ -58,16 +58,6 @@
       "providerShortName": null,
       "entitlements": null,
       "exceptionDomain": ""
-    }
-  },
-  "plugins": {
-    "updater": {
-      "active": true,
-      "endpoints": [
-        "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest/download/latest.json"
-      ],
-      "dialog": true,
-      "pubkey": "YOUR_UPDATER_PUBLIC_KEY_HERE"
     }
   }
 }
