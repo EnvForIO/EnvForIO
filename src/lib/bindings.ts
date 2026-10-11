@@ -142,6 +142,85 @@ async updateQuickPaneShortcut(shortcut: string | null) : Promise<Result<null, st
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Today as EnvIO counts it (the day starts at 07:00), 'YYYY-MM-DD'.
+ * The UI uses it to show "My Day" and overdue dates without its own day logic.
+ */
+async getToday() : Promise<string> {
+    return await TAURI_INVOKE("get_today");
+},
+async listTasks(view: TaskView) : Promise<Result<Task[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_tasks", { view }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async createTask(title: string, view: TaskView) : Promise<Result<Task, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("create_task", { title, view }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async updateTask(id: number, update: TaskUpdate) : Promise<Result<Task, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("update_task", { id, update }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setTaskDone(id: number, done: boolean) : Promise<Result<Task, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_task_done", { id, done }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteTask(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_task", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listTaskSteps(taskId: number) : Promise<Result<TaskStep[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_task_steps", { taskId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async addTaskStep(taskId: number, title: string) : Promise<Result<TaskStep, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_task_step", { taskId, title }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setTaskStepDone(id: number, done: boolean) : Promise<Result<TaskStep, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_task_step_done", { id, done }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteTaskStep(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_task_step", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -155,6 +234,19 @@ async updateQuickPaneShortcut(shortcut: string | null) : Promise<Result<null, st
 
 /** user-defined types **/
 
+export type AppError = 
+/**
+ * The row asked for does not exist (deleted, or a stale id from the UI).
+ */
+{ type: "NotFound"; what: string; id: number } | 
+/**
+ * The input breaks a rule, e.g. an empty title.
+ */
+{ type: "Invalid"; message: string } | 
+/**
+ * SQLite failed. The message is for logs; the UI shows a generic error.
+ */
+{ type: "Database"; message: string }
 /**
  * Application preferences that persist to disk.
  * Only contains settings that should be saved between sessions.
@@ -195,6 +287,16 @@ export type RecoveryError =
  * JSON serialization/deserialization error
  */
 { type: "ParseError"; message: string }
+export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; stepCount: number; stepsDone: number; createdAt: string }
+export type TaskStep = { id: number; taskId: number; title: string; isDone: boolean; sortOrder: number }
+/**
+ * Everything the details pane can edit, sent whole on every save.
+ */
+export type TaskUpdate = { title: string; note: string; isImportant: boolean; isPinned: boolean; inMyDay: boolean; dueDate: string | null }
+/**
+ * The built-in lists in the sidebar.
+ */
+export type TaskView = "MyDay" | "Important" | "Planned" | "Tasks"
 
 /** tauri-specta globals **/
 

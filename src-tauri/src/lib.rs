@@ -4,8 +4,15 @@
 //! Command implementations are organized in the `commands` module,
 //! and shared types are in the `types` module.
 
+mod api;
 mod bindings;
 mod commands;
+mod config;
+mod db;
+mod domain;
+mod entity;
+mod errors;
+mod service;
 mod types;
 mod utils;
 
@@ -97,6 +104,9 @@ pub fn run() {
         .plugin(tauri_plugin_os::init())
         .setup(|app| {
             log::info!("Application starting up");
+
+            // Open the database before any window can call a command that needs it.
+            app.manage(config::AppState::open(app.handle())?);
             log::debug!(
                 "App handle initialized for package: {}",
                 app.package_info().name
