@@ -1,8 +1,16 @@
 import { render, screen } from '@/test/test-utils'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import App from './App'
 
-// Tauri bindings are mocked globally in src/test/setup.ts
+// Tauri bindings are mocked globally in src/test/setup.ts.
+// Language detection and the native menu need the Tauri runtime, which tests do not have.
+vi.mock('./i18n/language-init', () => ({
+  initializeLanguage: vi.fn().mockResolvedValue(undefined),
+}))
+vi.mock('./lib/menu', () => ({
+  buildAppMenu: vi.fn().mockResolvedValue(undefined),
+  setupMenuLanguageListener: vi.fn(),
+}))
 
 describe('App', () => {
   it('renders main window layout', () => {

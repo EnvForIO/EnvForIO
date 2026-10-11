@@ -71,7 +71,7 @@ fn init_quick_pane_macos(app: &AppHandle) -> Result<(), String> {
     log::debug!("Creating quick pane as NSPanel (macOS)");
 
     let panel = PanelBuilder::<_, QuickPanePanel>::new(app, QUICK_PANE_LABEL)
-        .url(WebviewUrl::App("quick-pane.html".into()))
+        .url(WebviewUrl::App("index.html?window=quick-pane".into()))
         .title("Quick Entry")
         .size(Size::Logical(LogicalSize::new(500.0, 72.0)))
         .level(PanelLevel::Status) // Status level to appear above fullscreen apps
@@ -111,7 +111,7 @@ fn init_quick_pane_standard(app: &AppHandle) -> Result<(), String> {
     WebviewWindowBuilder::new(
         app,
         QUICK_PANE_LABEL,
-        WebviewUrl::App("quick-pane.html".into()),
+        WebviewUrl::App("index.html?window=quick-pane".into()),
     )
     .title("Quick Entry")
     .inner_size(500.0, 72.0)
