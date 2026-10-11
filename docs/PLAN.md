@@ -197,7 +197,7 @@ Example: ticking a task as done.
   - The Tauri CLI is installed per project with npm, not globally
 - Known gap: there is no `clang-cl` command. It is only needed when cross-compiling dependencies with C code (such as SQLite), and `cargo-xwin` may handle it. If it errors, install `clang-tools` or add a `clang-cl` link to `clang`.
 - 2026-11-19: Tauri needs rustc 1.90+, so `rustup update stable` upgraded Rust to 1.100.0; the Windows target is kept. rustup in WSL comes from snap and has no `~/.cargo/env`, so `source ~/.cargo/env &&` was removed from the template's npm scripts.
-- Whether the environment really works is confirmed only when Phase 0 builds once.
+- 2026-11-19 Phase 0: the cross-compile works. `cargo-xwin` lives in `~/.cargo/bin`, which is not on PATH, so it is linked into `~/.local/bin`. `clang-cl` was not needed yet.
 - Nothing to install on Windows; WebView2 ships with Windows 11.
 - `sudo` in WSL needs a password, so system packages are installed by hand.
 - How Windows builds are produced:
@@ -209,8 +209,8 @@ Example: ticking a task as done.
 
 ### Phase 0: verify the toolchain
 
-- [ ] Cross-compile a Windows exe in WSL and run it on this machine
-- [ ] Show a transparent, frameless, draggable window
+- [x] Cross-compile a Windows exe in WSL and run it on this machine (2026-11-19; details in `docs/m0_toolchain.md`)
+- [x] Show a transparent, frameless, draggable window (2026-11-19, confirmed on Windows 11)
 
 If this fails, revisit the "no toolchain on Windows" premise.
 
