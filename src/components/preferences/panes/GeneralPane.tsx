@@ -1,25 +1,15 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Switch } from '@/components/ui/switch'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { ShortcutPicker } from '../ShortcutPicker'
 import { SettingsField, SettingsSection } from '../shared/SettingsComponents'
 import { usePreferences, useSavePreferences } from '@/services/preferences'
 import { commands } from '@/lib/tauri-bindings'
 import { logger } from '@/lib/logger'
+import { LaunchAtLogin } from './LaunchAtLogin'
 
 export function GeneralPane() {
   const { t } = useTranslation()
-  // Example local state - these are NOT persisted to disk
-  // To add persistent preferences:
-  // 1. Add the field to AppPreferences in both Rust and TypeScript
-  // 2. Use usePreferencesManager() and updatePreferences()
-  const [exampleText, setExampleText] = useState('Example value')
-  const [exampleToggle, setExampleToggle] = useState(true)
-
   // Load preferences for keyboard shortcuts
   const { data: preferences } = usePreferences()
   const savePreferences = useSavePreferences()
@@ -102,32 +92,12 @@ export function GeneralPane() {
         </SettingsField>
       </SettingsSection>
 
-      <SettingsSection title={t('preferences.general.exampleSettings')}>
+      <SettingsSection title={t('preferences.general.startup')}>
         <SettingsField
-          label={t('preferences.general.exampleText')}
-          description={t('preferences.general.exampleTextDescription')}
+          label={t('preferences.general.launchAtLogin')}
+          description={t('preferences.general.launchAtLoginDescription')}
         >
-          <Input
-            value={exampleText}
-            onChange={e => setExampleText(e.target.value)}
-            placeholder={t('preferences.general.exampleTextPlaceholder')}
-          />
-        </SettingsField>
-
-        <SettingsField
-          label={t('preferences.general.exampleToggle')}
-          description={t('preferences.general.exampleToggleDescription')}
-        >
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="example-toggle"
-              checked={exampleToggle}
-              onCheckedChange={setExampleToggle}
-            />
-            <Label htmlFor="example-toggle" className="text-sm">
-              {exampleToggle ? t('common.enabled') : t('common.disabled')}
-            </Label>
-          </div>
+          <LaunchAtLogin />
         </SettingsField>
       </SettingsSection>
     </div>

@@ -9,6 +9,8 @@ mod bindings;
 mod commands;
 mod config;
 mod db;
+#[cfg(desktop)]
+mod desktop;
 mod domain;
 mod entity;
 mod errors;
@@ -43,6 +45,15 @@ pub fn run() {
                 let _ = window.unminimize();
             }
         }));
+    }
+
+    // Autostart: the "Launch at login" switch in Preferences > General
+    #[cfg(desktop)]
+    {
+        app_builder = app_builder.plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            Some(vec![desktop::tray::AUTOSTART_ARG]),
+        ));
     }
 
     // Window state plugin - saves/restores window position and size
@@ -107,6 +118,18 @@ pub fn run() {
 
             // Open the database before any window can call a command that needs it.
             app.manage(config::AppState::open(app.handle())?);
+
+            // The tray keeps EnvIO reachable after its window is closed.
+            #[cfg(desktop)]
+            {
+                desktop::tray::create(app.handle())?;
+                // Started by "Launch at login": stay in the tray instead of opening the window.
+                if std::env::args().any(|arg| arg == desktop::tray::AUTOSTART_ARG) {
+                    if let Some(window) = app.get_webview_window("main") {
+                        window.hide()?;
+                    }
+                }
+            }
             log::debug!(
                 "App handle initialized for package: {}",
                 app.package_info().name
@@ -150,15 +173,14 @@ pub fn run() {
         .build(tauri::generate_context!())
         .expect("error while building tauri application")
         .run(|app_handle, event| match &event {
-            // macOS: Hide the main window instead of quitting so the dock icon can reopen it
-            // and the quick-pane shortcut works independently of the main window.
-            // On other platforms, the close proceeds normally and the app exits.
+            // Closing the main window hides it to the tray instead of quitting, so the
+            // tray, autostart and the quick-pane shortcut keep working. Quit from the tray.
             RunEvent::WindowEvent {
                 label,
                 event: WindowEvent::CloseRequested { api, .. },
                 ..
             } if label == "main" => {
-                #[cfg(target_os = "macos")]
+                #[cfg(desktop)]
                 {
                     api.prevent_close();
 

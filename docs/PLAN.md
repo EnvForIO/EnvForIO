@@ -226,7 +226,7 @@ Before starting, design the tables for Phase 2's needs (projects, deadlines, est
 - [ ] Context menu: rename, pin, delete
 - [ ] Adjustable material, font and size, applied to both windows
 - [ ] Data stored locally
-- [ ] Tray icon, autostart, remembered window position
+- [x] Tray icon, autostart, remembered window position (2026-11-19; closing the window now hides it to the tray)
 
 ### Phase 2: DayEcho parity
 

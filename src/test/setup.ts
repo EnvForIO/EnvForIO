@@ -23,6 +23,12 @@ vi.mock('@tauri-apps/api/event', () => ({
   }),
 }))
 
+vi.mock('@tauri-apps/plugin-autostart', () => ({
+  isEnabled: vi.fn().mockResolvedValue(false),
+  enable: vi.fn().mockResolvedValue(undefined),
+  disable: vi.fn().mockResolvedValue(undefined),
+}))
+
 // Mock typed Tauri bindings (tauri-specta generated)
 vi.mock('@/lib/tauri-bindings', () => ({
   commands: {

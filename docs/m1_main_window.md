@@ -85,3 +85,10 @@ Conventions:
 - `src/pages/tasks/`: list page, task row, details pane, steps. `src/components/layout/SidebarNav.tsx`: the four lists with open counts.
 - The template's `components/layout/` is kept instead of a new `src/layouts/` folder, to avoid moving template files for no gain.
 - Known gap: the details pane finds the task in the current list, so un-starring a task in Important closes the pane.
+
+## Step 4: tray, autostart, window position
+
+- `src-tauri/src/desktop/tray.rs`: left click shows the window; the menu has "Show EnvIO" and "Quit EnvIO" (English constants in Rust, not i18n strings).
+- Closing the main window hides it to the tray on every desktop platform (the template did this only on macOS). Quit from the tray.
+- "Launch at login" lives in Preferences > General and uses `tauri-plugin-autostart`. The OS stores the setting. A login start passes `--autostart`, and EnvIO then starts hidden in the tray.
+- Window position and size were already remembered by the template's `window-state` plugin; it saves before hiding.
