@@ -13,11 +13,10 @@ vi.mock('./lib/menu', () => ({
 }))
 
 describe('App', () => {
-  it('renders main window layout', () => {
+  it('renders the My Day list by default', () => {
     render(<App />)
-    expect(
-      screen.getByRole('heading', { name: /hello world/i })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /my day/i })).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/add a task/i)).toBeInTheDocument()
   })
 
   it('renders title bar with traffic light buttons', () => {

@@ -50,6 +50,24 @@ describe('UIStore', () => {
     expect(useUIStore.getState().preferencesOpen).toBe(false)
   })
 
+  it('opens the details pane only while a task is selected', () => {
+    const { selectTask, selectView } = useUIStore.getState()
+
+    selectTask(7)
+    expect(useUIStore.getState()).toMatchObject({
+      selectedTaskId: 7,
+      rightSidebarVisible: true,
+    })
+
+    // Switching lists closes the details pane, like Microsoft To Do.
+    selectView('Planned')
+    expect(useUIStore.getState()).toMatchObject({
+      selectedView: 'Planned',
+      selectedTaskId: null,
+      rightSidebarVisible: false,
+    })
+  })
+
   it('toggles command palette', () => {
     const { toggleCommandPalette } = useUIStore.getState()
 

@@ -7,6 +7,9 @@ import { TitleBar } from '@/components/titlebar/TitleBar'
 import { LeftSideBar } from './LeftSideBar'
 import { RightSideBar } from './RightSideBar'
 import { MainWindowContent } from './MainWindowContent'
+import { SidebarNav } from './SidebarNav'
+import { TaskListPage } from '@/pages/tasks/TaskListPage'
+import { TaskDetails } from '@/pages/tasks/TaskDetails'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
 import { PreferencesDialog } from '@/components/preferences/PreferencesDialog'
 import { Toaster } from 'sonner'
@@ -21,8 +24,8 @@ import { cn } from '@/lib/utils'
  * Sidebar defaults + main default must equal 100.
  */
 const LAYOUT = {
-  leftSidebar: { default: 20, min: 15, max: 40 },
-  rightSidebar: { default: 20, min: 15, max: 40 },
+  leftSidebar: { default: 18, min: 12, max: 30 },
+  rightSidebar: { default: 25, min: 20, max: 40 },
   main: { min: 30 },
 } as const
 
@@ -50,7 +53,9 @@ export function MainWindow() {
             maxSize={LAYOUT.leftSidebar.max}
             className={cn(!leftSidebarVisible && 'hidden')}
           >
-            <LeftSideBar />
+            <LeftSideBar>
+              <SidebarNav />
+            </LeftSideBar>
           </ResizablePanel>
 
           <ResizableHandle className={cn(!leftSidebarVisible && 'hidden')} />
@@ -59,7 +64,9 @@ export function MainWindow() {
             defaultSize={MAIN_CONTENT_DEFAULT}
             minSize={LAYOUT.main.min}
           >
-            <MainWindowContent />
+            <MainWindowContent>
+              <TaskListPage />
+            </MainWindowContent>
           </ResizablePanel>
 
           <ResizableHandle className={cn(!rightSidebarVisible && 'hidden')} />
@@ -70,7 +77,9 @@ export function MainWindow() {
             maxSize={LAYOUT.rightSidebar.max}
             className={cn(!rightSidebarVisible && 'hidden')}
           >
-            <RightSideBar />
+            <RightSideBar>
+              <TaskDetails />
+            </RightSideBar>
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
