@@ -218,7 +218,7 @@ If this fails, revisit the "no toolchain on Windows" premise.
 
 Before starting, design the tables for Phase 2's needs (projects, deadlines, estimates, scheduled dates) to avoid rework.
 
-- [ ] Three-pane main window: lists on the left, tasks in the middle, details on the right (see "UI shape"); start with My Day, Important, Planned and Tasks
+- [x] Three-pane main window: lists on the left, tasks in the middle, details on the right (see "UI shape"); start with My Day, Important, Planned and Tasks (2026-11-19)
 - [ ] Two separate windows: a capsule on top and a todo card below; dragging one moves the other; each resizes independently
 - [ ] The capsule expands into a heatmap with year / month / week ranges
 - [ ] Clicking a day on the heatmap switches the card to that day's todos
