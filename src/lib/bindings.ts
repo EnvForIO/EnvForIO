@@ -221,6 +221,30 @@ async deleteTaskStep(id: number) : Promise<Result<null, AppError>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async listDayTasks(date: string) : Promise<Result<Task[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_day_tasks", { date }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async createDayTask(title: string, date: string) : Promise<Result<Task, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("create_day_task", { title, date }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getDayCompletion(from: string, to: string) : Promise<Result<DayCompletion[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_day_completion", { from, to }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -262,6 +286,10 @@ quick_pane_shortcut: string | null;
  * If None, uses system locale detection
  */
 language: string | null }
+/**
+ * How much of one day's tasks are done: one heatmap cell.
+ */
+export type DayCompletion = { date: string; total: number; done: number }
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 /**
  * Error types for recovery operations (typed for frontend matching)

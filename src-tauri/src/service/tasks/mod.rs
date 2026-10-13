@@ -136,4 +136,51 @@ mod tests {
             Err(AppError::NotFound { .. })
         ));
     }
+
+    #[test]
+    fn a_day_holds_its_my_day_and_due_tasks() {
+        let conn = open_in_memory();
+        let today_task = mutation::create_on_day(&conn, "standup", TODAY, TODAY).unwrap();
+        assert_eq!(today_task.my_day_date.as_deref(), Some(TODAY));
+        let later = mutation::create_on_day(&conn, "review", "2026-11-21", TODAY).unwrap();
+        assert_eq!(later.due_date.as_deref(), Some("2026-11-21"));
+        assert!(later.my_day_date.is_none());
+
+        assert_eq!(titles(&query::list_day(&conn, TODAY).unwrap()), ["standup"]);
+        assert_eq!(
+            titles(&query::list_day(&conn, "2026-11-21").unwrap()),
+            ["review"]
+        );
+        assert!(query::list_day(&conn, "2026-11-20").unwrap().is_empty());
+        assert!(mutation::create_on_day(&conn, "x", "someday", TODAY).is_err());
+    }
+
+    #[test]
+    fn day_completion_counts_each_task_once_per_day() {
+        let conn = open_in_memory();
+        let a = mutation::create_on_day(&conn, "a", TODAY, TODAY).unwrap();
+        mutation::create_on_day(&conn, "b", TODAY, TODAY).unwrap();
+        mutation::create_on_day(&conn, "c", "2026-11-25", TODAY).unwrap();
+        mutation::set_done(&conn, a.id, true).unwrap();
+        // In My Day today and also due today: still one task for today.
+        let edit = TaskUpdate {
+            title: "a".into(),
+            note: String::new(),
+            is_important: false,
+            is_pinned: false,
+            in_my_day: true,
+            due_date: Some(TODAY.into()),
+        };
+        mutation::update(&conn, a.id, &edit, TODAY).unwrap();
+
+        let days = query::day_completion(&conn, "2026-11-01", "2026-11-30").unwrap();
+        let summary: Vec<_> = days
+            .iter()
+            .map(|d| (d.date.as_str(), d.total, d.done))
+            .collect();
+        assert_eq!(summary, [(TODAY, 2, 1), ("2026-11-25", 1, 0)]);
+        assert!(query::day_completion(&conn, "2026-12-01", "2026-12-31")
+            .unwrap()
+            .is_empty());
+    }
 }

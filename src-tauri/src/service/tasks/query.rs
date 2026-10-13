@@ -42,6 +42,55 @@ pub fn list(conn: &Connection, view: TaskView, today: &str) -> AppResult<Vec<Tas
     Ok(rows.collect::<Result<_, _>>()?)
 }
 
+// ---------------------------------------------------------------------------
+// Days (Todo Duo card and heatmap)
+//
+// A task belongs to a day when it was put in My Day that day or is due that
+// day. A task can belong to two days (in My Day on Monday, due Friday).
+
+/// How much of one day's tasks are done: one heatmap cell.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+pub struct DayCompletion {
+    pub date: String, // 'YYYY-MM-DD'
+    pub total: i64,
+    pub done: i64,
+}
+
+pub fn list_day(conn: &Connection, date: &str) -> AppResult<Vec<Task>> {
+    let sql = format!(
+        "SELECT {TASK_COLUMNS} FROM tasks t WHERE t.my_day_date = ?1 OR t.due_date = ?1 {ORDER}"
+    );
+    let mut stmt = conn.prepare(&sql)?;
+    let rows = stmt.query_map(params![date], Task::from_row)?;
+    Ok(rows.collect::<Result<_, _>>()?)
+}
+
+/// Completion for every day in `from..=to` that has at least one task.
+/// Days without tasks are left out; the UI draws them empty.
+pub fn day_completion(conn: &Connection, from: &str, to: &str) -> AppResult<Vec<DayCompletion>> {
+    // UNION (not UNION ALL) so a task in My Day and due on the same day counts once.
+    let mut stmt = conn.prepare(
+        "SELECT day, count(*), sum(done) FROM (
+             SELECT id, my_day_date AS day, done_at IS NOT NULL AS done
+               FROM tasks WHERE my_day_date BETWEEN ?1 AND ?2
+             UNION
+             SELECT id, due_date, done_at IS NOT NULL
+               FROM tasks WHERE due_date BETWEEN ?1 AND ?2
+         ) GROUP BY day ORDER BY day",
+    )?;
+    let rows = stmt.query_map(params![from, to], |row| {
+        Ok(DayCompletion {
+            date: row.get(0)?,
+            total: row.get(1)?,
+            done: row.get(2)?,
+        })
+    })?;
+    Ok(rows.collect::<Result<_, _>>()?)
+}
+
+// ---------------------------------------------------------------------------
+// Single rows
+
 pub fn get(conn: &Connection, id: i64) -> AppResult<Task> {
     let sql = format!("SELECT {TASK_COLUMNS} FROM tasks t WHERE t.id = ?1");
     conn.query_row(&sql, params![id], Task::from_row)

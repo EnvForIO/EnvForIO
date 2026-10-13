@@ -27,6 +27,9 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         tasks::add_task_step,
         tasks::set_task_step_done,
         tasks::delete_task_step,
+        tasks::list_day_tasks,
+        tasks::create_day_task,
+        tasks::get_day_completion,
     ])
 }
 

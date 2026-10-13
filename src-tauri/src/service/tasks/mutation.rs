@@ -60,6 +60,19 @@ pub fn create(conn: &Connection, title: &str, view: TaskView, today: &str) -> Ap
     query::get(conn, conn.last_insert_rowid())
 }
 
+/// Add a task from the Todo Duo card for `date`. Today's card is My Day;
+/// any other day's task gets that day as its due date (its "date tag").
+pub fn create_on_day(conn: &Connection, title: &str, date: &str, today: &str) -> AppResult<Task> {
+    check_date(&Some(date.to_string()))?;
+    let view = if date == today {
+        TaskView::MyDay
+    } else {
+        TaskView::Planned
+    };
+    // `create` dates My Day and Planned tasks with its last argument, so pass the card's date.
+    create(conn, title, view, date)
+}
+
 pub fn update(conn: &Connection, id: i64, update: &TaskUpdate, today: &str) -> AppResult<Task> {
     let title = clean_title(&update.title)?;
     check_date(&update.due_date)?;

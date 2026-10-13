@@ -8,7 +8,7 @@ use crate::domain::day::today;
 use crate::entity::task::{Task, TaskStep};
 use crate::errors::AppResult;
 use crate::service::tasks::mutation::{self, TaskUpdate};
-use crate::service::tasks::query::{self, TaskView};
+use crate::service::tasks::query::{self, DayCompletion, TaskView};
 
 /// Today as EnvIO counts it (the day starts at 07:00), 'YYYY-MM-DD'.
 /// The UI uses it to show "My Day" and overdue dates without its own day logic.
@@ -74,4 +74,29 @@ pub fn set_task_step_done(state: State<'_, AppState>, id: i64, done: bool) -> Ap
 #[specta::specta]
 pub fn delete_task_step(state: State<'_, AppState>, id: i64) -> AppResult<()> {
     mutation::delete_step(&state.db(), id)
+}
+
+// ---------------------------------------------------------------------------
+// Days (Todo Duo)
+
+#[tauri::command]
+#[specta::specta]
+pub fn list_day_tasks(state: State<'_, AppState>, date: String) -> AppResult<Vec<Task>> {
+    query::list_day(&state.db(), &date)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn create_day_task(state: State<'_, AppState>, title: String, date: String) -> AppResult<Task> {
+    mutation::create_on_day(&state.db(), &title, &date, &today())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn get_day_completion(
+    state: State<'_, AppState>,
+    from: String,
+    to: String,
+) -> AppResult<Vec<DayCompletion>> {
+    query::day_completion(&state.db(), &from, &to)
 }
