@@ -12,6 +12,11 @@ const windowName =
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 async function mount(): Promise<void> {
+  if (windowName === 'duo-capsule' || windowName === 'duo-card') {
+    const { renderDuo } = await import('./windows/duo')
+    renderDuo(root, windowName === 'duo-capsule' ? 'capsule' : 'card')
+    return
+  }
   if (windowName === 'quick-pane') {
     const { renderQuickPane } = await import('./windows/quick-pane')
     renderQuickPane(root)

@@ -18,6 +18,7 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock Tauri APIs for tests
 vi.mock('@tauri-apps/api/event', () => ({
+  emit: vi.fn().mockResolvedValue(undefined),
   listen: vi.fn().mockResolvedValue(() => {
     // Mock unlisten function
   }),

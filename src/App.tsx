@@ -10,9 +10,11 @@ import { MainWindow } from './components/layout/MainWindow'
 import { ThemeProvider } from './components/ThemeProvider'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { useSquareCornersEffect } from './hooks/useSquareCornersEffect'
+import { useTaskSync } from './api/tasks'
 
 function App() {
   useSquareCornersEffect()
+  useTaskSync() // refetch when the Todo Duo widgets change tasks
 
   // Initialize command system and cleanup on app startup
   useEffect(() => {

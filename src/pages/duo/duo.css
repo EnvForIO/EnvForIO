@@ -1,0 +1,30 @@
+/* Todo Duo widgets: the page is transparent so only the rounded panels show. */
+@import 'tailwindcss';
+@import '../../theme-variables.css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Panel background; the style settings (material) override it. */
+  --duo-surface: color-mix(in oklab, var(--background) 85%, transparent);
+}
+
+html,
+body,
+#root {
+  background: transparent !important;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  user-select: none;
+}
+
+body {
+  font-family: var(--duo-font, 'Segoe UI', system-ui, sans-serif);
+  font-size: var(--duo-font-size, 14px);
+  -webkit-font-smoothing: antialiased;
+}
+
+input {
+  user-select: text;
+}

@@ -1,5 +1,6 @@
 //! The tray icon. EnvIO keeps running in the tray when its window is closed,
 //! so a left click (or "Show EnvIO") brings the window back and "Quit" exits.
+//! It also shows and hides the Todo Duo widgets.
 //!
 //! NOTE: the two menu labels are plain English constants, not i18n strings;
 //! the tray is built in Rust before the frontend's translations exist.
@@ -12,12 +13,14 @@ use tauri::{AppHandle, Manager};
 pub const AUTOSTART_ARG: &str = "--autostart";
 
 const SHOW_ID: &str = "show";
+const DUO_ID: &str = "duo";
 const QUIT_ID: &str = "quit";
 
 pub fn create(app: &AppHandle) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, SHOW_ID, "Show EnvIO", true, None::<&str>)?;
+    let duo = MenuItem::with_id(app, DUO_ID, "Show / Hide Todo Duo", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, QUIT_ID, "Quit EnvIO", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &quit])?;
+    let menu = Menu::with_items(app, &[&show, &duo, &quit])?;
 
     let mut tray = TrayIconBuilder::with_id("main")
         .tooltip("EnvIO")
@@ -25,6 +28,7 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
         .show_menu_on_left_click(false) // left click shows the window; right click opens the menu
         .on_menu_event(|app, event| match event.id.as_ref() {
             SHOW_ID => show_main_window(app),
+            DUO_ID => super::duo::toggle(app),
             QUIT_ID => app.exit(0),
             _ => {}
         })

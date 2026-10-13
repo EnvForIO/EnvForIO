@@ -1,0 +1,16 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "duo-capability",
+  "description": "Todo Duo widgets: the capsule and the todo card",
+  "windows": ["duo-capsule", "duo-card"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-size",
+    "core:window:allow-hide",
+    "core:window:allow-set-effects",
+    "core:event:default",
+    "core:event:allow-emit",
+    "core:menu:default"
+  ]
+}
