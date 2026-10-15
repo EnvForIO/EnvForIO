@@ -25,6 +25,7 @@ export { commands, type Result } from './bindings'
 export type {
   AppError,
   AppPreferences,
+  DuoStyle,
   JsonValue,
   RecoveryError,
   Task,

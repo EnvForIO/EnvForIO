@@ -285,11 +285,19 @@ quick_pane_shortcut: string | null;
  * User's preferred language (e.g., "en", "es", "de")
  * If None, uses system locale detection
  */
-language: string | null }
+language: string | null; 
+/**
+ * Look of the Todo Duo widgets. Missing in files saved before it existed.
+ */
+duo_style?: DuoStyle }
 /**
  * How much of one day's tasks are done: one heatmap cell.
  */
 export type DayCompletion = { date: string; total: number; done: number }
+export type DuoFont = "system" | "serif" | "mono"
+export type DuoMaterial = "translucent" | "acrylic" | "mica" | "solid"
+export type DuoStyle = { material: DuoMaterial; font: DuoFont; text_size: DuoTextSize }
+export type DuoTextSize = "small" | "medium" | "large"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 /**
  * Error types for recovery operations (typed for frontend matching)

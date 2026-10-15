@@ -33,6 +33,48 @@ pub struct AppPreferences {
     /// User's preferred language (e.g., "en", "es", "de")
     /// If None, uses system locale detection
     pub language: Option<String>,
+    /// Look of the Todo Duo widgets. Missing in files saved before it existed.
+    #[serde(default)]
+    pub duo_style: DuoStyle,
+}
+
+// ============================================================================
+// Todo Duo widget style (applied to both widget windows)
+// ============================================================================
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, Type)]
+#[serde(rename_all = "lowercase")]
+pub enum DuoMaterial {
+    #[default]
+    Translucent, // tinted see-through panel, no system blur
+    Acrylic, // Windows acrylic blur behind the window
+    Mica,    // Windows 11 Mica (tinted by the wallpaper)
+    Solid,   // opaque panel
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, Type)]
+#[serde(rename_all = "lowercase")]
+pub enum DuoFont {
+    #[default]
+    System,
+    Serif,
+    Mono,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, Type)]
+#[serde(rename_all = "lowercase")]
+pub enum DuoTextSize {
+    Small,
+    #[default]
+    Medium,
+    Large,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, Type)]
+pub struct DuoStyle {
+    pub material: DuoMaterial,
+    pub font: DuoFont,
+    pub text_size: DuoTextSize,
 }
 
 impl Default for AppPreferences {
@@ -41,6 +83,7 @@ impl Default for AppPreferences {
             theme: "system".to_string(),
             quick_pane_shortcut: None, // None means use default
             language: None,            // None means use system locale
+            duo_style: DuoStyle::default(),
         }
     }
 }

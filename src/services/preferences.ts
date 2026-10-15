@@ -1,4 +1,6 @@
+import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { emit, listen } from '@tauri-apps/api/event'
 import { toast } from 'sonner'
 import { logger } from '@/lib/logger'
 import { commands, type AppPreferences } from '@/lib/tauri-bindings'
@@ -7,6 +9,21 @@ import { commands, type AppPreferences } from '@/lib/tauri-bindings'
 export const preferencesQueryKeys = {
   all: ['preferences'] as const,
   preferences: () => [...preferencesQueryKeys.all] as const,
+}
+
+const PREFERENCES_CHANGED = 'preferences-changed'
+
+/** Reload preferences when another window saves them. Used by the widget windows. */
+export function usePreferencesSync(): void {
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    const unlisten = listen(PREFERENCES_CHANGED, () => {
+      void queryClient.invalidateQueries({ queryKey: preferencesQueryKeys.all })
+    })
+    return () => {
+      void unlisten.then(stop => stop())
+    }
+  }, [queryClient])
 }
 
 // TanStack Query hooks following the architectural patterns
@@ -22,7 +39,16 @@ export function usePreferences() {
         logger.warn('Failed to load preferences, using defaults', {
           error: result.error,
         })
-        return { theme: 'system', quick_pane_shortcut: null, language: null }
+        return {
+          theme: 'system',
+          quick_pane_shortcut: null,
+          language: null,
+          duo_style: {
+            material: 'translucent',
+            font: 'system',
+            text_size: 'medium',
+          },
+        }
       }
 
       logger.info('Preferences loaded successfully', {
@@ -57,6 +83,8 @@ export function useSavePreferences() {
     onSuccess: (_, preferences) => {
       // Update the cache with the new preferences
       queryClient.setQueryData(preferencesQueryKeys.preferences(), preferences)
+      // Other windows (the Todo Duo widgets) have their own cache.
+      void emit(PREFERENCES_CHANGED)
       logger.info('Preferences cache updated')
       toast.success('Preferences saved')
     },

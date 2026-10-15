@@ -92,3 +92,12 @@ Conventions:
 - Closing the main window hides it to the tray on every desktop platform (the template did this only on macOS). Quit from the tray.
 - "Launch at login" lives in Preferences > General and uses `tauri-plugin-autostart`. The OS stores the setting. A login start passes `--autostart`, and EnvIO then starts hidden in the tray.
 - Window position and size were already remembered by the template's `window-state` plugin; it saves before hiding.
+
+## Step 5: Todo Duo widgets
+
+- Windows `duo-capsule` and `duo-card` are built in `src-tauri/src/desktop/duo.rs`, hidden at start, toggled from the tray ("Show / Hide Todo Duo"). The window-state plugin remembers their position and visibility.
+- Linked dragging: the card sits under the capsule. A Moved event on one window moves the other; it is ignored when the other window is already in place (1 px slack), which stops the loop. Alt+F4 hides both instead of closing one.
+- A day's tasks are those in My Day that day or due that day. Today's card adds to My Day; other days add with that due date.
+- Heatmap: week and month are calendar grids, year is 53 weeks (Monday first). Colour steps by done / total.
+- Cross-window sync: writes emit `tasks-changed`, preference saves emit `preferences-changed`; every window refetches.
+- Style (material, font, text size) lives in preferences as `duo_style` and is set in Preferences > Appearance. Acrylic and Mica use the Windows window effect; how it looks with rounded panels has not been checked on screen yet.

@@ -13,6 +13,7 @@ import { SettingsField, SettingsSection } from '../shared/SettingsComponents'
 import { usePreferences, useSavePreferences } from '@/services/preferences'
 import { availableLanguages } from '@/i18n'
 import { logger } from '@/lib/logger'
+import { DuoStyleSettings } from './DuoStyleSettings'
 
 // Language display names (native names)
 const languageNames: Record<string, string> = {
@@ -126,6 +127,8 @@ export function AppearancePane() {
           </Select>
         </SettingsField>
       </SettingsSection>
+
+      <DuoStyleSettings />
     </div>
   )
 }

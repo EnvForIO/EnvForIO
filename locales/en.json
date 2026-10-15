@@ -138,5 +138,19 @@
   "duo.menu.unflag": "Remove flag",
   "duo.menu.dueToday": "Date: today",
   "duo.menu.dueTomorrow": "Date: tomorrow",
-  "duo.menu.removeDate": "Remove date"
+  "duo.menu.removeDate": "Remove date",
+  "preferences.duo.title": "Todo Duo widgets",
+  "preferences.duo.material": "Material",
+  "preferences.duo.material.translucent": "Translucent",
+  "preferences.duo.material.acrylic": "Acrylic",
+  "preferences.duo.material.mica": "Mica",
+  "preferences.duo.material.solid": "Solid",
+  "preferences.duo.font": "Font",
+  "preferences.duo.font.system": "System",
+  "preferences.duo.font.serif": "Serif",
+  "preferences.duo.font.mono": "Monospace",
+  "preferences.duo.text_size": "Text size",
+  "preferences.duo.text_size.small": "Small",
+  "preferences.duo.text_size.medium": "Medium",
+  "preferences.duo.text_size.large": "Large"
 }
