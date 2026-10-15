@@ -100,4 +100,6 @@ Conventions:
 - A day's tasks are those in My Day that day or due that day. Today's card adds to My Day; other days add with that due date.
 - Heatmap: week and month are calendar grids, year is 53 weeks (Monday first). Colour steps by done / total.
 - Cross-window sync: writes emit `tasks-changed`, preference saves emit `preferences-changed`; every window refetches.
-- Style (material, font, text size) lives in preferences as `duo_style` and is set in Preferences > Appearance. Acrylic and Mica use the Windows window effect; how it looks with rounded panels has not been checked on screen yet.
+- Style (material, font, text size) lives in preferences as `duo_style` and is set in Preferences > Appearance. Acrylic and Mica use the Windows window effect; confirmed on Windows 11 together with dragging and transparency (2026-11-19).
+
+Phase 1 is complete (2026-11-19).

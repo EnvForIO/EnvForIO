@@ -219,13 +219,13 @@ If this fails, revisit the "no toolchain on Windows" premise.
 Before starting, design the tables for Phase 2's needs (projects, deadlines, estimates, scheduled dates) to avoid rework.
 
 - [x] Three-pane main window: lists on the left, tasks in the middle, details on the right (see "UI shape"); start with My Day, Important, Planned and Tasks (2026-11-19)
-- [x] Two separate windows: a capsule on top and a todo card below; dragging one moves the other; each resizes independently (2026-11-19, needs a check on screen)
-- [x] The capsule expands into a heatmap with year / month / week ranges (2026-11-19, needs a check on screen)
-- [x] Clicking a day on the heatmap switches the card to that day's todos (2026-11-19, needs a check on screen)
-- [x] Todos: add, tick off, date tag, flag (2026-11-19, needs a check on screen)
-- [x] Context menu: rename, pin, delete (2026-11-19, needs a check on screen)
-- [x] Adjustable material, font and size, applied to both windows (2026-11-19, needs a check on screen)
-- [x] Data stored locally (2026-11-19, needs a check on screen)
+- [x] Two separate windows: a capsule on top and a todo card below; dragging one moves the other; each resizes independently (2026-11-19, confirmed on Windows 11)
+- [x] The capsule expands into a heatmap with year / month / week ranges (2026-11-19, confirmed on Windows 11)
+- [x] Clicking a day on the heatmap switches the card to that day's todos (2026-11-19, confirmed on Windows 11)
+- [x] Todos: add, tick off, date tag, flag (2026-11-19, confirmed on Windows 11)
+- [x] Context menu: rename, pin, delete (2026-11-19, confirmed on Windows 11)
+- [x] Adjustable material, font and size, applied to both windows (2026-11-19, confirmed on Windows 11)
+- [x] Data stored locally (2026-11-19, confirmed on Windows 11)
 - [x] Tray icon, autostart, remembered window position (2026-11-19; closing the window now hides it to the tray)
 
 ### Phase 2: DayEcho parity
