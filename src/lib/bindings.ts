@@ -245,6 +245,89 @@ async getDayCompletion(from: string, to: string) : Promise<Result<DayCompletion[
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async listProjectTemplates() : Promise<ProjectTemplate[]> {
+    return await TAURI_INVOKE("list_project_templates");
+},
+async listProjects() : Promise<Result<Project[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_projects") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async createProject(input: ProjectInput, template: string) : Promise<Result<Project, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("create_project", { input, template }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async updateProject(id: number, input: ProjectInput) : Promise<Result<Project, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("update_project", { id, input }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteProject(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_project", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listModules(projectId: number) : Promise<Result<Module[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_modules", { projectId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async addModule(projectId: number, name: string) : Promise<Result<Module, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_module", { projectId, name }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async renameModule(id: number, name: string) : Promise<Result<Module, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("rename_module", { id, name }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteModule(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_module", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listProjectTasks(projectId: number) : Promise<Result<Task[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_project_tasks", { projectId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async addProjectTask(projectId: number, moduleId: number | null, title: string, estimate: string | null) : Promise<Result<Task, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_project_task", { projectId, moduleId, title, estimate }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -299,6 +382,13 @@ export type DuoMaterial = "translucent" | "acrylic" | "mica" | "solid"
 export type DuoStyle = { material: DuoMaterial; font: DuoFont; text_size: DuoTextSize }
 export type DuoTextSize = "small" | "medium" | "large"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
+export type Module = { id: number; projectId: number; name: string; sortOrder: number }
+export type Project = { id: number; name: string; color: string; template: string; startDate: string | null; deadline: string | null; bufferDays: number; planDate: string | null; isArchived: boolean; sortOrder: number; taskCount: number; doneCount: number; estimateMinutes: number; doneEstimateMinutes: number }
+/**
+ * The project dialog's fields, sent whole on create and on every save.
+ */
+export type ProjectInput = { name: string; color: string; startDate: string | null; deadline: string | null; bufferDays: number; isArchived: boolean }
+export type ProjectTemplate = { id: string; modules: string[] }
 /**
  * Error types for recovery operations (typed for frontend matching)
  */
@@ -323,12 +413,12 @@ export type RecoveryError =
  * JSON serialization/deserialization error
  */
 { type: "ParseError"; message: string }
-export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; stepCount: number; stepsDone: number; createdAt: string }
+export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; stepCount: number; stepsDone: number; createdAt: string }
 export type TaskStep = { id: number; taskId: number; title: string; isDone: boolean; sortOrder: number }
 /**
  * Everything the details pane can edit, sent whole on every save.
  */
-export type TaskUpdate = { title: string; note: string; isImportant: boolean; isPinned: boolean; inMyDay: boolean; dueDate: string | null }
+export type TaskUpdate = { title: string; note: string; isImportant: boolean; isPinned: boolean; inMyDay: boolean; dueDate: string | null; estimate: string | null }
 /**
  * The built-in lists in the sidebar.
  */

@@ -11,7 +11,10 @@ use rusqlite::Connection;
 use crate::errors::AppResult;
 
 /// Every migration in order. The version of a migration is its index + 1.
-const MIGRATIONS: &[&str] = &[include_str!("../../migrations/0001_initial_schema.sql")];
+const MIGRATIONS: &[&str] = &[
+    include_str!("../../migrations/0001_initial_schema.sql"),
+    include_str!("../../migrations/0002_projects.sql"),
+];
 
 /// Open (or create) the database file and migrate it.
 pub fn open(path: &Path) -> AppResult<Connection> {

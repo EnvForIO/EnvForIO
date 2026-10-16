@@ -1,8 +1,7 @@
 //! The `tasks` and `task_steps` tables as Rust types.
 //!
 //! These are also the shapes the frontend receives (via tauri-specta), so
-//! only columns the UI uses today are exposed. Phase 2 columns stay in the
-//! table and get fields when Phase 2 needs them.
+//! only columns the UI uses are exposed; the rest get fields when needed.
 
 use rusqlite::Row;
 use serde::{Deserialize, Serialize};
@@ -20,6 +19,9 @@ pub struct Task {
     pub due_date: Option<String>,    // 'YYYY-MM-DD'
     pub done_at: Option<String>,     // RFC 3339 UTC; None = open
     pub sort_order: f64,
+    pub project_id: Option<i64>,
+    pub module_id: Option<i64>,
+    pub estimate_minutes: Option<i64>,
     pub step_count: i64,
     pub steps_done: i64,
     pub created_at: String,
@@ -28,6 +30,7 @@ pub struct Task {
 /// Columns in the order `Task::from_row` reads them. Step counts come from a subquery.
 pub const TASK_COLUMNS: &str = "t.id, t.title, t.note, t.is_important, t.is_pinned, \
      t.my_day_date, t.due_date, t.done_at, t.sort_order, \
+     t.project_id, t.module_id, t.estimate_minutes, \
      (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id), \
      (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id AND s.is_done = 1), \
      t.created_at";
@@ -44,9 +47,12 @@ impl Task {
             due_date: row.get(6)?,
             done_at: row.get(7)?,
             sort_order: row.get(8)?,
-            step_count: row.get(9)?,
-            steps_done: row.get(10)?,
-            created_at: row.get(11)?,
+            project_id: row.get(9)?,
+            module_id: row.get(10)?,
+            estimate_minutes: row.get(11)?,
+            step_count: row.get(12)?,
+            steps_done: row.get(13)?,
+            created_at: row.get(14)?,
         })
     }
 }

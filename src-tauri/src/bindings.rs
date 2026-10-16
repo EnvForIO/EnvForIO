@@ -1,7 +1,7 @@
 use tauri_specta::{collect_commands, Builder};
 
 pub fn generate_bindings() -> Builder<tauri::Wry> {
-    use crate::api::tasks;
+    use crate::api::{projects, tasks};
     use crate::commands::{notifications, preferences, quick_pane, recovery};
 
     Builder::<tauri::Wry>::new().commands(collect_commands![
@@ -30,6 +30,17 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         tasks::list_day_tasks,
         tasks::create_day_task,
         tasks::get_day_completion,
+        projects::list_project_templates,
+        projects::list_projects,
+        projects::create_project,
+        projects::update_project,
+        projects::delete_project,
+        projects::list_modules,
+        projects::add_module,
+        projects::rename_module,
+        projects::delete_module,
+        projects::list_project_tasks,
+        projects::add_project_task,
     ])
 }
 

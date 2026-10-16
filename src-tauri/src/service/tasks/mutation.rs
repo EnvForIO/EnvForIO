@@ -1,7 +1,6 @@
 //! Changing tasks and steps. Every function returns the row as it is now,
 //! so the UI can update without a second round trip.
 
-use chrono::NaiveDate;
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -10,6 +9,7 @@ use super::query::{self, TaskView};
 use crate::domain::day::now_timestamp;
 use crate::entity::task::{Task, TaskStep};
 use crate::errors::{AppError, AppResult};
+use crate::service::validate::{check_date, clean_name as clean_title, estimate_minutes};
 
 /// Everything the details pane can edit, sent whole on every save.
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
@@ -21,22 +21,7 @@ pub struct TaskUpdate {
     pub is_pinned: bool,
     pub in_my_day: bool,
     pub due_date: Option<String>, // 'YYYY-MM-DD'
-}
-
-fn clean_title(title: &str) -> AppResult<String> {
-    let title = title.trim();
-    if title.is_empty() {
-        return Err(AppError::invalid("title is empty"));
-    }
-    Ok(title.to_string())
-}
-
-fn check_date(date: &Option<String>) -> AppResult<()> {
-    if let Some(d) = date {
-        NaiveDate::parse_from_str(d, "%Y-%m-%d")
-            .map_err(|_| AppError::invalid(format!("not a date: {d}")))?;
-    }
-    Ok(())
+    pub estimate: Option<String>, // typed, e.g. "1h30m"; None or "" = no estimate
 }
 
 /// Add a task to the top of a list. The list decides the defaults, as in
@@ -85,7 +70,7 @@ pub fn update(conn: &Connection, id: i64, update: &TaskUpdate, today: &str) -> A
     };
     conn.execute(
         "UPDATE tasks SET title = ?2, note = ?3, is_important = ?4, is_pinned = ?5,
-             my_day_date = ?6, due_date = ?7, updated_at = ?8
+             my_day_date = ?6, due_date = ?7, estimate_minutes = ?8, updated_at = ?9
          WHERE id = ?1",
         params![
             id,
@@ -95,6 +80,7 @@ pub fn update(conn: &Connection, id: i64, update: &TaskUpdate, today: &str) -> A
             update.is_pinned,
             my_day,
             update.due_date,
+            estimate_minutes(&update.estimate)?,
             now_timestamp()
         ],
     )?;

@@ -87,6 +87,7 @@ mod tests {
             is_pinned: true,
             in_my_day: true,
             due_date: Some("2026-12-01".into()),
+            estimate: None,
         };
         let t = mutation::update(&conn, t.id, &edit, TODAY).unwrap();
         assert_eq!(
@@ -170,6 +171,7 @@ mod tests {
             is_pinned: false,
             in_my_day: true,
             due_date: Some(TODAY.into()),
+            estimate: None,
         };
         mutation::update(&conn, a.id, &edit, TODAY).unwrap();
 
