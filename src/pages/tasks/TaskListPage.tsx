@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from './dates'
 import { TaskRow } from './TaskRow'
+import { SafetyLineCard } from '@/pages/plans/SafetyLineCard'
 
 export function TaskListPage() {
   const { t } = useTranslation()
@@ -39,6 +40,8 @@ export function TaskListPage() {
           <p className="text-sm text-muted-foreground">{dateLabel(today)}</p>
         )}
       </header>
+
+      {view === 'MyDay' && <SafetyLineCard />}
 
       <div className="flex items-center gap-2 rounded-md border px-3">
         <PlusIcon className="size-4 text-muted-foreground" />

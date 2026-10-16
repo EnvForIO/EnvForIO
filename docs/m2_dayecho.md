@@ -27,3 +27,13 @@ Project templates (paper submission and so on) come with step 1 as a few built-i
 - Built-in templates (`service/projects/templates.rs`): blank, paper, grant, thesis. Module names are English constants; template names are translated in the UI.
 - `Project.planDate` (deadline minus buffer days) is computed in SQL so the UI does no date arithmetic.
 - UI: a Projects section in the sidebar with a + button; a project page with dates, progress (tasks and estimated time), modules (double-click to rename) and an add row per module that takes a title and an estimate; the details pane gained an estimate field.
+
+## Steps 2 and 3: available time and the safety line
+
+Done together, since available time only matters through the line.
+
+- Migration `0003_capacity.sql`: `weekday_capacity` (Monday = 0) and `day_overrides`. No row = no limit and still a work day; 0 = rest day. Weekdays are set in Preferences > Planning; per-date overrides have a backend and get their UI with the calendar (step 4).
+- `domain/safety_line.rs` implements the documented rules as one pure function with worked-example tests in `safety_line_tests.rs`. Levelling is on and earliest-first is off; the switches get a UI in step 7.
+- Today's line is computed from the work left at the start of the day (tasks finished today still count as remaining), which gives the "frozen in the morning" behaviour without a table: finishing work does not lower it, changing the plan does. Storing each day's line for the next-day comparison comes with check-ins (step 7).
+- Projects without a deadline have no line.
+- UI: a safety line card at the top of My Day (total, done, per project), and "Today: X (Y done)" on each project page.

@@ -185,5 +185,19 @@
   "projects.delete": "Delete project",
   "projects.deleteTitle": "Delete {{name}}?",
   "projects.deleteDescription": "This also deletes its {{count}} tasks. It cannot be undone.",
-  "projects.cancel": "Cancel"
+  "projects.cancel": "Cancel",
+  "preferences.planning": "Planning",
+  "preferences.planning.availableTime": "Available time",
+  "preferences.planning.availableTimeDescription": "Hours you can spend on projects each day. Leave empty for no limit; 0 makes it a rest day. The daily safety line spreads work over these hours.",
+  "preferences.planning.noLimit": "No limit",
+  "preferences.planning.mon": "Monday",
+  "preferences.planning.tue": "Tuesday",
+  "preferences.planning.wed": "Wednesday",
+  "preferences.planning.thu": "Thursday",
+  "preferences.planning.fri": "Friday",
+  "preferences.planning.sat": "Saturday",
+  "preferences.planning.sun": "Sunday",
+  "plans.todayLine": "Safety line today: {{minutes}}",
+  "plans.done": "{{minutes}} done",
+  "plans.projectToday": "Today: {{minutes}} ({{done}} done)"
 }

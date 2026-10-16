@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatMinutes } from '@/lib/duration'
 import type { Project } from '@/lib/tauri-bindings'
+import { useTodayLine } from '@/api/plans'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from '@/pages/tasks/dates'
 import { ModuleSection } from './ModuleSection'
@@ -49,6 +50,9 @@ function ProjectView({ project }: { project: Project }) {
   const [moduleName, setModuleName] = useState('')
 
   const ungrouped = tasks.filter(task => task.moduleId === null)
+  const todayLine = useTodayLine().data?.projects.find(
+    p => p.projectId === project.id
+  )
   const dates = [
     project.startDate &&
       t('projects.starts', { date: dateLabel(project.startDate) }),
@@ -80,6 +84,14 @@ function ProjectView({ project }: { project: Project }) {
               totalTime: formatMinutes(project.estimateMinutes),
             })}
           </p>
+          {todayLine && (
+            <p className="text-sm font-medium text-primary">
+              {t('plans.projectToday', {
+                minutes: formatMinutes(todayLine.minutes),
+                done: formatMinutes(todayLine.doneMinutes),
+              })}
+            </p>
+          )}
         </div>
         <Button
           variant="ghost"

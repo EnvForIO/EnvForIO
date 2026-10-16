@@ -25,7 +25,10 @@ export { commands, type Result } from './bindings'
 export type {
   AppError,
   AppPreferences,
+  DayOverride,
   DuoStyle,
+  TodayLine,
+  WeekCapacity,
   Module,
   Project,
   ProjectInput,
