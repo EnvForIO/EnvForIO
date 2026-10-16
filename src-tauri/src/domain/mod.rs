@@ -2,3 +2,4 @@
 
 pub mod day;
 pub mod duration;
+pub mod safety_line;

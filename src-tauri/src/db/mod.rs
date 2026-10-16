@@ -14,6 +14,7 @@ use crate::errors::AppResult;
 const MIGRATIONS: &[&str] = &[
     include_str!("../../migrations/0001_initial_schema.sql"),
     include_str!("../../migrations/0002_projects.sql"),
+    include_str!("../../migrations/0003_capacity.sql"),
 ];
 
 /// Open (or create) the database file and migrate it.

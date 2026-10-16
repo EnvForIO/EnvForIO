@@ -328,6 +328,49 @@ async addProjectTask(projectId: number, moduleId: number | null, title: string, 
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+async getTodayLine() : Promise<Result<TodayLine, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_today_line") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getWeekCapacity() : Promise<Result<WeekCapacity, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_week_capacity") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * `weekday` 0 = Monday; `minutes` None = no limit, 0 = rest day.
+ */
+async setWeekdayCapacity(weekday: number, minutes: number | null) : Promise<Result<WeekCapacity, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_weekday_capacity", { weekday, minutes }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listDayOverrides(from: string, to: string) : Promise<Result<DayOverride[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_day_overrides", { from, to }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setDayOverride(date: string, minutes: number | null) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_day_override", { date, minutes }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -377,6 +420,7 @@ duo_style?: DuoStyle }
  * How much of one day's tasks are done: one heatmap cell.
  */
 export type DayCompletion = { date: string; total: number; done: number }
+export type DayOverride = { date: string; minutes: number }
 export type DuoFont = "system" | "serif" | "mono"
 export type DuoMaterial = "translucent" | "acrylic" | "mica" | "solid"
 export type DuoStyle = { material: DuoMaterial; font: DuoFont; text_size: DuoTextSize }
@@ -388,6 +432,7 @@ export type Project = { id: number; name: string; color: string; template: strin
  * The project dialog's fields, sent whole on create and on every save.
  */
 export type ProjectInput = { name: string; color: string; startDate: string | null; deadline: string | null; bufferDays: number; isArchived: boolean }
+export type ProjectLine = { projectId: number; name: string; color: string; minutes: number; doneMinutes: number }
 export type ProjectTemplate = { id: string; modules: string[] }
 /**
  * Error types for recovery operations (typed for frontend matching)
@@ -423,6 +468,11 @@ export type TaskUpdate = { title: string; note: string; isImportant: boolean; is
  * The built-in lists in the sidebar.
  */
 export type TaskView = "MyDay" | "Important" | "Planned" | "Tasks"
+export type TodayLine = { date: string; minutes: number; doneMinutes: number; capacity: number | null; projects: ProjectLine[] }
+/**
+ * Minutes per weekday, Monday first; None = no limit.
+ */
+export type WeekCapacity = [(number | null), (number | null), (number | null), (number | null), (number | null), (number | null), (number | null)]
 
 /** tauri-specta globals **/
 
