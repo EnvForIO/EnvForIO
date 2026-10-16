@@ -12,11 +12,13 @@ import {
   useToday,
   useUpdateTask,
 } from '@/api/tasks'
+import { useProjectTasks } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import type { Task, TaskUpdate } from '@/lib/tauri-bindings'
+import { formatMinutes } from '@/lib/duration'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel, formatDate, parseDate } from './dates'
@@ -25,7 +27,10 @@ import { TaskSteps } from './TaskSteps'
 export function TaskDetails() {
   const view = useUIStore(state => state.selectedView)
   const selectedTaskId = useUIStore(state => state.selectedTaskId)
-  const { data: tasks = [] } = useTasks(view)
+  const projectId = useUIStore(state => state.selectedProjectId)
+  const listTasks = useTasks(view).data
+  const projectTasks = useProjectTasks(projectId).data
+  const tasks = (projectId === null ? listTasks : projectTasks) ?? []
   // NOTE: the task is looked up in the current list, so un-starring a task in
   // Important closes the pane. Microsoft To Do keeps it open; fine for now.
   const task = tasks.find(t => t.id === selectedTaskId)
@@ -42,6 +47,9 @@ function TaskDetailsForm({ task }: { task: Task }) {
   const deleteTask = useDeleteTask()
   const [title, setTitle] = useState(task.title)
   const [note, setNote] = useState(task.note)
+  const [estimate, setEstimate] = useState(
+    task.estimateMinutes === null ? '' : formatMinutes(task.estimateMinutes)
+  )
 
   const save = (change: Partial<TaskUpdate>) =>
     updateTask.mutate({
@@ -118,6 +126,20 @@ function TaskDetailsForm({ task }: { task: Task }) {
         onChange={date => save({ dueDate: date ? formatDate(date) : null })}
         placeholder={t('tasks.addDueDate')}
       />
+
+      <Input
+        value={estimate}
+        onChange={e => setEstimate(e.target.value)}
+        onBlur={() =>
+          save({ estimate: estimate.trim() === '' ? null : estimate })
+        }
+        onKeyDown={e => e.key === 'Enter' && e.currentTarget.blur()}
+        placeholder={t('tasks.addEstimate')}
+        aria-label={t('tasks.estimate')}
+      />
+      {updateTask.error && (
+        <p className="text-xs text-destructive">{t('tasks.saveFailed')}</p>
+      )}
 
       <Textarea
         value={note}

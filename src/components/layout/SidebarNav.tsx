@@ -24,7 +24,9 @@ const VIEWS: { view: TaskView; icon: LucideIcon }[] = [
 
 function NavItem({ view, icon: Icon }: { view: TaskView; icon: LucideIcon }) {
   const { t } = useTranslation()
-  const selected = useUIStore(state => state.selectedView) === view
+  const selected = useUIStore(
+    state => state.selectedProjectId === null && state.selectedView === view
+  )
   const selectView = useUIStore(state => state.selectView)
   const { data: tasks = [] } = useTasks(view)
   const openCount = tasks.filter(task => task.doneAt === null).length

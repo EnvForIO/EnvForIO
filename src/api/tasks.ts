@@ -97,13 +97,17 @@ export function toUpdate(task: Task, today: string | undefined): TaskUpdate {
     isPinned: task.isPinned,
     inMyDay: task.myDayDate !== null && task.myDayDate === today,
     dueDate: task.dueDate,
+    // Whole minutes are a valid typed estimate, so they round-trip unchanged.
+    estimate:
+      task.estimateMinutes === null ? null : String(task.estimateMinutes),
   }
 }
 
 // ---------------------------------------------------------------------------
 // Writes
 
-function useTaskMutation<Args, Out>(run: (args: Args) => Promise<Out>) {
+/** A write that refetches every task-derived query here and in other windows. */
+export function useTaskMutation<Args, Out>(run: (args: Args) => Promise<Out>) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: run,

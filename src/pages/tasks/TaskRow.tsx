@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { CalendarIcon, PinIcon, StarIcon, SunIcon } from 'lucide-react'
 import { toUpdate, useSetTaskDone, useToday, useUpdateTask } from '@/api/tasks'
 import type { Task, TaskView } from '@/lib/tauri-bindings'
+import { formatMinutes } from '@/lib/duration'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel, isOverdue } from './dates'
@@ -32,6 +33,9 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
       <span key="day" className="flex items-center gap-1">
         <SunIcon className="size-3" /> {t('tasks.myDay')}
       </span>
+    ),
+    task.estimateMinutes !== null && (
+      <span key="estimate">{formatMinutes(task.estimateMinutes)}</span>
     ),
     task.stepCount > 0 && (
       <span key="steps">

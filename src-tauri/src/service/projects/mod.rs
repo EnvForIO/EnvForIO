@@ -81,7 +81,9 @@ mod tests {
         let p = query::get(&conn, p.id).unwrap();
         assert_eq!((p.task_count, p.done_count), (2, 1));
         assert_eq!((p.estimate_minutes, p.done_estimate_minutes), (105, 90));
-        assert_eq!(p.plan_date.as_deref(), Some("2026-12-17")); // Dec 20 minus 3 buffer days
+        // Plan date = Dec 20 minus 3 buffer days.
+        assert_eq!(p.plan_date.as_deref(), Some("2026-12-17"));
+
         // Project tasks are not in the Tasks pool.
         assert!(
             tasks::query::list(&conn, tasks::query::TaskView::Tasks, "2026-11-20")

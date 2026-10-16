@@ -8,7 +8,8 @@ import { LeftSideBar } from './LeftSideBar'
 import { RightSideBar } from './RightSideBar'
 import { MainWindowContent } from './MainWindowContent'
 import { SidebarNav } from './SidebarNav'
-import { TaskListPage } from '@/pages/tasks/TaskListPage'
+import { SidebarProjects } from './SidebarProjects'
+import { MainPane } from '@/pages/MainPane'
 import { TaskDetails } from '@/pages/tasks/TaskDetails'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
 import { PreferencesDialog } from '@/components/preferences/PreferencesDialog'
@@ -55,6 +56,7 @@ export function MainWindow() {
           >
             <LeftSideBar>
               <SidebarNav />
+              <SidebarProjects />
             </LeftSideBar>
           </ResizablePanel>
 
@@ -65,7 +67,7 @@ export function MainWindow() {
             minSize={LAYOUT.main.min}
           >
             <MainWindowContent>
-              <TaskListPage />
+              <MainPane />
             </MainWindowContent>
           </ResizablePanel>
 

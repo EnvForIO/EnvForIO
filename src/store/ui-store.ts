@@ -10,6 +10,8 @@ interface UIState {
   lastQuickPaneEntry: string | null
   /** Which built-in list the main pane shows. */
   selectedView: TaskView
+  /** The project shown in the middle pane instead of a built-in list, if any. */
+  selectedProjectId: number | null
   /** The task open in the details pane, or null when it is closed. */
   selectedTaskId: number | null
 
@@ -25,6 +27,7 @@ interface UIState {
   setSquareCorners: (enabled: boolean) => void
   selectView: (view: TaskView) => void
   selectTask: (id: number | null) => void
+  selectProject: (id: number) => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -36,6 +39,7 @@ export const useUIStore = create<UIState>()(
       preferencesOpen: false,
       lastQuickPaneEntry: null,
       selectedView: 'MyDay',
+      selectedProjectId: null,
       selectedTaskId: null,
 
       toggleLeftSidebar: () =>
@@ -93,11 +97,23 @@ export const useUIStore = create<UIState>()(
         set(
           {
             selectedView: view,
+            selectedProjectId: null,
             selectedTaskId: null,
             rightSidebarVisible: false,
           },
           undefined,
           'selectView'
+        ),
+
+      selectProject: id =>
+        set(
+          {
+            selectedProjectId: id,
+            selectedTaskId: null,
+            rightSidebarVisible: false,
+          },
+          undefined,
+          'selectProject'
         ),
 
       selectTask: id =>
