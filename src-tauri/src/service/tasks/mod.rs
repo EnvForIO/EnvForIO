@@ -3,6 +3,7 @@
 
 pub mod mutation;
 pub mod query;
+pub mod schedule;
 
 #[cfg(test)]
 mod tests {

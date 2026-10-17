@@ -4,6 +4,7 @@
 //! The template's own commands (preferences, quick pane, recovery, notifications)
 //! still live in `commands/` until they are moved here.
 
+pub mod calendar;
 pub mod plans;
 pub mod projects;
 pub mod tasks;

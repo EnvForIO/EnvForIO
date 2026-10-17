@@ -1,7 +1,7 @@
 use tauri_specta::{collect_commands, Builder};
 
 pub fn generate_bindings() -> Builder<tauri::Wry> {
-    use crate::api::{plans, projects, tasks};
+    use crate::api::{calendar, plans, projects, tasks};
     use crate::commands::{notifications, preferences, quick_pane, recovery};
 
     Builder::<tauri::Wry>::new().commands(collect_commands![
@@ -46,6 +46,12 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         plans::set_weekday_capacity,
         plans::list_day_overrides,
         plans::set_day_override,
+        calendar::list_calendar_tasks,
+        calendar::list_unscheduled_tasks,
+        calendar::schedule_task,
+        calendar::create_scheduled_task,
+        calendar::list_day_notes,
+        calendar::set_day_note,
     ])
 }
 

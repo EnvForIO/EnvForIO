@@ -22,6 +22,7 @@ pub struct Task {
     pub project_id: Option<i64>,
     pub module_id: Option<i64>,
     pub estimate_minutes: Option<i64>,
+    pub scheduled_date: Option<String>, // 'YYYY-MM-DD': the day it is planned on the calendar
     pub step_count: i64,
     pub steps_done: i64,
     pub created_at: String,
@@ -30,7 +31,7 @@ pub struct Task {
 /// Columns in the order `Task::from_row` reads them. Step counts come from a subquery.
 pub const TASK_COLUMNS: &str = "t.id, t.title, t.note, t.is_important, t.is_pinned, \
      t.my_day_date, t.due_date, t.done_at, t.sort_order, \
-     t.project_id, t.module_id, t.estimate_minutes, \
+     t.project_id, t.module_id, t.estimate_minutes, t.scheduled_date, \
      (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id), \
      (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id AND s.is_done = 1), \
      t.created_at";
@@ -50,9 +51,10 @@ impl Task {
             project_id: row.get(9)?,
             module_id: row.get(10)?,
             estimate_minutes: row.get(11)?,
-            step_count: row.get(12)?,
-            steps_done: row.get(13)?,
-            created_at: row.get(14)?,
+            scheduled_date: row.get(12)?,
+            step_count: row.get(13)?,
+            steps_done: row.get(14)?,
+            created_at: row.get(15)?,
         })
     }
 }

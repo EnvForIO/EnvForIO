@@ -1,0 +1,57 @@
+//! Calendar commands: scheduled tasks, day notes and per-day available time.
+
+use tauri::State;
+
+use crate::config::AppState;
+use crate::entity::task::Task;
+use crate::errors::AppResult;
+use crate::service::days::{self, DayNote};
+use crate::service::tasks::schedule;
+
+#[tauri::command]
+#[specta::specta]
+pub fn list_calendar_tasks(
+    state: State<'_, AppState>,
+    from: String,
+    to: String,
+) -> AppResult<Vec<Task>> {
+    schedule::in_range(&state.db(), &from, &to)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn list_unscheduled_tasks(state: State<'_, AppState>) -> AppResult<Vec<Task>> {
+    schedule::unscheduled(&state.db())
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn schedule_task(state: State<'_, AppState>, id: i64, date: Option<String>) -> AppResult<Task> {
+    schedule::schedule(&state.db(), id, date)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn create_scheduled_task(
+    state: State<'_, AppState>,
+    title: String,
+    date: String,
+) -> AppResult<Task> {
+    schedule::create_on(&state.db(), &title, &date)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn list_day_notes(
+    state: State<'_, AppState>,
+    from: String,
+    to: String,
+) -> AppResult<Vec<DayNote>> {
+    days::notes(&state.db(), &from, &to)
+}
+
+#[tauri::command]
+#[specta::specta]
+pub fn set_day_note(state: State<'_, AppState>, date: String, text: String) -> AppResult<()> {
+    days::set_note(&state.db(), &date, &text)
+}
