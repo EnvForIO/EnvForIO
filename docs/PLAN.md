@@ -235,8 +235,8 @@ All of this lives in the main window: projects go in the sidebar, Calendar and S
 - [x] **Projects**: name, template, start date, deadline, "N days early" buffer, colour
 - [x] **Breakdown**: modules and tasks under a project, each task with an estimate
 - [x] **Daily safety line**: see the algorithm section
-- [x] **Available time**: hours per weekday; override for a single day; 0 means a rest day (per-date override UI comes with the calendar)
-- [ ] **Calendar**: month and week views; drag to schedule; right-click a day to add, view or note
+- [x] **Available time**: hours per weekday; override for a single day; 0 means a rest day (per-date override in the calendar day dialog)
+- [x] **Calendar**: month and week views; drag to schedule; right-click a day to add, view or note
 - [ ] **Today**: to do today, to schedule, a line written for today
 - [ ] **Task pool and quick capture**: standalone items; typing `14:00-15:00 group meeting` detects the time
 - [ ] **Item list**: open / with deadline / done / all, filtered by project

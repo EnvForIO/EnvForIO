@@ -100,3 +100,10 @@ pub fn get_day_completion(
 ) -> AppResult<Vec<DayCompletion>> {
     query::day_completion(&state.db(), &from, &to)
 }
+
+/// One task by id, for the details pane (wherever it was opened from).
+#[tauri::command]
+#[specta::specta]
+pub fn get_task(state: State<'_, AppState>, id: i64) -> AppResult<Task> {
+    query::get(&state.db(), id)
+}

@@ -19,6 +19,7 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         quick_pane::update_quick_pane_shortcut,
         tasks::get_today,
         tasks::list_tasks,
+        tasks::get_task,
         tasks::create_task,
         tasks::update_task,
         tasks::set_task_done,

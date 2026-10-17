@@ -12,6 +12,8 @@ interface UIState {
   selectedView: TaskView
   /** The project shown in the middle pane instead of a built-in list, if any. */
   selectedProjectId: number | null
+  /** The calendar is shown in the middle pane. */
+  calendarOpen: boolean
   /** The task open in the details pane, or null when it is closed. */
   selectedTaskId: number | null
 
@@ -28,6 +30,7 @@ interface UIState {
   selectView: (view: TaskView) => void
   selectTask: (id: number | null) => void
   selectProject: (id: number) => void
+  openCalendar: () => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -40,6 +43,7 @@ export const useUIStore = create<UIState>()(
       lastQuickPaneEntry: null,
       selectedView: 'MyDay',
       selectedProjectId: null,
+      calendarOpen: false,
       selectedTaskId: null,
 
       toggleLeftSidebar: () =>
@@ -98,6 +102,7 @@ export const useUIStore = create<UIState>()(
           {
             selectedView: view,
             selectedProjectId: null,
+            calendarOpen: false,
             selectedTaskId: null,
             rightSidebarVisible: false,
           },
@@ -109,11 +114,24 @@ export const useUIStore = create<UIState>()(
         set(
           {
             selectedProjectId: id,
+            calendarOpen: false,
             selectedTaskId: null,
             rightSidebarVisible: false,
           },
           undefined,
           'selectProject'
+        ),
+
+      openCalendar: () =>
+        set(
+          {
+            calendarOpen: true,
+            selectedProjectId: null,
+            selectedTaskId: null,
+            rightSidebarVisible: false,
+          },
+          undefined,
+          'openCalendar'
         ),
 
       selectTask: id =>

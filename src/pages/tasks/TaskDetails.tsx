@@ -8,11 +8,10 @@ import { PinIcon, StarIcon, SunIcon, Trash2Icon, XIcon } from 'lucide-react'
 import {
   toUpdate,
   useDeleteTask,
-  useTasks,
+  useTask,
   useToday,
   useUpdateTask,
 } from '@/api/tasks'
-import { useProjectTasks } from '@/api/projects'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
@@ -25,15 +24,10 @@ import { dateLabel, formatDate, parseDate } from './dates'
 import { TaskSteps } from './TaskSteps'
 
 export function TaskDetails() {
-  const view = useUIStore(state => state.selectedView)
   const selectedTaskId = useUIStore(state => state.selectedTaskId)
-  const projectId = useUIStore(state => state.selectedProjectId)
-  const listTasks = useTasks(view).data
-  const projectTasks = useProjectTasks(projectId).data
-  const tasks = (projectId === null ? listTasks : projectTasks) ?? []
-  // NOTE: the task is looked up in the current list, so un-starring a task in
-  // Important closes the pane. Microsoft To Do keeps it open; fine for now.
-  const task = tasks.find(t => t.id === selectedTaskId)
+  // Fetched by id, so the pane works from any list, project or the calendar,
+  // and stays open when an edit moves the task out of the current list.
+  const { data: task } = useTask(selectedTaskId)
   if (!task) return null
   // Keyed by id so the text drafts reset when another task is selected.
   return <TaskDetailsForm key={task.id} task={task} />

@@ -37,3 +37,12 @@ Done together, since available time only matters through the line.
 - Today's line is computed from the work left at the start of the day (tasks finished today still count as remaining), which gives the "frozen in the morning" behaviour without a table: finishing work does not lower it, changing the plan does. Storing each day's line for the next-day comparison comes with check-ins (step 7).
 - Projects without a deadline have no line.
 - UI: a safety line card at the top of My Day (total, done, per project), and "Today: X (Y done)" on each project page.
+
+## Step 4: calendar
+
+- Migration `0004_day_notes.sql`: one note per date; `tasks.scheduled_date` is now used and indexed.
+- A task shows on a day when it is scheduled that day, or (if unscheduled) due that day, with a due marker. "To schedule" lists open tasks without a scheduled day, project tasks first.
+- Month view shows whole Monday-first weeks; week view one taller row. Drag a task chip onto a day to schedule it, or onto "To schedule" to unschedule. Double-click or right-click a day for a dialog with a new task, the note, and that day's available hours (the per-date override from step 2).
+- Native file drop is off (`dragDropEnabled: false`) because WebView2 swallows HTML drag events while it is on.
+- The details pane now fetches its task by id (`get_task`), so it opens from the calendar and stays open when an edit moves the task out of the current list.
+- Built by hand (CSS grid + HTML drag and drop) instead of FullCalendar or Schedule-X: the views are simple, and a library would bring its own styling and drag system.

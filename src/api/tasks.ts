@@ -61,6 +61,15 @@ export function useTasks(view: TaskView) {
   })
 }
 
+/** One task by id (the details pane); disabled while nothing is selected. */
+export function useTask(id: number | null) {
+  return useQuery({
+    queryKey: ['tasks', 'one', id ?? -1] as const,
+    queryFn: async () => unwrapResult(await commands.getTask(id ?? -1)),
+    enabled: id !== null,
+  })
+}
+
 export function useTaskSteps(taskId: number | null) {
   return useQuery({
     queryKey: taskKeys.steps(taskId ?? -1),

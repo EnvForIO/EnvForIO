@@ -5,6 +5,7 @@
 import { useTranslation } from 'react-i18next'
 import {
   CalendarDaysIcon,
+  CalendarRangeIcon,
   HouseIcon,
   StarIcon,
   SunIcon,
@@ -25,7 +26,10 @@ const VIEWS: { view: TaskView; icon: LucideIcon }[] = [
 function NavItem({ view, icon: Icon }: { view: TaskView; icon: LucideIcon }) {
   const { t } = useTranslation()
   const selected = useUIStore(
-    state => state.selectedProjectId === null && state.selectedView === view
+    state =>
+      state.selectedProjectId === null &&
+      !state.calendarOpen &&
+      state.selectedView === view
   )
   const selectView = useUIStore(state => state.selectView)
   const { data: tasks = [] } = useTasks(view)
@@ -49,12 +53,32 @@ function NavItem({ view, icon: Icon }: { view: TaskView; icon: LucideIcon }) {
   )
 }
 
+function CalendarItem() {
+  const { t } = useTranslation()
+  const open = useUIStore(state => state.calendarOpen)
+  const openCalendar = useUIStore(state => state.openCalendar)
+  return (
+    <button
+      type="button"
+      onClick={openCalendar}
+      className={cn(
+        'flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent/60',
+        open && 'bg-accent font-medium'
+      )}
+    >
+      <CalendarRangeIcon className="size-4" />
+      <span className="flex-1 text-left">{t('calendar.title')}</span>
+    </button>
+  )
+}
+
 export function SidebarNav() {
   return (
     <nav className="flex flex-col gap-1 p-2">
       {VIEWS.map(item => (
         <NavItem key={item.view} {...item} />
       ))}
+      <CalendarItem />
     </nav>
   )
 }

@@ -158,6 +158,17 @@ async listTasks(view: TaskView) : Promise<Result<Task[], AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * One task by id, for the details pane (wherever it was opened from).
+ */
+async getTask(id: number) : Promise<Result<Task, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_task", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async createTask(title: string, view: TaskView) : Promise<Result<Task, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("create_task", { title, view }) };
