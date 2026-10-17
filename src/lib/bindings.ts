@@ -432,7 +432,13 @@ async setDayNote(date: string, text: string) : Promise<Result<null, AppError>> {
 }
 },
 /**
- * Shrink the main window into the Todo Duo sticky (the minimize button).
+ * Keep the Todo Duo sticky on top of other windows, or not.
+ */
+async setMiniPinned(pinned: boolean) : Promise<void> {
+    await TAURI_INVOKE("set_mini_pinned", { pinned });
+},
+/**
+ * Shrink the main window into the Todo Duo sticky (the title bar's float button).
  */
 async enterMiniMode() : Promise<void> {
     await TAURI_INVOKE("enter_mini_mode");

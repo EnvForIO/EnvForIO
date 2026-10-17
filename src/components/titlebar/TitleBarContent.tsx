@@ -2,11 +2,13 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { useUIStore } from '@/store/ui-store'
 import { executeCommand, useCommandContext } from '@/lib/commands'
+import { commands } from '@/lib/tauri-bindings'
 import {
   PanelLeft,
   PanelLeftClose,
   PanelRight,
   PanelRightClose,
+  PictureInPicture2,
   Settings,
 } from 'lucide-react'
 
@@ -61,6 +63,16 @@ export function TitleBarRightActions() {
 
   return (
     <div className="flex items-center gap-1">
+      <Button
+        onClick={() => void commands.enterMiniMode()}
+        variant="ghost"
+        size="icon"
+        className="h-6 w-6 text-foreground/70 hover:text-foreground"
+        title={t('titlebar.float')}
+      >
+        <PictureInPicture2 className="h-3 w-3" />
+      </Button>
+
       <Button
         onClick={handleOpenPreferences}
         variant="ghost"

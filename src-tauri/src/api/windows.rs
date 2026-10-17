@@ -4,7 +4,14 @@ use tauri::AppHandle;
 
 use crate::desktop::duo;
 
-/// Shrink the main window into the Todo Duo sticky (the minimize button).
+/// Keep the Todo Duo sticky on top of other windows, or not.
+#[tauri::command]
+#[specta::specta]
+pub fn set_mini_pinned(app: AppHandle, pinned: bool) {
+    duo::set_pinned(&app, pinned);
+}
+
+/// Shrink the main window into the Todo Duo sticky (the title bar's float button).
 #[tauri::command]
 #[specta::specta]
 pub fn enter_mini_mode(app: AppHandle) {

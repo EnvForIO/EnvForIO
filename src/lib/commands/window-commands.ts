@@ -1,6 +1,5 @@
 import type { AppCommand } from './types'
 import { getCurrentWindow } from '@tauri-apps/api/window'
-import { commands } from '@/lib/tauri-bindings'
 import i18n from '@/i18n/config'
 
 export const windowCommands: AppCommand[] = [
@@ -32,8 +31,8 @@ export const windowCommands: AppCommand[] = [
 
     execute: async context => {
       try {
-        // EnvIO's minimize shrinks the window into the Todo Duo sticky (mini mode).
-        await commands.enterMiniMode()
+        const appWindow = getCurrentWindow()
+        await appWindow.minimize()
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error'
         context.showToast(

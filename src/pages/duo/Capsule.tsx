@@ -5,7 +5,12 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDownIcon, ChevronUpIcon, Maximize2Icon } from 'lucide-react'
+import {
+  ChevronDownIcon,
+  ChevronUpIcon,
+  Maximize2Icon,
+  PinIcon,
+} from 'lucide-react'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { LogicalSize } from '@tauri-apps/api/dpi'
 import { useDayTasks, useToday } from '@/api/tasks'
@@ -30,6 +35,11 @@ export function Capsule() {
   const selected = useSelectedDuoDay(today)
   const { data: tasks = [] } = useDayTasks(today)
   const [expanded, setExpanded] = useState(false)
+  const [pinned, setPinned] = useState(false)
+  const togglePin = () => {
+    void commands.setMiniPinned(!pinned)
+    setPinned(!pinned)
+  }
   const [range, setRange] = useState<HeatmapRange>('month')
 
   const done = tasks.filter(task => task.doneAt !== null).length
@@ -68,6 +78,16 @@ export function Capsule() {
               {t(`duo.range.${r}`)}
             </button>
           ))}
+        <button
+          type="button"
+          onClick={togglePin}
+          aria-label={pinned ? t('duo.unpin') : t('duo.pin')}
+          title={pinned ? t('duo.unpin') : t('duo.pin')}
+        >
+          <PinIcon
+            className={cn('size-3.5', pinned ? 'fill-current' : 'opacity-50')}
+          />
+        </button>
         <button
           type="button"
           onClick={() => void commands.leaveMiniMode()}

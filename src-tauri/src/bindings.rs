@@ -53,6 +53,7 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         calendar::create_scheduled_task,
         calendar::list_day_notes,
         calendar::set_day_note,
+        windows::set_mini_pinned,
         windows::enter_mini_mode,
         windows::leave_mini_mode,
     ])

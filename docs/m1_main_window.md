@@ -106,5 +106,5 @@ Phase 1 is complete (2026-11-19).
 
 ## Later changes (2026-11-19, user feedback)
 
-- Sidebars have fixed widths (left 240 px, right 320 px) instead of resizable percentages. Opening the details pane takes width from the middle only; the left sidebar never changes. Titles and padding were tightened.
-- Todo Duo is now EnvIO's mini mode rather than a separate widget: the minimize button (and the tray's "Mini mode") hides the main window and shows the sticky at the window's top-right corner; the capsule's expand button, the tray icon and "Show EnvIO" bring the window back.
+- Sidebars have fixed widths (left 240 px, right 320 px). Opening the details pane makes the window 320 px wider and closing it gives the width back (a maximized window shares its width instead); the left sidebar never changes. Titles and padding were tightened.
+- Todo Duo is EnvIO's floating mode rather than a separate widget. Minimize is a normal minimize. A separate float button in the title bar (and the tray's "Mini mode") hides the main window and shows the sticky at the window's top-right corner; the capsule's expand button, the tray icon and "Show EnvIO" bring the window back. A pin button on the capsule keeps the sticky above other windows.

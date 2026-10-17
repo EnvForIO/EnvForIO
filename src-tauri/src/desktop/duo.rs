@@ -161,6 +161,13 @@ pub fn enter_mini_mode<R: Runtime>(app: &AppHandle<R>) {
     }
 }
 
+/// Keep the sticky above other windows (pinned) or let them cover it.
+pub fn set_pinned<R: Runtime>(app: &AppHandle<R>, pinned: bool) {
+    for window in both(app) {
+        let _ = window.set_always_on_top(pinned);
+    }
+}
+
 /// Hide the sticky and bring the main window back.
 pub fn leave_mini_mode<R: Runtime>(app: &AppHandle<R>) {
     hide_both(app);

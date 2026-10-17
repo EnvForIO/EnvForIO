@@ -224,5 +224,8 @@
   "calendar.availableHoursHint": "Leave empty to use the usual hours for this weekday; 0 makes it a rest day.",
   "calendar.save": "Save",
   "tasks.nothingSelected": "Select a task to see its details.",
-  "duo.openEnvio": "Open the EnvIO window"
+  "duo.openEnvio": "Open the EnvIO window",
+  "titlebar.float": "Float as a sticky (Todo Duo)",
+  "duo.pin": "Keep on top",
+  "duo.unpin": "Stop keeping on top"
 }
