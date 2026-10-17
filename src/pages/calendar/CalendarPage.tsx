@@ -55,8 +55,8 @@ function CalendarBody({ today }: { today: string }) {
   return (
     <div className="flex h-full">
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-2 p-4">
-          <h1 className="flex-1 text-2xl font-semibold">{title}</h1>
+        <header className="flex items-center gap-2 px-4 py-3">
+          <h1 className="flex-1 text-xl font-semibold">{title}</h1>
           <Button variant="outline" size="sm" onClick={() => setAnchor(null)}>
             {t('calendar.today')}
           </Button>

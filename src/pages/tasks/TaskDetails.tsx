@@ -28,9 +28,18 @@ export function TaskDetails() {
   // Fetched by id, so the pane works from any list, project or the calendar,
   // and stays open when an edit moves the task out of the current list.
   const { data: task } = useTask(selectedTaskId)
-  if (!task) return null
+  if (!task) return <NothingSelected />
   // Keyed by id so the text drafts reset when another task is selected.
   return <TaskDetailsForm key={task.id} task={task} />
+}
+
+function NothingSelected() {
+  const { t } = useTranslation()
+  return (
+    <p className="p-6 text-center text-sm text-muted-foreground">
+      {t('tasks.nothingSelected')}
+    </p>
+  )
 }
 
 function TaskDetailsForm({ task }: { task: Task }) {

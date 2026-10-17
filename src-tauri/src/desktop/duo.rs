@@ -1,4 +1,6 @@
 //! Todo Duo: two linked desktop windows, a capsule on top and a todo card below.
+//! They are EnvIO's mini mode: minimizing the main window shrinks it into
+//! this sticky, and the capsule's expand button brings the window back.
 //!
 //! The card always sits just under the capsule. Dragging the capsule moves the
 //! card; dragging the card moves the capsule; when the capsule grows into the
@@ -133,14 +135,38 @@ fn hide_both<R: Runtime>(app: &AppHandle<R>) {
     }
 }
 
-/// Show both windows if either is hidden, otherwise hide both.
-pub fn toggle<R: Runtime>(app: &AppHandle<R>) {
-    let windows = both(app);
-    if windows.iter().all(|w| w.is_visible().unwrap_or(false)) {
-        hide_both(app);
-    } else {
-        for window in &windows {
-            let _ = window.show();
+// ---------------------------------------------------------------------------
+// Mini mode: the main window shrinks into the Todo Duo sticky and back.
+
+/// Hide the main window and show the sticky at its top-right corner,
+/// so it looks like the window shrank in place.
+pub fn enter_mini_mode<R: Runtime>(app: &AppHandle<R>) {
+    let main = app.get_webview_window("main");
+    let capsule = app.get_webview_window(CAPSULE);
+    if let (Some(main), Some(capsule)) = (&main, &capsule) {
+        if let (Ok(pos), Ok(size), Ok(capsule_size)) = (
+            main.outer_position(),
+            main.outer_size(),
+            capsule.outer_size(),
+        ) {
+            let x = pos.x + size.width as i32 - capsule_size.width as i32;
+            let _ = capsule.set_position(PhysicalPosition::new(x, pos.y));
         }
+    }
+    for window in both(app) {
+        let _ = window.show();
+    }
+    if let Some(main) = main {
+        let _ = main.hide();
+    }
+}
+
+/// Hide the sticky and bring the main window back.
+pub fn leave_mini_mode<R: Runtime>(app: &AppHandle<R>) {
+    hide_both(app);
+    if let Some(main) = app.get_webview_window("main") {
+        let _ = main.show();
+        let _ = main.unminimize();
+        let _ = main.set_focus();
     }
 }

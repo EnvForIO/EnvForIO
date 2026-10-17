@@ -40,7 +40,7 @@ function NavItem({ view, icon: Icon }: { view: TaskView; icon: LucideIcon }) {
       type="button"
       onClick={() => selectView(view)}
       className={cn(
-        'flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent/60',
+        'flex items-center gap-3 rounded-md px-3 py-1.5 text-sm hover:bg-accent/60',
         selected && 'bg-accent font-medium'
       )}
     >
@@ -62,7 +62,7 @@ function CalendarItem() {
       type="button"
       onClick={openCalendar}
       className={cn(
-        'flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent/60',
+        'flex items-center gap-3 rounded-md px-3 py-1.5 text-sm hover:bg-accent/60',
         open && 'bg-accent font-medium'
       )}
     >

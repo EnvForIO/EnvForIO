@@ -60,7 +60,7 @@ export function DayCell(props: Props) {
       }}
       className={cn(
         'flex min-h-0 flex-col gap-0.5 overflow-hidden border-r border-b p-1',
-        tall ? 'min-h-64' : 'min-h-24',
+        tall ? 'min-h-64' : 'min-h-20',
         outside && 'bg-muted/40 text-muted-foreground',
         dropping && 'bg-primary/10'
       )}

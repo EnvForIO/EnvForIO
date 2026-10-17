@@ -67,14 +67,14 @@ function ProjectView({ project }: { project: Project }) {
   ].filter(Boolean)
 
   return (
-    <div className="flex h-full flex-col gap-3 p-6">
+    <div className="flex h-full flex-col gap-3 px-5 py-4">
       <header className="flex items-start gap-3">
         <span
           className="mt-2 size-3 rounded-full"
           style={{ background: project.color }}
         />
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold">{project.name}</h1>
+          <h1 className="text-xl font-semibold">{project.name}</h1>
           <p className="text-sm text-muted-foreground">{dates.join(' · ')}</p>
           <p className="text-sm text-muted-foreground">
             {t('projects.progress', {

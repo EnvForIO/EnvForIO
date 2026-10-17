@@ -37,7 +37,7 @@ export function SidebarProjects() {
             type="button"
             onClick={() => selectProject(project.id)}
             className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-2 text-sm hover:bg-accent/60',
+              'flex items-center gap-3 rounded-md px-3 py-1.5 text-sm hover:bg-accent/60',
               selectedProjectId === project.id && 'bg-accent font-medium'
             )}
           >

@@ -222,5 +222,7 @@
   "calendar.availableHours": "Available hours this day",
   "calendar.usualHours": "Usual",
   "calendar.availableHoursHint": "Leave empty to use the usual hours for this weekday; 0 makes it a rest day.",
-  "calendar.save": "Save"
+  "calendar.save": "Save",
+  "tasks.nothingSelected": "Select a task to see its details.",
+  "duo.openEnvio": "Open the EnvIO window"
 }

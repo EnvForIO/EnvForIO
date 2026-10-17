@@ -1,14 +1,15 @@
 /**
- * The Todo Duo capsule. Collapsed it shows today's progress; expanded it
+ * The Todo Duo capsule (EnvIO in mini mode). Collapsed it shows today's progress; expanded it
  * grows into the week / month / year heatmap. The window resizes to fit and
  * Rust slides the card down with it.
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
+import { ChevronDownIcon, ChevronUpIcon, Maximize2Icon } from 'lucide-react'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { LogicalSize } from '@tauri-apps/api/dpi'
 import { useDayTasks, useToday } from '@/api/tasks'
+import { commands } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { Heatmap } from './Heatmap'
 import type { HeatmapRange } from './heatmap-range'
@@ -67,6 +68,14 @@ export function Capsule() {
               {t(`duo.range.${r}`)}
             </button>
           ))}
+        <button
+          type="button"
+          onClick={() => void commands.leaveMiniMode()}
+          aria-label={t('duo.openEnvio')}
+          title={t('duo.openEnvio')}
+        >
+          <Maximize2Icon className="size-3.5" />
+        </button>
         <button
           type="button"
           onClick={() => setExpanded(!expanded)}

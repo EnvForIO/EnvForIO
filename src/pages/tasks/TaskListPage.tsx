@@ -33,9 +33,9 @@ export function TaskListPage() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-4 p-6">
+    <div className="flex h-full flex-col gap-3 px-5 py-4">
       <header>
-        <h1 className="text-2xl font-semibold">{t(`tasks.view.${view}`)}</h1>
+        <h1 className="text-xl font-semibold">{t(`tasks.view.${view}`)}</h1>
         {view === 'MyDay' && today && (
           <p className="text-sm text-muted-foreground">{dateLabel(today)}</p>
         )}

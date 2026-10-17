@@ -8,3 +8,4 @@ pub mod calendar;
 pub mod plans;
 pub mod projects;
 pub mod tasks;
+pub mod windows;

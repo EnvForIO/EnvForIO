@@ -430,6 +430,18 @@ async setDayNote(date: string, text: string) : Promise<Result<null, AppError>> {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
+},
+/**
+ * Shrink the main window into the Todo Duo sticky (the minimize button).
+ */
+async enterMiniMode() : Promise<void> {
+    await TAURI_INVOKE("enter_mini_mode");
+},
+/**
+ * Bring the main window back from the sticky.
+ */
+async leaveMiniMode() : Promise<void> {
+    await TAURI_INVOKE("leave_mini_mode");
 }
 }
 
