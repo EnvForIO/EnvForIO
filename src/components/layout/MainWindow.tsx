@@ -12,7 +12,6 @@ import { Toaster } from 'sonner'
 import { useTheme } from '@/hooks/use-theme'
 import { useUIStore } from '@/store/ui-store'
 import { useMainWindowEventListeners } from '@/hooks/useMainWindowEventListeners'
-import { useGrowWithDetailsPane } from '@/hooks/use-grow-with-details-pane'
 
 export function MainWindow() {
   const { theme } = useTheme()
@@ -21,13 +20,13 @@ export function MainWindow() {
 
   // Set up global event listeners (keyboard shortcuts, etc.)
   useMainWindowEventListeners()
-  useGrowWithDetailsPane(rightSidebarVisible)
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden rounded-[var(--app-corner-radius)] bg-background">
       <TitleBar />
 
-      <div className="flex flex-1 overflow-hidden">
+      {/* relative: the details pane floats over the right edge of this area */}
+      <div className="relative flex flex-1 overflow-hidden">
         {leftSidebarVisible && (
           <LeftSideBar className="w-60 shrink-0">
             <SidebarNav />
@@ -40,7 +39,7 @@ export function MainWindow() {
         </MainWindowContent>
 
         {rightSidebarVisible && (
-          <RightSideBar className="w-80 shrink-0">
+          <RightSideBar className="absolute inset-y-0 right-0 z-10 w-80 shadow-xl">
             <TaskDetails />
           </RightSideBar>
         )}
