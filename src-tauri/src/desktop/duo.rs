@@ -69,7 +69,7 @@ fn build<R: Runtime>(
     .shadow(false)
     .skip_taskbar(true)
     .resizable(true)
-    .visible(false) // shown from the tray; the window-state plugin restores last visibility
+    .visible(false) // shown by the float button; not tracked by the window-state plugin
     .build()
 }
 

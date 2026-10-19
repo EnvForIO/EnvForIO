@@ -63,8 +63,12 @@ pub fn run() {
     {
         app_builder = app_builder.plugin(
             tauri_plugin_window_state::Builder::new()
-                .with_state_flags(tauri_plugin_window_state::StateFlags::all())
-                .with_denylist(&["quick-pane"])
+                // Not VISIBLE: EnvIO always starts with its main window (or in the tray at login).
+                .with_state_flags(
+                    tauri_plugin_window_state::StateFlags::all()
+                        - tauri_plugin_window_state::StateFlags::VISIBLE,
+                )
+                .with_denylist(&["quick-pane", "duo-capsule", "duo-card"])
                 .build(),
         );
     }
