@@ -169,6 +169,18 @@ async getTask(id: number) : Promise<Result<Task, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * The item list: tasks filtered by status and project
+ * (`project` None = any, 0 = outside projects).
+ */
+async listItems(status: ItemStatus, project: number | null) : Promise<Result<Task[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_items", { status, project }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async createTask(title: string, view: TaskView) : Promise<Result<Task, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("create_task", { title, view }) };
@@ -503,6 +515,7 @@ export type DuoFont = "system" | "serif" | "mono"
 export type DuoMaterial = "translucent" | "acrylic" | "mica" | "solid"
 export type DuoStyle = { material: DuoMaterial; font: DuoFont; text_size: DuoTextSize }
 export type DuoTextSize = "small" | "medium" | "large"
+export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
 export type Project = { id: number; name: string; color: string; template: string; startDate: string | null; deadline: string | null; bufferDays: number; planDate: string | null; isArchived: boolean; sortOrder: number; taskCount: number; doneCount: number; estimateMinutes: number; doneEstimateMinutes: number }
@@ -536,7 +549,7 @@ export type RecoveryError =
  * JSON serialization/deserialization error
  */
 { type: "ParseError"; message: string }
-export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; scheduledDate: string | null; stepCount: number; stepsDone: number; createdAt: string }
+export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string }
 export type TaskStep = { id: number; taskId: number; title: string; isDone: boolean; sortOrder: number }
 /**
  * Everything the details pane can edit, sent whole on every save.

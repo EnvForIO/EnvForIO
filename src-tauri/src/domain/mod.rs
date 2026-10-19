@@ -3,3 +3,4 @@
 pub mod day;
 pub mod duration;
 pub mod safety_line;
+pub mod time_parse;

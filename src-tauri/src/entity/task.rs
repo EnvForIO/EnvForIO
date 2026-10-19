@@ -23,6 +23,8 @@ pub struct Task {
     pub module_id: Option<i64>,
     pub estimate_minutes: Option<i64>,
     pub scheduled_date: Option<String>, // 'YYYY-MM-DD': the day it is planned on the calendar
+    pub start_time: Option<String>,     // 'HH:MM', from quick capture
+    pub end_time: Option<String>,       // 'HH:MM'
     pub step_count: i64,
     pub steps_done: i64,
     pub created_at: String,
@@ -32,6 +34,7 @@ pub struct Task {
 pub const TASK_COLUMNS: &str = "t.id, t.title, t.note, t.is_important, t.is_pinned, \
      t.my_day_date, t.due_date, t.done_at, t.sort_order, \
      t.project_id, t.module_id, t.estimate_minutes, t.scheduled_date, \
+     t.start_time, t.end_time, \
      (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id), \
      (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id AND s.is_done = 1), \
      t.created_at";
@@ -52,9 +55,11 @@ impl Task {
             module_id: row.get(10)?,
             estimate_minutes: row.get(11)?,
             scheduled_date: row.get(12)?,
-            step_count: row.get(13)?,
-            steps_done: row.get(14)?,
-            created_at: row.get(15)?,
+            start_time: row.get(13)?,
+            end_time: row.get(14)?,
+            step_count: row.get(15)?,
+            steps_done: row.get(16)?,
+            created_at: row.get(17)?,
         })
     }
 }

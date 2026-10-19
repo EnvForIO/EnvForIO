@@ -7,6 +7,7 @@ use specta::Type;
 
 use super::query::{self, TaskView};
 use crate::domain::day::now_timestamp;
+use crate::domain::time_parse::capture;
 use crate::entity::task::{Task, TaskStep};
 use crate::errors::{AppError, AppResult};
 use crate::service::validate::{check_date, clean_name as clean_title, estimate_minutes};
@@ -26,9 +27,11 @@ pub struct TaskUpdate {
 
 /// Add a task to the top of a list. The list decides the defaults, as in
 /// Microsoft To Do: adding in My Day puts it in My Day, in Important flags it,
-/// in Planned gives it today's date.
+/// in Planned gives it today's date. A leading time ("14:00-15:00 seminar")
+/// becomes the task's time slot (quick capture).
 pub fn create(conn: &Connection, title: &str, view: TaskView, today: &str) -> AppResult<Task> {
-    let title = clean_title(title)?;
+    let captured = capture(title);
+    let title = clean_title(&captured.title)?;
     let now = now_timestamp();
     let top: f64 = conn.query_row(
         "SELECT coalesce(min(sort_order), 0) - 1 FROM tasks",
@@ -38,9 +41,19 @@ pub fn create(conn: &Connection, title: &str, view: TaskView, today: &str) -> Ap
     let my_day = (view == TaskView::MyDay).then_some(today);
     let due = (view == TaskView::Planned).then_some(today);
     conn.execute(
-        "INSERT INTO tasks (title, is_important, my_day_date, due_date, sort_order, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?6)",
-        params![title, view == TaskView::Important, my_day, due, top, now],
+        "INSERT INTO tasks (title, is_important, my_day_date, due_date, start_time, end_time,
+                            sort_order, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?8)",
+        params![
+            title,
+            view == TaskView::Important,
+            my_day,
+            due,
+            captured.start,
+            captured.end,
+            top,
+            now
+        ],
     )?;
     query::get(conn, conn.last_insert_rowid())
 }

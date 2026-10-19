@@ -24,7 +24,8 @@ const ORDER: &str = "ORDER BY t.is_pinned DESC, (t.done_at IS NOT NULL), t.sort_
 
 pub fn list(conn: &Connection, view: TaskView, today: &str) -> AppResult<Vec<Task>> {
     let filter = match view {
-        TaskView::MyDay => "t.my_day_date = ?1",
+        // Today: added to My Day today, or scheduled for today on the calendar.
+        TaskView::MyDay => "(t.my_day_date = ?1 OR t.scheduled_date = ?1)",
         TaskView::Important => "t.is_important = 1 AND ?1 IS NOT NULL",
         // Planned is ordered by date first: the nearest deadline on top.
         TaskView::Planned => "t.due_date IS NOT NULL AND ?1 IS NOT NULL",
@@ -45,8 +46,9 @@ pub fn list(conn: &Connection, view: TaskView, today: &str) -> AppResult<Vec<Tas
 // ---------------------------------------------------------------------------
 // Days (Todo Duo card and heatmap)
 //
-// A task belongs to a day when it was put in My Day that day or is due that
-// day. A task can belong to two days (in My Day on Monday, due Friday).
+// A task belongs to a day when it was put in My Day that day, is scheduled
+// that day, or is due that day. It can belong to several days (in My Day on
+// Monday, due Friday).
 
 /// How much of one day's tasks are done: one heatmap cell.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
@@ -58,7 +60,8 @@ pub struct DayCompletion {
 
 pub fn list_day(conn: &Connection, date: &str) -> AppResult<Vec<Task>> {
     let sql = format!(
-        "SELECT {TASK_COLUMNS} FROM tasks t WHERE t.my_day_date = ?1 OR t.due_date = ?1 {ORDER}"
+        "SELECT {TASK_COLUMNS} FROM tasks t
+         WHERE t.my_day_date = ?1 OR t.scheduled_date = ?1 OR t.due_date = ?1 {ORDER}"
     );
     let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map(params![date], Task::from_row)?;
@@ -73,6 +76,9 @@ pub fn day_completion(conn: &Connection, from: &str, to: &str) -> AppResult<Vec<
         "SELECT day, count(*), sum(done) FROM (
              SELECT id, my_day_date AS day, done_at IS NOT NULL AS done
                FROM tasks WHERE my_day_date BETWEEN ?1 AND ?2
+             UNION
+             SELECT id, scheduled_date, done_at IS NOT NULL
+               FROM tasks WHERE scheduled_date BETWEEN ?1 AND ?2
              UNION
              SELECT id, due_date, done_at IS NOT NULL
                FROM tasks WHERE due_date BETWEEN ?1 AND ?2

@@ -7,6 +7,7 @@ use crate::config::AppState;
 use crate::domain::day::today;
 use crate::entity::task::{Task, TaskStep};
 use crate::errors::AppResult;
+use crate::service::tasks::items::{self, ItemStatus};
 use crate::service::tasks::mutation::{self, TaskUpdate};
 use crate::service::tasks::query::{self, DayCompletion, TaskView};
 
@@ -106,4 +107,16 @@ pub fn get_day_completion(
 #[specta::specta]
 pub fn get_task(state: State<'_, AppState>, id: i64) -> AppResult<Task> {
     query::get(&state.db(), id)
+}
+
+/// The item list: tasks filtered by status and project
+/// (`project` None = any, 0 = outside projects).
+#[tauri::command]
+#[specta::specta]
+pub fn list_items(
+    state: State<'_, AppState>,
+    status: ItemStatus,
+    project: Option<i64>,
+) -> AppResult<Vec<Task>> {
+    items::list(&state.db(), status, project)
 }

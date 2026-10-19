@@ -1,6 +1,7 @@
 //! Tasks: the four built-in lists, their steps, and the rules for changing them.
 //! Reads are in `query`, writes in `mutation`.
 
+pub mod items;
 pub mod mutation;
 pub mod query;
 pub mod schedule;
