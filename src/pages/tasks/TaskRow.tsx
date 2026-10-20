@@ -34,6 +34,11 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
         <SunIcon className="size-3" /> {t('tasks.myDay')}
       </span>
     ),
+    task.startTime !== null && (
+      <span key="time">
+        {task.endTime ? `${task.startTime}–${task.endTime}` : task.startTime}
+      </span>
+    ),
     task.estimateMinutes !== null && (
       <span key="estimate">{formatMinutes(task.estimateMinutes)}</span>
     ),

@@ -3,6 +3,8 @@ import { emit, listen } from '@tauri-apps/api/event'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { commands } from '@/lib/tauri-bindings'
 import { logger } from '@/lib/logger'
+import { useTranslation } from 'react-i18next'
+import { TASKS_CHANGED } from '@/api/tasks'
 
 /** Dismiss the quick pane window, logging any errors */
 async function dismissQuickPane() {
@@ -17,7 +19,7 @@ async function dismissQuickPane() {
  *
  * This component demonstrates the quick pane pattern:
  * - Single text input with submit on Enter
- * - Emits 'quick-pane-submit' event with the entered text
+ * - Creates a task in My Day (quick capture) and tells other windows to refetch
  * - Theme synced with main window via localStorage
  * - Hides window on submit or Escape
  */
@@ -40,6 +42,7 @@ function applyTheme() {
 }
 
 export default function QuickPaneApp() {
+  const { t } = useTranslation()
   const [text, setText] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -95,9 +98,14 @@ export default function QuickPaneApp() {
     e.preventDefault()
 
     if (text.trim()) {
-      // Emit the event for main window to handle
-      await emit('quick-pane-submit', { text: text.trim() })
-      setText('')
+      // Quick capture: a new task in My Day ("14:00-15:00 meeting" keeps its time).
+      const result = await commands.createTask(text.trim(), 'MyDay')
+      if (result.status === 'error') {
+        logger.error('Quick capture failed', { error: result.error })
+      } else {
+        await emit(TASKS_CHANGED)
+        setText('')
+      }
     }
 
     // Use dismiss command to avoid space switching on macOS
@@ -114,7 +122,7 @@ export default function QuickPaneApp() {
         type="text"
         value={text}
         onChange={e => setText(e.target.value)}
-        placeholder="Enter text..."
+        placeholder={t('quickCapture.placeholder')}
         className="w-full bg-transparent text-lg text-foreground placeholder:text-muted-foreground outline-none"
         autoComplete="off"
         autoCorrect="off"

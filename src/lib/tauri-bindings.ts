@@ -28,6 +28,7 @@ export type {
   DayNote,
   DayOverride,
   DuoStyle,
+  ItemStatus,
   TodayLine,
   WeekCapacity,
   Module,

@@ -12,6 +12,8 @@ import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from './dates'
 import { TaskRow } from './TaskRow'
 import { SafetyLineCard } from '@/pages/plans/SafetyLineCard'
+import { TodayNote } from './TodayNote'
+import { ToSchedule } from './ToSchedule'
 
 export function TaskListPage() {
   const { t } = useTranslation()
@@ -39,6 +41,7 @@ export function TaskListPage() {
         {view === 'MyDay' && today && (
           <p className="text-sm text-muted-foreground">{dateLabel(today)}</p>
         )}
+        {view === 'MyDay' && today && <TodayNote today={today} />}
       </header>
 
       {view === 'MyDay' && <SafetyLineCard />}
@@ -94,6 +97,8 @@ export function TaskListPage() {
                 ))}
             </>
           )}
+
+          {view === 'MyDay' && today && <ToSchedule today={today} />}
         </div>
       </ScrollArea>
     </div>

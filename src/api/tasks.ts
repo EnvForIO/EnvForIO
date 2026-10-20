@@ -15,6 +15,7 @@ import { emit, listen } from '@tauri-apps/api/event'
 import {
   commands,
   unwrapResult,
+  type ItemStatus,
   type Task,
   type TaskUpdate,
   type TaskView,
@@ -30,7 +31,7 @@ export const taskKeys = {
     ['tasks', 'completion', from, to] as const,
 }
 
-const TASKS_CHANGED = 'tasks-changed'
+export const TASKS_CHANGED = 'tasks-changed'
 
 /** Refetch tasks when another window changes them. Call once per window. */
 export function useTaskSync(): void {
@@ -58,6 +59,15 @@ export function useTasks(view: TaskView) {
   return useQuery({
     queryKey: taskKeys.list(view),
     queryFn: async () => unwrapResult(await commands.listTasks(view)),
+  })
+}
+
+/** The item list: status filter, and project (null = any, 0 = outside projects). */
+export function useItems(status: ItemStatus, project: number | null) {
+  return useQuery({
+    queryKey: ['tasks', 'items', status, project] as const,
+    queryFn: async () =>
+      unwrapResult(await commands.listItems(status, project)),
   })
 }
 

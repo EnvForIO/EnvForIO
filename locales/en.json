@@ -227,5 +227,16 @@
   "duo.openEnvio": "Open the EnvIO window",
   "titlebar.float": "Float as a sticky (Todo Duo)",
   "duo.pin": "Keep on top",
-  "duo.unpin": "Stop keeping on top"
+  "duo.unpin": "Stop keeping on top",
+  "tasks.todayNotePlaceholder": "A line for today…",
+  "tasks.toSchedule": "To schedule ({{count}})",
+  "items.title": "Items",
+  "items.status.Open": "Open",
+  "items.status.WithDeadline": "With deadline",
+  "items.status.Done": "Done",
+  "items.status.All": "All",
+  "items.anyProject": "All projects",
+  "items.noProject": "Not in a project",
+  "items.empty": "Nothing here.",
+  "quickCapture.placeholder": "Add to My Day (e.g. 14:00-15:00 group meeting)"
 }

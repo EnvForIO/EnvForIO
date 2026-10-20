@@ -46,3 +46,12 @@ Done together, since available time only matters through the line.
 - Native file drop is off (`dragDropEnabled: false`) because WebView2 swallows HTML drag events while it is on.
 - The details pane now fetches its task by id (`get_task`), so it opens from the calendar and stays open when an edit moves the task out of the current list.
 - Built by hand (CSS grid + HTML drag and drop) instead of FullCalendar or Schedule-X: the views are simple, and a library would bring its own styling and drag system.
+
+## Step 5: today, quick capture, item list
+
+- My Day (the "Today" view) now also includes tasks scheduled for today; so do the Todo Duo day lists and heatmap.
+- Under the My Day date there is "a line for today": today's day note, the same one the calendar shows.
+- "To schedule" at the bottom of My Day lists open tasks with no day; "Today" schedules one for today.
+- Quick capture: `domain/time_parse.rs` turns a leading time into the task's slot ("14:00-15:00 group meeting", "9:30 call", "14:00 to 15:30 seminar"). It applies to every new task. Rows show the slot. The template's quick pane (global shortcut, default Ctrl+Shift+.) now adds the typed text to My Day.
+- Items page (sidebar): every task filtered by open / with deadline / done / all, and by project or "not in a project".
+- The UI store's calendar flag became `page: 'calendar' | 'items' | null`.

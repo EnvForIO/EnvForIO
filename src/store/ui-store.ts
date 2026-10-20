@@ -12,8 +12,8 @@ interface UIState {
   selectedView: TaskView
   /** The project shown in the middle pane instead of a built-in list, if any. */
   selectedProjectId: number | null
-  /** The calendar is shown in the middle pane. */
-  calendarOpen: boolean
+  /** A full page in the middle pane instead of a list or project. */
+  page: 'calendar' | 'items' | null
   /** The task open in the details pane, or null when it is closed. */
   selectedTaskId: number | null
 
@@ -30,7 +30,7 @@ interface UIState {
   selectView: (view: TaskView) => void
   selectTask: (id: number | null) => void
   selectProject: (id: number) => void
-  openCalendar: () => void
+  openPage: (page: 'calendar' | 'items') => void
 }
 
 export const useUIStore = create<UIState>()(
@@ -43,7 +43,7 @@ export const useUIStore = create<UIState>()(
       lastQuickPaneEntry: null,
       selectedView: 'MyDay',
       selectedProjectId: null,
-      calendarOpen: false,
+      page: null,
       selectedTaskId: null,
 
       toggleLeftSidebar: () =>
@@ -102,7 +102,7 @@ export const useUIStore = create<UIState>()(
           {
             selectedView: view,
             selectedProjectId: null,
-            calendarOpen: false,
+            page: null,
             selectedTaskId: null,
             rightSidebarVisible: false,
           },
@@ -114,7 +114,7 @@ export const useUIStore = create<UIState>()(
         set(
           {
             selectedProjectId: id,
-            calendarOpen: false,
+            page: null,
             selectedTaskId: null,
             rightSidebarVisible: false,
           },
@@ -122,16 +122,16 @@ export const useUIStore = create<UIState>()(
           'selectProject'
         ),
 
-      openCalendar: () =>
+      openPage: page =>
         set(
           {
-            calendarOpen: true,
+            page,
             selectedProjectId: null,
             selectedTaskId: null,
             rightSidebarVisible: false,
           },
           undefined,
-          'openCalendar'
+          'openPage'
         ),
 
       selectTask: id =>
