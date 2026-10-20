@@ -10,6 +10,7 @@ use crate::domain::day::now_timestamp;
 use crate::domain::time_parse::capture;
 use crate::entity::task::{Task, TaskStep};
 use crate::errors::{AppError, AppResult};
+use crate::service::timer;
 use crate::service::validate::{check_date, clean_name as clean_title, estimate_minutes};
 
 /// Everything the details pane can edit, sent whole on every save.
@@ -101,6 +102,10 @@ pub fn update(conn: &Connection, id: i64, update: &TaskUpdate, today: &str) -> A
 }
 
 pub fn set_done(conn: &Connection, id: i64, done: bool) -> AppResult<Task> {
+    // Finishing the task the timer is running on stops the timer (and records its time).
+    if done && timer::running(conn)?.is_some_and(|t| t.task_id == id) {
+        timer::stop(conn)?;
+    }
     let now = now_timestamp();
     let done_at = done.then_some(now.as_str());
     let changed = conn.execute(

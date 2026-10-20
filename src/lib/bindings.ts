@@ -443,6 +443,47 @@ async setDayNote(date: string, text: string) : Promise<Result<null, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+async getRunningTimer() : Promise<Result<RunningTimer | null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_running_timer") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Start timing a task; a timer already running on another task stops first.
+ */
+async startTimer(taskId: number) : Promise<Result<RunningTimer, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("start_timer", { taskId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Stop the running timer; returns the minutes added to its task.
+ */
+async stopTimer() : Promise<Result<number, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("stop_timer") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Finish part of a task (`done` is typed, e.g. "45m"); returns the new task with the rest.
+ */
+async completeTaskPartially(id: number, done: string) : Promise<Result<Task, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("complete_task_partially", { id, done }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 /**
  * Keep the Todo Duo sticky on top of other windows, or not.
  */
@@ -549,7 +590,8 @@ export type RecoveryError =
  * JSON serialization/deserialization error
  */
 { type: "ParseError"; message: string }
-export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string }
+export type RunningTimer = { taskId: number; title: string; startedAt: string }
+export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string }
 export type TaskStep = { id: number; taskId: number; title: string; isDone: boolean; sortOrder: number }
 /**
  * Everything the details pane can edit, sent whole on every save.

@@ -3,6 +3,7 @@
 
 pub mod items;
 pub mod mutation;
+pub mod partial;
 pub mod query;
 pub mod schedule;
 

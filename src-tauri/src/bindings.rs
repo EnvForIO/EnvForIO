@@ -1,7 +1,7 @@
 use tauri_specta::{collect_commands, Builder};
 
 pub fn generate_bindings() -> Builder<tauri::Wry> {
-    use crate::api::{calendar, plans, projects, tasks, windows};
+    use crate::api::{calendar, plans, projects, tasks, timer, windows};
     use crate::commands::{notifications, preferences, quick_pane, recovery};
 
     Builder::<tauri::Wry>::new().commands(collect_commands![
@@ -54,6 +54,10 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         calendar::create_scheduled_task,
         calendar::list_day_notes,
         calendar::set_day_note,
+        timer::get_running_timer,
+        timer::start_timer,
+        timer::stop_timer,
+        timer::complete_task_partially,
         windows::set_mini_pinned,
         windows::enter_mini_mode,
         windows::leave_mini_mode,
