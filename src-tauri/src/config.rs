@@ -11,6 +11,7 @@ use tauri::{AppHandle, Manager};
 
 use crate::db;
 use crate::errors::{AppError, AppResult};
+use crate::service::settings;
 
 const DATABASE_FILE: &str = "envio.db";
 
@@ -30,8 +31,11 @@ impl AppState {
             .map_err(|e| AppError::invalid(format!("cannot create {}: {e}", dir.display())))?;
         let path = dir.join(DATABASE_FILE);
         log::info!("opening database at {}", path.display());
+        let conn = db::open(&path)?;
+        // The saved day start decides what "today" is, so apply it before any command runs.
+        settings::apply(&conn)?;
         Ok(Self {
-            db: Mutex::new(db::open(&path)?),
+            db: Mutex::new(conn),
         })
     }
 

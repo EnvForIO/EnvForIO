@@ -2,14 +2,36 @@
 //!
 //! EnvIO's day starts at a rollover time (07:00 by default, as in DayEcho),
 //! not at midnight: working until 01:30 still counts as the previous day.
+//! The rollover is a setting; it is loaded at startup and kept here so that
+//! `today()` needs no database.
 
-use chrono::{Duration, Local, NaiveDate, NaiveDateTime, NaiveTime};
+use std::sync::atomic::{AtomicU32, Ordering};
+
+use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 
 /// The default start of a new day.
 pub const DEFAULT_DAY_START: NaiveTime = match NaiveTime::from_hms_opt(7, 0, 0) {
     Some(t) => t,
     None => panic!("07:00 is a valid time"),
 };
+
+/// The current rollover, in minutes after midnight.
+static DAY_START_MINUTES: AtomicU32 = AtomicU32::new(7 * 60);
+
+pub fn set_day_start(time: NaiveTime) {
+    DAY_START_MINUTES.store(time.hour() * 60 + time.minute(), Ordering::Relaxed);
+}
+
+pub fn day_start() -> NaiveTime {
+    let m = DAY_START_MINUTES.load(Ordering::Relaxed);
+    NaiveTime::from_hms_opt(m / 60, m % 60, 0).unwrap_or(DEFAULT_DAY_START)
+}
+
+/// The EnvIO day a UTC RFC 3339 timestamp (`done_at` and friends) falls on.
+pub fn day_of_timestamp(timestamp: &str) -> Option<NaiveDate> {
+    let utc = DateTime::parse_from_rfc3339(timestamp).ok()?;
+    Some(day_of(utc.with_timezone(&Local).naive_local(), day_start()))
+}
 
 /// The EnvIO day that a local date-time falls in.
 pub fn day_of(local: NaiveDateTime, day_start: NaiveTime) -> NaiveDate {
@@ -22,7 +44,7 @@ pub fn day_of(local: NaiveDateTime, day_start: NaiveTime) -> NaiveDate {
 
 /// Today as EnvIO sees it, formatted 'YYYY-MM-DD' like the database stores dates.
 pub fn today() -> String {
-    day_of(Local::now().naive_local(), DEFAULT_DAY_START).to_string()
+    day_of(Local::now().naive_local(), day_start()).to_string()
 }
 
 /// The current time as an RFC 3339 UTC timestamp, for `created_at` and friends.

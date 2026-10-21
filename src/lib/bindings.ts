@@ -395,6 +395,52 @@ async setDayOverride(date: string, minutes: number | null) : Promise<Result<null
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * The last 14 days' results, the streak, and yesterday's shortfall.
+ */
+async getCheckIns() : Promise<Result<CheckIns, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_check_ins") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Planned project work for each of the next 14 days.
+ */
+async getLoadForecast() : Promise<Result<ForecastDay[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_load_forecast") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getProjectHealth() : Promise<Result<ProjectHealth[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_project_health") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getPlanningSettings() : Promise<Result<PlanningSettings, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_planning_settings") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async savePlanningSettings(settings: PlanningSettings) : Promise<Result<PlanningSettings, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("save_planning_settings", { settings }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async listCalendarTasks(from: string, to: string) : Promise<Result<Task[], AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("list_calendar_tasks", { from, to }) };
@@ -546,20 +592,30 @@ language: string | null;
  * Look of the Todo Duo widgets. Missing in files saved before it existed.
  */
 duo_style?: DuoStyle }
+export type CheckIns = { 
+/**
+ * Days in a row (up to today) that met their line; days without a line don't break it.
+ */
+streak: number; yesterday: DayResult | null; shortfall: number; days: DayResult[] }
 /**
  * How much of one day's tasks are done: one heatmap cell.
  */
 export type DayCompletion = { date: string; total: number; done: number }
 export type DayNote = { date: string; text: string }
 export type DayOverride = { date: string; minutes: number }
+export type DayResult = { date: string; line: number; done: number; met: boolean }
 export type DuoFont = "system" | "serif" | "mono"
 export type DuoMaterial = "translucent" | "acrylic" | "mica" | "solid"
 export type DuoStyle = { material: DuoMaterial; font: DuoFont; text_size: DuoTextSize }
 export type DuoTextSize = "small" | "medium" | "large"
+export type ForecastDay = { date: string; minutes: number; capacity: number | null }
+export type Health = "Done" | "OnTrack" | "Tight" | "Behind" | "Overdue"
 export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
+export type PlanningSettings = { dayStart: string; level: boolean; earliestFirst: boolean }
 export type Project = { id: number; name: string; color: string; template: string; startDate: string | null; deadline: string | null; bufferDays: number; planDate: string | null; isArchived: boolean; sortOrder: number; taskCount: number; doneCount: number; estimateMinutes: number; doneEstimateMinutes: number }
+export type ProjectHealth = { projectId: number; ratio: number; samples: number; remaining: number; predictedRemaining: number; neededPerDay: number | null; health: Health }
 /**
  * The project dialog's fields, sent whole on create and on every save.
  */
