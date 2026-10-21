@@ -28,6 +28,8 @@ export type {
   DayNote,
   DayOverride,
   DuoStyle,
+  Health,
+  PlanningSettings,
   ItemStatus,
   TodayLine,
   WeekCapacity,

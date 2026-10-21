@@ -242,10 +242,10 @@ All of this lives in the main window: projects go in the sidebar, Calendar and S
 - [x] **Item list**: open / with deadline / done / all, filtered by project
 - [x] **Timer**, recording actual time on completion
 - [x] **Partial completion**: record how much was done; the rest becomes a new task on the next work day
-- [ ] **Estimate calibration**: use the actual / estimated ratio to forecast remaining work, finish date and project health
-- [ ] **14-day load forecast chart**
-- [ ] **Check-ins and streaks**; "yesterday fell short by X, redistributed"
-- [ ] **Day rollover time**: a new day starts at 07:00 by default
+- [x] **Estimate calibration**: use the actual / estimated ratio to forecast remaining work, finish date and project health
+- [x] **14-day load forecast chart**
+- [x] **Check-ins and streaks**; "yesterday fell short by X, redistributed"
+- [x] **Day rollover time**: a new day starts at 07:00 by default
 - [ ] **Stats**: items done, time spent, completion rate, active days, time trend, where time went, completion heatmap, weekly rhythm, project progress; by week / month / year
 - [ ] **Export**: day / week / month / project lists as PDF, image, spreadsheet, calendar file
 - [ ] **Yearly review** and share card

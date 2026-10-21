@@ -30,6 +30,7 @@ import { useTodayLine } from '@/api/plans'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from '@/pages/tasks/dates'
 import { ModuleSection } from './ModuleSection'
+import { ProjectHealthBadge } from '@/pages/plans/ProjectHealthBadge'
 import { ProjectDialog } from './ProjectDialog'
 
 export function ProjectPage({ projectId }: { projectId: number }) {
@@ -92,6 +93,7 @@ function ProjectView({ project }: { project: Project }) {
               })}
             </p>
           )}
+          <ProjectHealthBadge projectId={project.id} />
         </div>
         <Button
           variant="ghost"

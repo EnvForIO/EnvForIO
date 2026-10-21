@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { useSetWeekdayCapacity, useWeekCapacity } from '@/api/plans'
 import { Input } from '@/components/ui/input'
 import { SettingsField, SettingsSection } from '../shared/SettingsComponents'
+import { PlanningOptions } from './PlanningOptions'
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
@@ -63,6 +64,8 @@ export function PlanningPane() {
           </SettingsField>
         ))}
       </SettingsSection>
+
+      <PlanningOptions />
     </div>
   )
 }
