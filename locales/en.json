@@ -238,5 +238,13 @@
   "items.anyProject": "All projects",
   "items.noProject": "Not in a project",
   "items.empty": "Nothing here.",
-  "quickCapture.placeholder": "Add to My Day (e.g. 14:00-15:00 group meeting)"
+  "quickCapture.placeholder": "Add to My Day (e.g. 14:00-15:00 group meeting)",
+  "timer.start": "Start timer",
+  "timer.stop": "Stop timer",
+  "timer.actual": "Actual: {{minutes}}",
+  "timer.didPart": "Did part of it",
+  "timer.howMuch": "How much did you do? e.g. 45m",
+  "timer.split": "Split",
+  "timer.splitHint": "The done part is finished; the rest becomes a new task on the next work day.",
+  "timer.splitFailed": "Use a time shorter than the estimate, like 45m."
 }

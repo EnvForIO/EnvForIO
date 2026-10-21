@@ -3,7 +3,15 @@
  * Clicking the row opens it in the details pane.
  */
 import { useTranslation } from 'react-i18next'
-import { CalendarIcon, PinIcon, StarIcon, SunIcon } from 'lucide-react'
+import {
+  CalendarIcon,
+  PinIcon,
+  PlayIcon,
+  SquareIcon,
+  StarIcon,
+  SunIcon,
+} from 'lucide-react'
+import { useRunningTimer, useStartTimer, useStopTimer } from '@/api/timer'
 import { toUpdate, useSetTaskDone, useToday, useUpdateTask } from '@/api/tasks'
 import type { Task, TaskView } from '@/lib/tauri-bindings'
 import { formatMinutes } from '@/lib/duration'
@@ -18,6 +26,9 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
   const selectTask = useUIStore(state => state.selectTask)
   const setDone = useSetTaskDone()
   const updateTask = useUpdateTask()
+  const running = useRunningTimer().data?.taskId === task.id
+  const startTimer = useStartTimer()
+  const stopTimer = useStopTimer()
 
   const done = task.doneAt !== null
   const inMyDay = task.myDayDate !== null && task.myDayDate === today
@@ -71,7 +82,7 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
       onClick={() => selectTask(task.id)}
       onKeyDown={e => e.key === 'Enter' && selectTask(task.id)}
       className={cn(
-        'flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-left hover:bg-accent/50',
+        'group flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-left hover:bg-accent/50',
         selectedTaskId === task.id && 'bg-accent'
       )}
     >
@@ -101,6 +112,25 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
         )}
       </div>
       {task.isPinned && <PinIcon className="size-4 text-muted-foreground" />}
+      {!done && (
+        <button
+          type="button"
+          aria-label={running ? t('timer.stop') : t('timer.start')}
+          title={running ? t('timer.stop') : t('timer.start')}
+          onClick={e => {
+            e.stopPropagation()
+            if (running) stopTimer.mutate(undefined)
+            else startTimer.mutate(task.id)
+          }}
+          className={cn(!running && 'opacity-0 group-hover:opacity-100')}
+        >
+          {running ? (
+            <SquareIcon className="size-3.5 fill-red-500 text-red-500" />
+          ) : (
+            <PlayIcon className="size-3.5 text-muted-foreground" />
+          )}
+        </button>
+      )}
       <button
         type="button"
         aria-label={

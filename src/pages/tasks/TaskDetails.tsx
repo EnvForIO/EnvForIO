@@ -22,6 +22,7 @@ import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel, formatDate, parseDate } from './dates'
 import { TaskSteps } from './TaskSteps'
+import { TimerSection } from '@/pages/timer/TimerSection'
 
 export function TaskDetails() {
   const selectedTaskId = useUIStore(state => state.selectedTaskId)
@@ -109,6 +110,8 @@ function TaskDetailsForm({ task }: { task: Task }) {
       </div>
 
       <TaskSteps taskId={task.id} />
+
+      <TimerSection task={task} />
 
       <div className="flex flex-col gap-1">
         {toggles.map(({ key, on, icon: Icon, label, change }) => (

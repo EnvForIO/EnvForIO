@@ -240,8 +240,8 @@ All of this lives in the main window: projects go in the sidebar, Calendar and S
 - [x] **Today**: to do today, to schedule, a line written for today
 - [x] **Task pool and quick capture**: standalone items; typing `14:00-15:00 group meeting` detects the time
 - [x] **Item list**: open / with deadline / done / all, filtered by project
-- [ ] **Timer**, recording actual time on completion
-- [ ] **Partial completion**: record how much was done; the rest becomes a new task on the next work day
+- [x] **Timer**, recording actual time on completion
+- [x] **Partial completion**: record how much was done; the rest becomes a new task on the next work day
 - [ ] **Estimate calibration**: use the actual / estimated ratio to forecast remaining work, finish date and project health
 - [ ] **14-day load forecast chart**
 - [ ] **Check-ins and streaks**; "yesterday fell short by X, redistributed"

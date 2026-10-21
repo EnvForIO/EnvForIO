@@ -4,6 +4,7 @@ import { RightSideBar } from './RightSideBar'
 import { MainWindowContent } from './MainWindowContent'
 import { SidebarNav } from './SidebarNav'
 import { SidebarProjects } from './SidebarProjects'
+import { SidebarTimer } from '@/pages/timer/SidebarTimer'
 import { MainPane } from '@/pages/MainPane'
 import { TaskDetails } from '@/pages/tasks/TaskDetails'
 import { CommandPalette } from '@/components/command-palette/CommandPalette'
@@ -31,6 +32,7 @@ export function MainWindow() {
           <LeftSideBar className="w-60 shrink-0">
             <SidebarNav />
             <SidebarProjects />
+            <SidebarTimer />
           </LeftSideBar>
         )}
 

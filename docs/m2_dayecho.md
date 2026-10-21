@@ -55,3 +55,10 @@ Done together, since available time only matters through the line.
 - Quick capture: `domain/time_parse.rs` turns a leading time into the task's slot ("14:00-15:00 group meeting", "9:30 call", "14:00 to 15:30 seminar"). It applies to every new task. Rows show the slot. The template's quick pane (global shortcut, default Ctrl+Shift+.) now adds the typed text to My Day.
 - Items page (sidebar): every task filtered by open / with deadline / done / all, and by project or "not in a project".
 - The UI store's calendar flag became `page: 'calendar' | 'items' | null`.
+
+## Step 6: timer and partial completion
+
+- Migration `0005_time_entries.sql`: timer sessions; a partial unique index allows only one running session.
+- `service/timer`: starting a timer stops any running one; stopping (or finishing the task) adds the session, rounded to the nearest minute, to `tasks.actual_minutes`.
+- `service/tasks/partial.rs`: "did part of it" keeps the done part as the task's estimate and finishes it; the rest becomes a new task (same project, module, due date and flag, `split_from_id` set) scheduled on the next day that is not a rest day.
+- UI: a play / stop button on task rows (shown on hover, red while running), a running timer with elapsed time at the bottom of the sidebar, and a timer block in the details pane with actual time and "Did part of it".
