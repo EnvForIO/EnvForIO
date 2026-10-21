@@ -489,6 +489,17 @@ async setDayNote(date: string, text: string) : Promise<Result<null, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Stats for the week, month or year `offset` periods from the current one (0 = current).
+ */
+async getStats(period: Period, offset: number) : Promise<Result<Stats, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_stats", { period, offset }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getRunningTimer() : Promise<Result<RunningTimer | null, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_running_timer") };
@@ -592,6 +603,7 @@ language: string | null;
  * Look of the Todo Duo widgets. Missing in files saved before it existed.
  */
 duo_style?: DuoStyle }
+export type Bucket = { key: string; done: number; minutes: number }
 export type CheckIns = { 
 /**
  * Days in a row (up to today) that met their line; days without a line don't break it.
@@ -613,6 +625,7 @@ export type Health = "Done" | "OnTrack" | "Tight" | "Behind" | "Overdue"
 export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
+export type Period = "Week" | "Month" | "Year"
 export type PlanningSettings = { dayStart: string; level: boolean; earliestFirst: boolean }
 export type Project = { id: number; name: string; color: string; template: string; startDate: string | null; deadline: string | null; bufferDays: number; planDate: string | null; isArchived: boolean; sortOrder: number; taskCount: number; doneCount: number; estimateMinutes: number; doneEstimateMinutes: number }
 export type ProjectHealth = { projectId: number; ratio: number; samples: number; remaining: number; predictedRemaining: number; neededPerDay: number | null; health: Health }
@@ -622,6 +635,7 @@ export type ProjectHealth = { projectId: number; ratio: number; samples: number;
 export type ProjectInput = { name: string; color: string; startDate: string | null; deadline: string | null; bufferDays: number; isArchived: boolean }
 export type ProjectLine = { projectId: number; name: string; color: string; minutes: number; doneMinutes: number }
 export type ProjectTemplate = { id: string; modules: string[] }
+export type ProjectTime = { projectId: number | null; name: string | null; color: string | null; minutes: number; done: number }
 /**
  * Error types for recovery operations (typed for frontend matching)
  */
@@ -647,6 +661,7 @@ export type RecoveryError =
  */
 { type: "ParseError"; message: string }
 export type RunningTimer = { taskId: number; title: string; startedAt: string }
+export type Stats = { from: string; to: string; done: number; minutes: number; planned: number; plannedDone: number; activeDays: number; days: number; trend: Bucket[]; projects: ProjectTime[]; weekdays: Bucket[] }
 export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string }
 export type TaskStep = { id: number; taskId: number; title: string; isDone: boolean; sortOrder: number }
 /**
