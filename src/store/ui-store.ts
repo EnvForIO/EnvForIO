@@ -13,7 +13,7 @@ interface UIState {
   /** The project shown in the middle pane instead of a built-in list, if any. */
   selectedProjectId: number | null
   /** A full page in the middle pane instead of a list or project. */
-  page: 'calendar' | 'items' | null
+  page: 'calendar' | 'items' | 'stats' | null
   /** The task open in the details pane, or null when it is closed. */
   selectedTaskId: number | null
 
@@ -30,7 +30,7 @@ interface UIState {
   selectView: (view: TaskView) => void
   selectTask: (id: number | null) => void
   selectProject: (id: number) => void
-  openPage: (page: 'calendar' | 'items') => void
+  openPage: (page: 'calendar' | 'items' | 'stats') => void
 }
 
 export const useUIStore = create<UIState>()(

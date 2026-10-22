@@ -71,3 +71,10 @@ Done together, since available time only matters through the line.
 - Check-ins only exist for days EnvIO was opened (that is when the line is stored). Days without a line neither extend nor break the streak.
 - Calibration: actual / estimated time over finished tasks with both; per project from 3 tasks, else overall from 3 tasks, else 1. Health compares the calibrated work needed per day with the average available time (Behind if over, Tight if over 80%); with no time limit set it is always On track. Per-project comparison against the whole day's time is an approximation.
 - UI: the My Day card shows the streak, yesterday's shortfall and a folded 14-day bar chart (red when over the day's time); project pages show a health badge with the calibrated time left and time needed per day.
+
+## Step 8: stats
+
+- `service/stats`: one call per period (week Monday-first, calendar month or calendar year) with an offset for earlier periods. Days follow the day start; timer time counts for the day a session ended.
+- Numbers: tasks done, time tracked, completion rate (done / tasks with a My Day, scheduled or due day in the period), active days (a finished task or timer time). Trend buckets are days, or months for a year. Time and done counts by project, and by weekday.
+- UI: a Stats page in the sidebar with the four numbers, the trend, where time went, the weekly rhythm, the completion heatmap (last 53 weeks, reusing the Todo Duo heatmap) and project progress by estimated time.
+- Charts are plain bars in CSS, like the 14-day forecast, rather than ECharts: they are small, and a charting library would add about 1 MB.
