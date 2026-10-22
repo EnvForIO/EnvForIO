@@ -87,5 +87,7 @@ pub fn add_project_task(
     title: String,
     estimate: Option<String>,
 ) -> AppResult<Task> {
-    mutation::add_task(&state.db(), project_id, module_id, &title, &estimate)
+    state.creating("Add task", |db| {
+        mutation::add_task(db, project_id, module_id, &title, &estimate)
+    })
 }

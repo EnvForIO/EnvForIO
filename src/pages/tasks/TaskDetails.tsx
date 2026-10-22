@@ -10,8 +10,10 @@ import {
   useDeleteTask,
   useTask,
   useToday,
+  useUndo,
   useUpdateTask,
 } from '@/api/tasks'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
@@ -49,6 +51,7 @@ function TaskDetailsForm({ task }: { task: Task }) {
   const selectTask = useUIStore(state => state.selectTask)
   const updateTask = useUpdateTask()
   const deleteTask = useDeleteTask()
+  const undo = useUndo()
   const [title, setTitle] = useState(task.title)
   const [note, setNote] = useState(task.note)
   const [estimate, setEstimate] = useState(
@@ -166,7 +169,15 @@ function TaskDetailsForm({ task }: { task: Task }) {
           size="icon"
           aria-label={t('tasks.delete')}
           onClick={() => {
-            deleteTask.mutate(task.id)
+            deleteTask.mutate(task.id, {
+              onSuccess: () =>
+                toast(t('undo.deleted', { title: task.title }), {
+                  action: {
+                    label: t('undo.undo'),
+                    onClick: () => undo.mutate(undefined),
+                  },
+                }),
+            })
             selectTask(null)
           }}
         >

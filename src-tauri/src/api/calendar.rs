@@ -27,7 +27,9 @@ pub fn list_unscheduled_tasks(state: State<'_, AppState>) -> AppResult<Vec<Task>
 #[tauri::command]
 #[specta::specta]
 pub fn schedule_task(state: State<'_, AppState>, id: i64, date: Option<String>) -> AppResult<Task> {
-    schedule::schedule(&state.db(), id, date)
+    state.changing("Schedule task", &[id], |db| {
+        schedule::schedule(db, id, date)
+    })
 }
 
 #[tauri::command]
@@ -37,7 +39,7 @@ pub fn create_scheduled_task(
     title: String,
     date: String,
 ) -> AppResult<Task> {
-    schedule::create_on(&state.db(), &title, &date)
+    state.creating("Add task", |db| schedule::create_on(db, &title, &date))
 }
 
 #[tauri::command]

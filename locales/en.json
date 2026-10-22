@@ -286,5 +286,9 @@
   "stats.doneCount_one": "{{count}} done",
   "stats.doneCount_other": "{{count}} done",
   "stats.heatmap": "Completion, last 53 weeks",
-  "stats.projectProgress": "Project progress (by estimated time)"
+  "stats.projectProgress": "Project progress (by estimated time)",
+  "undo.done": "Undone: {{what}}",
+  "undo.nothing": "Nothing to undo",
+  "undo.deleted": "Deleted \"{{title}}\"",
+  "undo.undo": "Undo"
 }

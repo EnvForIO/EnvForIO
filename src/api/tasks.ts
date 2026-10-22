@@ -177,3 +177,7 @@ export const useDeleteTaskStep = () =>
   useTaskMutation(async (id: number) =>
     unwrapResult(await commands.deleteTaskStep(id))
   )
+
+/** Undo the last task change; resolves to what was undone (e.g. "Delete task"). */
+export const useUndo = () =>
+  useTaskMutation(async () => unwrapResult(await commands.undo()))

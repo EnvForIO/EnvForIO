@@ -21,6 +21,8 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         tasks::list_tasks,
         tasks::get_task,
         tasks::list_items,
+        tasks::undo,
+        tasks::peek_undo,
         tasks::create_task,
         tasks::update_task,
         tasks::set_task_done,

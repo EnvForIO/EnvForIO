@@ -181,6 +181,23 @@ async listItems(status: ItemStatus, project: number | null) : Promise<Result<Tas
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Undo the most recent task change; returns what was undone (e.g. "Delete task").
+ */
+async undo() : Promise<Result<string, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("undo") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * What `undo` would undo next, if anything.
+ */
+async peekUndo() : Promise<string | null> {
+    return await TAURI_INVOKE("peek_undo");
+},
 async createTask(title: string, view: TaskView) : Promise<Result<Task, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("create_task", { title, view }) };

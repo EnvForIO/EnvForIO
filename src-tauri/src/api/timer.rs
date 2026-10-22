@@ -37,5 +37,9 @@ pub fn complete_task_partially(
     id: i64,
     done: String,
 ) -> AppResult<Task> {
-    partial::complete_partially(&state.db(), id, &done, &today())
+    let rest = state.changing("Split task", &[id], |db| {
+        partial::complete_partially(db, id, &done, &today())
+    })?;
+    state.undo_stack().also_created(rest.id);
+    Ok(rest)
 }

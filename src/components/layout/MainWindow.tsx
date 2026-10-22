@@ -13,6 +13,7 @@ import { Toaster } from 'sonner'
 import { useTheme } from '@/hooks/use-theme'
 import { useUIStore } from '@/store/ui-store'
 import { useMainWindowEventListeners } from '@/hooks/useMainWindowEventListeners'
+import { useUndoShortcut } from '@/hooks/use-undo-shortcut'
 
 export function MainWindow() {
   const { theme } = useTheme()
@@ -21,6 +22,7 @@ export function MainWindow() {
 
   // Set up global event listeners (keyboard shortcuts, etc.)
   useMainWindowEventListeners()
+  useUndoShortcut()
 
   return (
     <div className="flex h-screen w-full flex-col overflow-hidden rounded-[var(--app-corner-radius)] bg-background">

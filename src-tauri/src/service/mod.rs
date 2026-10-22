@@ -8,4 +8,5 @@ pub mod settings;
 pub mod stats;
 pub mod tasks;
 pub mod timer;
+pub mod undo;
 pub mod validate;

@@ -28,25 +28,30 @@ pub fn list_tasks(state: State<'_, AppState>, view: TaskView) -> AppResult<Vec<T
 #[tauri::command]
 #[specta::specta]
 pub fn create_task(state: State<'_, AppState>, title: String, view: TaskView) -> AppResult<Task> {
-    mutation::create(&state.db(), &title, view, &today())
+    state.creating("Add task", |db| {
+        mutation::create(db, &title, view, &today())
+    })
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn update_task(state: State<'_, AppState>, id: i64, update: TaskUpdate) -> AppResult<Task> {
-    mutation::update(&state.db(), id, &update, &today())
+    state.changing("Edit task", &[id], |db| {
+        mutation::update(db, id, &update, &today())
+    })
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn set_task_done(state: State<'_, AppState>, id: i64, done: bool) -> AppResult<Task> {
-    mutation::set_done(&state.db(), id, done)
+    let label = if done { "Complete task" } else { "Reopen task" };
+    state.changing(label, &[id], |db| mutation::set_done(db, id, done))
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn delete_task(state: State<'_, AppState>, id: i64) -> AppResult<()> {
-    mutation::delete(&state.db(), id)
+    state.changing("Delete task", &[id], |db| mutation::delete(db, id))
 }
 
 #[tauri::command]
@@ -62,19 +67,27 @@ pub fn add_task_step(
     task_id: i64,
     title: String,
 ) -> AppResult<TaskStep> {
-    mutation::add_step(&state.db(), task_id, &title)
+    state.changing("Add step", &[task_id], |db| {
+        mutation::add_step(db, task_id, &title)
+    })
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn set_task_step_done(state: State<'_, AppState>, id: i64, done: bool) -> AppResult<TaskStep> {
-    mutation::set_step_done(&state.db(), id, done)
+    let task_id = query::get_step(&state.db(), id)?.task_id;
+    state.changing("Tick step", &[task_id], |db| {
+        mutation::set_step_done(db, id, done)
+    })
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn delete_task_step(state: State<'_, AppState>, id: i64) -> AppResult<()> {
-    mutation::delete_step(&state.db(), id)
+    let task_id = query::get_step(&state.db(), id)?.task_id;
+    state.changing("Delete step", &[task_id], |db| {
+        mutation::delete_step(db, id)
+    })
 }
 
 // ---------------------------------------------------------------------------
@@ -89,7 +102,9 @@ pub fn list_day_tasks(state: State<'_, AppState>, date: String) -> AppResult<Vec
 #[tauri::command]
 #[specta::specta]
 pub fn create_day_task(state: State<'_, AppState>, title: String, date: String) -> AppResult<Task> {
-    mutation::create_on_day(&state.db(), &title, &date, &today())
+    state.creating("Add task", |db| {
+        mutation::create_on_day(db, &title, &date, &today())
+    })
 }
 
 #[tauri::command]
@@ -119,4 +134,20 @@ pub fn list_items(
     project: Option<i64>,
 ) -> AppResult<Vec<Task>> {
     items::list(&state.db(), status, project)
+}
+
+/// Undo the most recent task change; returns what was undone (e.g. "Delete task").
+#[tauri::command]
+#[specta::specta]
+pub fn undo(state: State<'_, AppState>) -> AppResult<String> {
+    let mut db = state.db();
+    let label = state.undo_stack().undo(&mut db)?;
+    Ok(label)
+}
+
+/// What `undo` would undo next, if anything.
+#[tauri::command]
+#[specta::specta]
+pub fn peek_undo(state: State<'_, AppState>) -> Option<String> {
+    state.undo_stack().peek()
 }
