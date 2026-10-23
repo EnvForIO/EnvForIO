@@ -14,6 +14,8 @@ import { TaskRow } from './TaskRow'
 import { SafetyLineCard } from '@/pages/plans/SafetyLineCard'
 import { TodayNote } from './TodayNote'
 import { ToSchedule } from './ToSchedule'
+import { ExportDialog } from '@/pages/export/ExportDialog'
+import { Button } from '@/components/ui/button'
 
 export function TaskListPage() {
   const { t } = useTranslation()
@@ -23,6 +25,7 @@ export function TaskListPage() {
   const createTask = useCreateTask()
   const [draft, setDraft] = useState('')
   const [showCompleted, setShowCompleted] = useState(false)
+  const [exporting, setExporting] = useState(false)
 
   const open = tasks.filter(task => task.doneAt === null)
   const completed = tasks.filter(task => task.doneAt !== null)
@@ -35,7 +38,7 @@ export function TaskListPage() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3 px-5 py-4">
+    <div className="relative flex h-full flex-col gap-3 px-5 py-4">
       <header>
         <h1 className="text-xl font-semibold">{t(`tasks.view.${view}`)}</h1>
         {view === 'MyDay' && today && (
@@ -43,6 +46,23 @@ export function TaskListPage() {
         )}
         {view === 'MyDay' && today && <TodayNote today={today} />}
       </header>
+      {view === 'MyDay' && today && (
+        <>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="absolute top-3 right-5"
+            onClick={() => setExporting(true)}
+          >
+            {t('export.button')}
+          </Button>
+          <ExportDialog
+            scope={{ kind: 'Day', date: today }}
+            open={exporting}
+            onOpenChange={setExporting}
+          />
+        </>
+      )}
 
       {view === 'MyDay' && <SafetyLineCard />}
 

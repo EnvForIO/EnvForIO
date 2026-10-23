@@ -4,7 +4,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PencilIcon, Trash2Icon } from 'lucide-react'
+import { DownloadIcon, PencilIcon, Trash2Icon } from 'lucide-react'
 import {
   useAddModule,
   useDeleteProject,
@@ -32,6 +32,7 @@ import { dateLabel } from '@/pages/tasks/dates'
 import { ModuleSection } from './ModuleSection'
 import { ProjectHealthBadge } from '@/pages/plans/ProjectHealthBadge'
 import { ProjectDialog } from './ProjectDialog'
+import { ExportDialog } from '@/pages/export/ExportDialog'
 
 export function ProjectPage({ projectId }: { projectId: number }) {
   const project = useProjects().data?.find(p => p.id === projectId)
@@ -47,6 +48,7 @@ function ProjectView({ project }: { project: Project }) {
   const deleteProject = useDeleteProject()
   const selectView = useUIStore(state => state.selectView)
   const [editing, setEditing] = useState(false)
+  const [exporting, setExporting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [moduleName, setModuleName] = useState('')
 
@@ -98,6 +100,14 @@ function ProjectView({ project }: { project: Project }) {
         <Button
           variant="ghost"
           size="icon"
+          onClick={() => setExporting(true)}
+          aria-label={t('export.button')}
+        >
+          <DownloadIcon className="size-4" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={() => setEditing(true)}
           aria-label={t('projects.edit')}
         >
@@ -142,6 +152,11 @@ function ProjectView({ project }: { project: Project }) {
         </div>
       </ScrollArea>
 
+      <ExportDialog
+        scope={{ kind: 'Project', id: project.id }}
+        open={exporting}
+        onOpenChange={setExporting}
+      />
       <ProjectDialog
         open={editing}
         onOpenChange={setEditing}

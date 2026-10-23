@@ -14,6 +14,7 @@ import { formatMinutes } from '@/lib/duration'
 import type { Period } from '@/lib/tauri-bindings'
 import { Heatmap } from '@/pages/duo/Heatmap'
 import { dateLabel } from '@/pages/tasks/dates'
+import { YearReview } from '@/pages/review/YearReview'
 import {
   ProjectProgress,
   Section,
@@ -38,6 +39,7 @@ export function StatsPage() {
   const today = useToday()
   const [period, setPeriod] = useState<Period>('Week')
   const [offset, setOffset] = useState(0)
+  const [reviewing, setReviewing] = useState(false)
   const { data: stats } = useStats(period, offset)
 
   const rate =
@@ -49,6 +51,11 @@ export function StatsPage() {
     <div className="flex h-full flex-col gap-3 px-5 py-4">
       <header className="flex items-center gap-2">
         <h1 className="flex-1 text-xl font-semibold">{t('stats.title')}</h1>
+        {period === 'Year' && (
+          <Button size="sm" variant="ghost" onClick={() => setReviewing(true)}>
+            {t('review.open')}
+          </Button>
+        )}
         {PERIODS.map(p => (
           <Button
             key={p}
@@ -120,6 +127,13 @@ export function StatsPage() {
           </div>
         )}
       </ScrollArea>
+      {reviewing && (
+        <YearReview
+          offset={offset}
+          open={reviewing}
+          onOpenChange={setReviewing}
+        />
+      )}
     </div>
   )
 }

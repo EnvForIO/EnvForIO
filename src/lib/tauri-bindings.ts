@@ -28,6 +28,7 @@ export type {
   DayNote,
   DayOverride,
   DuoStyle,
+  ExportScope,
   Health,
   Period,
   PlanningSettings,

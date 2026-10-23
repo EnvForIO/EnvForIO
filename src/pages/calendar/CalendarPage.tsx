@@ -16,6 +16,7 @@ import { calendarRange, shiftAnchor, type CalendarMode } from './calendar-range'
 import { DayCell } from './DayCell'
 import { DayDialog } from './DayDialog'
 import { UnscheduledPanel } from './UnscheduledPanel'
+import { ExportDialog } from '@/pages/export/ExportDialog'
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
@@ -30,6 +31,7 @@ function CalendarBody({ today }: { today: string }) {
   const [mode, setMode] = useState<CalendarMode>('month')
   const [anchor, setAnchor] = useState<string | null>(null) // null = follow today
   const [openDay, setOpenDay] = useState<string | null>(null)
+  const [exporting, setExporting] = useState(false)
   const current = anchor ?? today
   const range = calendarRange(mode, current)
   const { data: tasks = [] } = useCalendarTasks(range.from, range.to)
@@ -57,6 +59,9 @@ function CalendarBody({ today }: { today: string }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-2 px-4 py-3">
           <h1 className="flex-1 text-xl font-semibold">{title}</h1>
+          <Button variant="ghost" size="sm" onClick={() => setExporting(true)}>
+            {t('export.button')}
+          </Button>
           <Button variant="outline" size="sm" onClick={() => setAnchor(null)}>
             {t('calendar.today')}
           </Button>
@@ -112,6 +117,11 @@ function CalendarBody({ today }: { today: string }) {
         </div>
       </div>
       <UnscheduledPanel colors={colors} />
+      <ExportDialog
+        scope={{ kind: mode === 'month' ? 'Month' : 'Week', date: current }}
+        open={exporting}
+        onOpenChange={setExporting}
+      />
       {openDay && (
         <DayDialog
           key={openDay}

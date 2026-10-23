@@ -247,9 +247,9 @@ All of this lives in the main window: projects go in the sidebar, Calendar and S
 - [x] **Check-ins and streaks**; "yesterday fell short by X, redistributed"
 - [x] **Day rollover time**: a new day starts at 07:00 by default
 - [x] **Stats**: items done, time spent, completion rate, active days, time trend, where time went, completion heatmap, weekly rhythm, project progress; by week / month / year
-- [ ] **Export**: day / week / month / project lists as PDF, image, spreadsheet, calendar file
-- [ ] **Yearly review** and share card
-- [ ] Undo, light / dark
+- [x] **Export**: day / week / month / project lists as PDF, image, spreadsheet, calendar file
+- [x] **Yearly review** and share card
+- [x] Undo, light / dark
 
 Not doing: login and cloud sync, the milk-tea challenge (奶茶对局), "add to phone home screen".
 

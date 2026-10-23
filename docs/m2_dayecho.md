@@ -78,3 +78,12 @@ Done together, since available time only matters through the line.
 - Numbers: tasks done, time tracked, completion rate (done / tasks with a My Day, scheduled or due day in the period), active days (a finished task or timer time). Trend buckets are days, or months for a year. Time and done counts by project, and by weekday.
 - UI: a Stats page in the sidebar with the four numbers, the trend, where time went, the weekly rhythm, the completion heatmap (last 53 weeks, reusing the Todo Duo heatmap) and project progress by estimated time.
 - Charts are plain bars in CSS, like the 14-day forecast, rather than ECharts: they are small, and a charting library would add about 1 MB.
+
+## Step 9: undo, export, year in review
+
+- Undo (`service/undo`): task commands go through `AppState::changing` / `creating`, which snapshot each affected task (row, steps, timer sessions) before the change. Undo restores the snapshots, or deletes tasks that were created. The last 50 changes are kept in memory only (they are gone after a restart). Ctrl+Z in the main window, outside text fields; deleting a task shows an Undo button. Project, module, capacity and note changes are not undoable yet.
+- Export (`service/export`): a day, week, month or project as rows. CSV (with a byte order mark so Excel reads non-ASCII text) and ICS (timed events when a task has a time slot, otherwise all-day; undated tasks are left out) are written by Rust to the path picked in the save dialog. PDF uses the system print dialog with a print stylesheet that shows only the preview; PNG renders the preview with `html-to-image`. Export buttons: My Day (today), Calendar (the month or week on screen), project pages.
+- Year in review: from the Stats page in Year view, a share card (tasks done, time tracked, active days, completion rate, top project, busiest month, best weekday) saved as PNG.
+- Light / dark already comes from the template's theme setting.
+
+Phase 2 is complete (2026-11-19).
