@@ -517,6 +517,44 @@ async getStats(period: Period, offset: number) : Promise<Result<Stats, AppError>
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * The rows of an export, for the on-screen preview (PDF and image are made from it).
+ */
+async getExport(scope: ExportScope) : Promise<Result<Export, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_export", { scope }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async exportCsv(scope: ExportScope, path: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("export_csv", { scope, path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async exportIcs(scope: ExportScope, path: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("export_ics", { scope, path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Save bytes the UI produced (a PNG of the preview or the share card).
+ */
+async saveImage(path: string, bytes: number[]) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("save_image", { path, bytes }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getRunningTimer() : Promise<Result<RunningTimer | null, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_running_timer") };
@@ -637,6 +675,9 @@ export type DuoFont = "system" | "serif" | "mono"
 export type DuoMaterial = "translucent" | "acrylic" | "mica" | "solid"
 export type DuoStyle = { material: DuoMaterial; font: DuoFont; text_size: DuoTextSize }
 export type DuoTextSize = "small" | "medium" | "large"
+export type Export = { title: string; rows: ExportRow[] }
+export type ExportRow = { id: number; date: string | null; startTime: string | null; endTime: string | null; title: string; project: string | null; module: string | null; estimateMinutes: number | null; actualMinutes: number | null; dueDate: string | null; done: boolean; note: string }
+export type ExportScope = { kind: "Day"; date: string } | { kind: "Week"; date: string } | { kind: "Month"; date: string } | { kind: "Project"; id: number }
 export type ForecastDay = { date: string; minutes: number; capacity: number | null }
 export type Health = "Done" | "OnTrack" | "Tight" | "Behind" | "Overdue"
 export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"

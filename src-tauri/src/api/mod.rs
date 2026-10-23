@@ -5,6 +5,7 @@
 //! still live in `commands/` until they are moved here.
 
 pub mod calendar;
+pub mod export;
 pub mod plans;
 pub mod projects;
 pub mod stats;
