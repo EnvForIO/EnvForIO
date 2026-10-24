@@ -82,6 +82,9 @@ pub struct Idea {
     pub step_count: i64,
     pub steps_done: i64,
     pub current_step: Option<String>, // the first step not yet ticked
+    pub open_todos: i64,
+    pub open_problems: i64,
+    pub log_count: i64,
     pub tags: Vec<Tag>,
     pub created_at: String,
 }
@@ -93,6 +96,9 @@ pub const IDEA_COLUMNS: &str = "i.id, i.title, i.description, i.status, i.priori
      (SELECT count(*) FROM idea_steps s WHERE s.idea_id = i.id AND s.done_on IS NOT NULL), \
      (SELECT s.title FROM idea_steps s WHERE s.idea_id = i.id AND s.done_on IS NULL \
         ORDER BY s.sort_order, s.id LIMIT 1), \
+     (SELECT count(*) FROM idea_todos d WHERE d.idea_id = i.id AND d.done_at IS NULL), \
+     (SELECT count(*) FROM idea_problems p WHERE p.idea_id = i.id AND p.is_solved = 0), \
+     (SELECT count(*) FROM idea_logs l WHERE l.idea_id = i.id), \
      i.created_at";
 
 impl Idea {
@@ -109,8 +115,11 @@ impl Idea {
             step_count: row.get(8)?,
             steps_done: row.get(9)?,
             current_step: row.get(10)?,
+            open_todos: row.get(11)?,
+            open_problems: row.get(12)?,
+            log_count: row.get(13)?,
             tags: Vec::new(),
-            created_at: row.get(11)?,
+            created_at: row.get(14)?,
         })
     }
 }

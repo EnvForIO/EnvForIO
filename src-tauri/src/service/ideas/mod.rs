@@ -3,6 +3,7 @@
 //! in `mutation`, steps and links in `parts`.
 
 pub mod mutation;
+pub mod notes;
 pub mod parts;
 pub mod query;
 

@@ -683,6 +683,110 @@ async deleteIdeaLink(id: number) : Promise<Result<null, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+async getIdeaNotes(ideaId: number) : Promise<Result<string, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_idea_notes", { ideaId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setIdeaNotes(ideaId: number, notes: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_idea_notes", { ideaId, notes }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listIdeaTodos(ideaId: number) : Promise<Result<IdeaTodo[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_idea_todos", { ideaId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async addIdeaTodo(ideaId: number, title: string, dueDate: string | null) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_idea_todo", { ideaId, title, dueDate }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setIdeaTodoDone(id: number, done: boolean) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_idea_todo_done", { id, done }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteIdeaTodo(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_idea_todo", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listIdeaProblems(ideaId: number) : Promise<Result<IdeaProblem[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_idea_problems", { ideaId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async addIdeaProblem(ideaId: number, problem: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_idea_problem", { ideaId, problem }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async updateIdeaProblem(id: number, solution: string, solved: boolean) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("update_idea_problem", { id, solution, solved }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteIdeaProblem(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_idea_problem", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listIdeaLogs(ideaId: number) : Promise<Result<IdeaLog[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_idea_logs", { ideaId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async addIdeaLog(ideaId: number, text: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_idea_log", { ideaId, text }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteIdeaLog(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_idea_log", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getRunningTimer() : Promise<Result<RunningTimer | null, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_running_timer") };
@@ -808,7 +912,7 @@ export type ExportRow = { id: number; date: string | null; startTime: string | n
 export type ExportScope = { kind: "Day"; date: string } | { kind: "Week"; date: string } | { kind: "Month"; date: string } | { kind: "Project"; id: number }
 export type ForecastDay = { date: string; minutes: number; capacity: number | null }
 export type Health = "Done" | "OnTrack" | "Tight" | "Behind" | "Overdue"
-export type Idea = { id: number; title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; stepCount: number; stepsDone: number; currentStep: string | null; tags: Tag[]; createdAt: string }
+export type Idea = { id: number; title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; stepCount: number; stepsDone: number; currentStep: string | null; openTodos: number; openProblems: number; logCount: number; tags: Tag[]; createdAt: string }
 /**
  * Counts for the filter chips.
  */
@@ -818,11 +922,14 @@ export type IdeaCounts = { all: number; pinned: number; unfinished: number; bySt
  */
 export type IdeaFilter = { status: IdeaStatus | null; pinned: boolean; unfinished: boolean; tagId: number | null }
 export type IdeaLink = { id: number; ideaId: number; label: string; url: string }
+export type IdeaLog = { id: number; ideaId: number; date: string; text: string }
+export type IdeaProblem = { id: number; ideaId: number; problem: string; solution: string; isSolved: boolean }
 /**
  * Where an idea is, from first spark to submission.
  */
 export type IdeaStatus = "Spark" | "Researching" | "InProgress" | "Writing" | "Submitted" | "Done" | "OnHold" | "Dropped"
 export type IdeaStep = { id: number; ideaId: number; title: string; doneOn: string | null }
+export type IdeaTodo = { id: number; ideaId: number; title: string; dueDate: string | null; done: boolean }
 /**
  * Everything the idea detail can edit, sent whole on every save.
  */
