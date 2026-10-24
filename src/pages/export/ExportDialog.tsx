@@ -1,12 +1,10 @@
 /**
- * Export a day, week, month or project: a preview of the list, and buttons
- * for a spreadsheet (CSV), a calendar file (ICS), PDF (the system print
- * dialog, "Save as PDF") and an image (PNG of the preview).
+ * Export a week, month or project: a preview of the list, and buttons for a
+ * spreadsheet (CSV) and a calendar file (ICS).
  */
-import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
-import { exportCsv, exportIcs, exportPng, useExport } from '@/api/export'
+import { exportCsv, exportIcs, useExport } from '@/api/export'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -27,7 +25,6 @@ interface Props {
 export function ExportDialog({ scope, open, onOpenChange }: Props) {
   const { t } = useTranslation()
   const { data } = useExport(scope, open)
-  const preview = useRef<HTMLDivElement>(null)
 
   const run = async (make: () => Promise<boolean>) => {
     try {
@@ -60,32 +57,9 @@ export function ExportDialog({ scope, open, onOpenChange }: Props) {
               >
                 {t('export.ics')}
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => window.print()}
-              >
-                {t('export.pdf')}
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() =>
-                  preview.current &&
-                  void run(() =>
-                    exportPng(preview.current as HTMLElement, data.title)
-                  )
-                }
-              >
-                {t('export.image')}
-              </Button>
             </div>
             <div className="max-h-96 overflow-y-auto rounded-md border">
-              {/* print-area: the only thing the print stylesheet shows (App.css) */}
-              <div
-                ref={preview}
-                className="print-area bg-background p-4 text-sm text-foreground"
-              >
+              <div className="p-4 text-sm text-foreground">
                 <h2 className="mb-2 text-base font-semibold">{data.title}</h2>
                 {data.rows.length === 0 && (
                   <p className="text-muted-foreground">{t('export.empty')}</p>

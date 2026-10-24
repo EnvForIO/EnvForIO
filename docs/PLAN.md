@@ -247,7 +247,7 @@ All of this lives in the main window: projects go in the sidebar, Calendar and S
 - [x] **Check-ins and streaks**; "yesterday fell short by X, redistributed"
 - [x] **Day rollover time**: a new day starts at 07:00 by default
 - [x] **Stats**: items done, time spent, completion rate, active days, time trend, where time went, completion heatmap, weekly rhythm, project progress; by week / month / year
-- [x] **Export**: day / week / month / project lists as PDF, image, spreadsheet, calendar file
+- [x] **Export**: week / month / project lists as a spreadsheet (CSV) or calendar file (ICS) (2026-11-19: no day export, no PDF or image, by user decision)
 - [x] **Yearly review** and share card
 - [x] Undo, light / dark
 

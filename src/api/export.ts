@@ -1,6 +1,7 @@
 /**
- * Exports. Each one asks where to save with the system dialog, then Rust
- * writes the file. Returns false when the user cancels the dialog.
+ * Exports (CSV, ICS) and saving the year-review card as PNG. Each asks where
+ * to save with the system dialog, then Rust writes the file. Returns false
+ * when the user cancels the dialog.
  */
 import { useQuery } from '@tanstack/react-query'
 import { save } from '@tauri-apps/plugin-dialog'
@@ -40,7 +41,7 @@ export async function exportIcs(scope: ExportScope, title: string) {
   return true
 }
 
-/** Render a DOM node to PNG and save it (export preview, share card). */
+/** Render a DOM node to PNG and save it (the year-review share card). */
 export async function exportPng(node: HTMLElement, title: string) {
   const path = await ask(title, 'png', 'PNG')
   if (!path) return false

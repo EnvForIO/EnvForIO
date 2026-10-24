@@ -295,8 +295,6 @@
   "export.title": "Export",
   "export.csv": "Spreadsheet (CSV)",
   "export.ics": "Calendar file (ICS)",
-  "export.pdf": "PDF (print)",
-  "export.image": "Image (PNG)",
   "export.empty": "Nothing in this range.",
   "export.saved": "Saved",
   "export.failed": "Could not export",
