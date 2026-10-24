@@ -3,6 +3,7 @@
 pub mod capacity;
 pub mod days;
 pub mod export;
+pub mod ideas;
 pub mod plans;
 pub mod projects;
 pub mod settings;

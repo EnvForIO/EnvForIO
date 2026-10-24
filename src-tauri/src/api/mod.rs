@@ -6,6 +6,7 @@
 
 pub mod calendar;
 pub mod export;
+pub mod ideas;
 pub mod plans;
 pub mod projects;
 pub mod stats;

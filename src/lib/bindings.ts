@@ -555,6 +555,134 @@ async saveImage(path: string, bytes: number[]) : Promise<Result<null, AppError>>
     else return { status: "error", error: e  as any };
 }
 },
+async listIdeas(filter: IdeaFilter) : Promise<Result<Idea[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_ideas", { filter }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getIdea(id: number) : Promise<Result<Idea, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_idea", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getIdeaCounts() : Promise<Result<IdeaCounts, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_idea_counts") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async createIdea(title: string) : Promise<Result<Idea, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("create_idea", { title }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async updateIdea(id: number, update: IdeaUpdate) : Promise<Result<Idea, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("update_idea", { id, update }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteIdea(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_idea", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listTags() : Promise<Result<Tag[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_tags") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async createTag(name: string, color: string) : Promise<Result<Tag, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("create_tag", { name, color }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteTag(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_tag", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listIdeaSteps(ideaId: number) : Promise<Result<IdeaStep[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_idea_steps", { ideaId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async addIdeaStep(ideaId: number, title: string) : Promise<Result<IdeaStep[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_idea_step", { ideaId, title }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setIdeaStepDone(id: number, done: boolean) : Promise<Result<IdeaStep[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_idea_step_done", { id, done }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteIdeaStep(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_idea_step", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listIdeaLinks(ideaId: number) : Promise<Result<IdeaLink[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_idea_links", { ideaId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async addIdeaLink(ideaId: number, label: string, url: string) : Promise<Result<IdeaLink, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_idea_link", { ideaId, label, url }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deleteIdeaLink(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_idea_link", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getRunningTimer() : Promise<Result<RunningTimer | null, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_running_timer") };
@@ -680,6 +808,25 @@ export type ExportRow = { id: number; date: string | null; startTime: string | n
 export type ExportScope = { kind: "Day"; date: string } | { kind: "Week"; date: string } | { kind: "Month"; date: string } | { kind: "Project"; id: number }
 export type ForecastDay = { date: string; minutes: number; capacity: number | null }
 export type Health = "Done" | "OnTrack" | "Tight" | "Behind" | "Overdue"
+export type Idea = { id: number; title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; stepCount: number; stepsDone: number; currentStep: string | null; tags: Tag[]; createdAt: string }
+/**
+ * Counts for the filter chips.
+ */
+export type IdeaCounts = { all: number; pinned: number; unfinished: number; byStatus: ([IdeaStatus, number])[]; byTag: ([number, number])[] }
+/**
+ * Which ideas the list shows. All None / false = every idea.
+ */
+export type IdeaFilter = { status: IdeaStatus | null; pinned: boolean; unfinished: boolean; tagId: number | null }
+export type IdeaLink = { id: number; ideaId: number; label: string; url: string }
+/**
+ * Where an idea is, from first spark to submission.
+ */
+export type IdeaStatus = "Spark" | "Researching" | "InProgress" | "Writing" | "Submitted" | "Done" | "OnHold" | "Dropped"
+export type IdeaStep = { id: number; ideaId: number; title: string; doneOn: string | null }
+/**
+ * Everything the idea detail can edit, sent whole on every save.
+ */
+export type IdeaUpdate = { title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; tagIds: number[] }
 export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
@@ -720,6 +867,7 @@ export type RecoveryError =
 { type: "ParseError"; message: string }
 export type RunningTimer = { taskId: number; title: string; startedAt: string }
 export type Stats = { from: string; to: string; done: number; minutes: number; planned: number; plannedDone: number; activeDays: number; days: number; trend: Bucket[]; projects: ProjectTime[]; weekdays: Bucket[] }
+export type Tag = { id: number; name: string; color: string }
 export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string }
 export type TaskStep = { id: number; taskId: number; title: string; isDone: boolean; sortOrder: number }
 /**
