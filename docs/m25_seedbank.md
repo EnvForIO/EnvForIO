@@ -6,12 +6,12 @@ Started 2026-11-19. The checklist is in `docs/PLAN.md`. Ideas are separate from 
 
 Each step ends with a Windows build the user tries before the next one starts.
 
-| Step | Contents | PLAN items |
-| --- | --- | --- |
-| 1 | Ideas: status, priority, pin, tags, target venue, deadline, links; the default 8-step research checklist; the Ideas page with filters, cards and a detail view | Idea pipeline, Status, Priority/pin/tags, Target venue, List card, Detail page, Progress checklist |
-| 2 | Inside an idea: todos with due dates, problems with solutions, progress log, Markdown + LaTeX notes | Todos and problems, Progress log, Notes |
-| 3 | Paper library: DOI / arXiv lookup, reading status, notes, BibTeX; links from ideas with a relation; PDFs | Paper library, Paper links, PDF |
-| 4 | Overview page; export | Overview page, Export |
+| Step | Contents                                                                                                                                                       | PLAN items                                                                                         |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| 1    | Ideas: status, priority, pin, tags, target venue, deadline, links; the default 8-step research checklist; the Ideas page with filters, cards and a detail view | Idea pipeline, Status, Priority/pin/tags, Target venue, List card, Detail page, Progress checklist |
+| 2    | Inside an idea: todos with due dates, problems with solutions, progress log, Markdown + LaTeX notes                                                            | Todos and problems, Progress log, Notes                                                            |
+| 3    | Paper library: DOI / arXiv lookup, reading status, notes, BibTeX; links from ideas with a relation; PDFs                                                       | Paper library, Paper links, PDF                                                                    |
+| 4    | Overview page; export                                                                                                                                          | Overview page, Export                                                                              |
 
 Open question for step 4: the reference exports SQLite, JSON and PDF, but EnvIO's export was cut to CSV and ICS on 2026-11-19. Ask before building it.
 

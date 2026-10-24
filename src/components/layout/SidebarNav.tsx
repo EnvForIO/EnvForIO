@@ -7,6 +7,7 @@ import {
   CalendarDaysIcon,
   CalendarRangeIcon,
   ChartColumnIcon,
+  LightbulbIcon,
   ListChecksIcon,
   HouseIcon,
   StarIcon,
@@ -59,7 +60,7 @@ function PageItem({
   page,
   icon: Icon,
 }: {
-  page: 'calendar' | 'items' | 'stats'
+  page: 'calendar' | 'items' | 'stats' | 'ideas'
   icon: LucideIcon
 }) {
   const { t } = useTranslation()
@@ -89,6 +90,7 @@ export function SidebarNav() {
       <PageItem page="calendar" icon={CalendarRangeIcon} />
       <PageItem page="items" icon={ListChecksIcon} />
       <PageItem page="stats" icon={ChartColumnIcon} />
+      <PageItem page="ideas" icon={LightbulbIcon} />
     </nav>
   )
 }

@@ -257,13 +257,13 @@ Not doing: login and cloud sync, the milk-tea challenge (奶茶对局), "add to 
 
 Numbered 2.5 so later phase references stay valid. Based on the official App Store description (checked 2026-11-19) and the user's Xiaohongshu screenshots; I have not used the app. Its UI is already three panes, matching EnvIO's main window.
 
-- [ ] **Idea pipeline**: a one-line "Jot down a new idea" input at the top; new ideas stay at the top; All ideas, Pinned and Unfinished entries
-- [ ] **Status**: Spark → Researching → In progress → Writing → Submitted → Done, plus On hold and Dropped; the sidebar filters by status with counts
-- [ ] **Priority, pin, tags**; user-defined tags, filterable
-- [ ] **Target journal / conference**: a coloured label per idea, such as MICCAI or PLOS ONE (seen in screenshots)
-- [ ] **List card**: title, one-line description, target venue, segmented progress bar, current step, days left, item counts, tags
-- [ ] **Detail page**: status, priority, pin, target venue, title, description, tags; Overleaf or other links; sections for Progress, Todos, Thinking, Problems, Papers, Log
-- [ ] **Progress checklist**: one research workflow per idea (the screenshot shows 8 default steps: literature review, hypothesis, experiment design, implementation, analysis, writing, submission prep, wrap-up); steps can be added; completion dates recorded; shows "Current: step (3/8)"
+- [x] **Idea pipeline**: a one-line "Jot down a new idea" input at the top; new ideas stay at the top; All ideas, Pinned and Unfinished entries
+- [x] **Status**: Spark → Researching → In progress → Writing → Submitted → Done, plus On hold and Dropped; the sidebar filters by status with counts
+- [x] **Priority, pin, tags**; user-defined tags, filterable
+- [x] **Target journal / conference**: a coloured label per idea, such as MICCAI or PLOS ONE (seen in screenshots)
+- [x] **List card**: title, one-line description, target venue, segmented progress bar, current step, days left, item counts, tags
+- [x] **Detail page**: status, priority, pin, target venue, title, description, tags; Overleaf or other links; sections for Progress, Todos, Thinking, Problems, Papers, Log
+- [x] **Progress checklist**: one research workflow per idea (the screenshot shows 8 default steps: literature review, hypothesis, experiment design, implementation, analysis, writing, submission prep, wrap-up); steps can be added; completion dates recorded; shows "Current: step (3/8)"
 - [ ] **Todos and problems**: action items with deadlines; blocking problems recorded with their solutions
 - [ ] **Progress log**
 - [ ] **Notes**: Markdown with LaTeX, code blocks and tables; click to edit
