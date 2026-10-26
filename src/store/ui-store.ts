@@ -14,6 +14,8 @@ interface UIState {
   selectedProjectId: number | null
   /** A full page in the middle pane instead of a list or project. */
   page: MainPage | null
+  /** The idea the Ideas page opens with (set when jumping from the overview). */
+  focusIdeaId: number | null
   /** The task open in the details pane, or null when it is closed. */
   selectedTaskId: number | null
 
@@ -31,10 +33,12 @@ interface UIState {
   selectTask: (id: number | null) => void
   selectProject: (id: number) => void
   openPage: (page: MainPage) => void
+  openIdea: (id: number) => void
 }
 
 /** The full pages the middle pane can show instead of a list or project. */
-export type MainPage = 'calendar' | 'items' | 'stats' | 'ideas' | 'papers'
+export type MainPage =
+  'calendar' | 'items' | 'stats' | 'research' | 'ideas' | 'papers'
 
 export const useUIStore = create<UIState>()(
   devtools(
@@ -47,6 +51,7 @@ export const useUIStore = create<UIState>()(
       selectedView: 'MyDay',
       selectedProjectId: null,
       page: null,
+      focusIdeaId: null,
       selectedTaskId: null,
 
       toggleLeftSidebar: () =>
@@ -129,12 +134,26 @@ export const useUIStore = create<UIState>()(
         set(
           {
             page,
+            focusIdeaId: null,
             selectedProjectId: null,
             selectedTaskId: null,
             rightSidebarVisible: false,
           },
           undefined,
           'openPage'
+        ),
+
+      openIdea: id =>
+        set(
+          {
+            page: 'ideas',
+            focusIdeaId: id,
+            selectedProjectId: null,
+            selectedTaskId: null,
+            rightSidebarVisible: false,
+          },
+          undefined,
+          'openIdea'
         ),
 
       selectTask: id =>

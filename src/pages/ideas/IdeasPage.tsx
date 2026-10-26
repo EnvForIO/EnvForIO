@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { LightbulbIcon } from 'lucide-react'
 import { useCreateIdea, useIdeas } from '@/api/ideas'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useUIStore } from '@/store/ui-store'
 import type { IdeaFilter } from '@/lib/tauri-bindings'
 import { IdeaCard } from './IdeaCard'
 import { IdeaDetail } from './IdeaDetail'
@@ -16,7 +17,9 @@ import { NO_FILTER } from './status'
 export function IdeasPage() {
   const { t } = useTranslation()
   const [filter, setFilter] = useState<IdeaFilter>(NO_FILTER)
-  const [selected, setSelected] = useState<number | null>(null)
+  const [selected, setSelected] = useState<number | null>(
+    () => useUIStore.getState().focusIdeaId
+  )
   const [draft, setDraft] = useState('')
   const { data: ideas = [] } = useIdeas(filter)
   const createIdea = useCreateIdea()

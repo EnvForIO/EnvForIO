@@ -2,7 +2,7 @@ use tauri_specta::{collect_commands, Builder};
 
 pub fn generate_bindings() -> Builder<tauri::Wry> {
     use crate::api::{
-        calendar, export, ideas, papers, plans, projects, stats, tasks, timer, windows,
+        calendar, export, ideas, papers, plans, projects, research, stats, tasks, timer, windows,
     };
     use crate::commands::{notifications, preferences, quick_pane, recovery};
 
@@ -68,6 +68,8 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         export::export_csv,
         export::export_ics,
         export::save_image,
+        export::export_research_json,
+        research::get_research_overview,
         ideas::list_ideas,
         ideas::get_idea,
         ideas::get_idea_counts,

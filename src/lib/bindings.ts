@@ -555,6 +555,25 @@ async saveImage(path: string, bytes: number[]) : Promise<Result<null, AppError>>
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Every idea and paper as one JSON file.
+ */
+async exportResearchJson(path: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("export_research_json", { path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getResearchOverview() : Promise<Result<ResearchOverview, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_research_overview") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async listIdeas(filter: IdeaFilter) : Promise<Result<Idea[], AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("list_ideas", { filter }) };
@@ -998,6 +1017,8 @@ export type DayCompletion = { date: string; total: number; done: number }
 export type DayNote = { date: string; text: string }
 export type DayOverride = { date: string; minutes: number }
 export type DayResult = { date: string; line: number; done: number; met: boolean }
+export type Deadline = { kind: DeadlineKind; id: number; title: string; detail: string; date: string; daysLeft: number }
+export type DeadlineKind = "Idea" | "Project" | "Task"
 export type DuoFont = "system" | "serif" | "mono"
 export type DuoMaterial = "translucent" | "acrylic" | "mica" | "solid"
 export type DuoStyle = { material: DuoMaterial; font: DuoFont; text_size: DuoTextSize }
@@ -1036,6 +1057,8 @@ export type IdeaUpdate = { title: string; description: string; status: IdeaStatu
 export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
+export type OpenProblem = { id: number; ideaId: number; ideaTitle: string; problem: string }
+export type OpenTodo = { id: number; ideaId: number; ideaTitle: string; title: string; dueDate: string | null }
 export type Paper = { id: number; title: string; authors: string[]; year: number | null; venue: string; kind: string; doi: string | null; arxivId: string | null; url: string; summary: string; status: ReadingStatus; notes: string; ideaCount: number; createdAt: string }
 export type PaperCounts = { all: number; byStatus: ([ReadingStatus, number])[] }
 export type PaperFilter = { status: ReadingStatus | null; 
@@ -1088,6 +1111,7 @@ export type RecoveryError =
  * JSON serialization/deserialization error
  */
 { type: "ParseError"; message: string }
+export type ResearchOverview = { byStatus: ([IdeaStatus, number])[]; unfinished: number; openTodos: number; openProblems: number; toRead: number; active: Idea[]; deadlines: Deadline[]; todos: OpenTodo[]; problems: OpenProblem[] }
 export type RunningTimer = { taskId: number; title: string; startedAt: string }
 export type Stats = { from: string; to: string; done: number; minutes: number; planned: number; plannedDone: number; activeDays: number; days: number; trend: Bucket[]; projects: ProjectTime[]; weekdays: Bucket[] }
 export type Tag = { id: number; name: string; color: string }

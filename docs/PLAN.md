@@ -270,8 +270,8 @@ Numbered 2.5 so later phase references stay valid. Based on the official App Sto
 - [x] **Paper library**: paste a DOI or arXiv link to fetch title, authors, year and abstract; reading status (including "To read") and notes; copy BibTeX in one click
 - [x] **Paper links**: attach papers to ideas with a relation (Inspiration / Baseline / Competing work) and a note on why they matter
 - [x] ~~**PDF**: download open-access PDFs automatically; import local PDFs; open any time~~ (2026-11-19: removed by user decision; PDFs stay in Zotero, the library keeps DOI and arXiv links)
-- [ ] **Overview page**: idea counts by status, unfinished ideas, todos, open problems, papers to read; ideas in progress with progress; deadline list; todo and problem summary; export everything to PDF
-- [ ] **Export**: SQLite, JSON, PDF
+- [x] **Overview page**: idea counts by status, unfinished ideas, todos, open problems, papers to read; ideas in progress with progress; deadline list; todo and problem summary (2026-11-19: no PDF export, by user decision)
+- [x] **Export**: JSON of every idea and paper (2026-11-19: JSON only, by user decision)
 - [ ] **Light / dark**
 
 Not doing: the AI assistant (one sentence to split steps, add todos, find papers, change status; the user decided on 2026-11-19 to skip it for now, Phase 4 if needed later); iCloud / Aurora DSQL / PostgreSQL sync (EnvIO has no cloud sync); 8 UI languages (EnvIO is English only); 7 colour themes; free vs Pro limits.

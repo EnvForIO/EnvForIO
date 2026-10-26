@@ -77,4 +77,16 @@ describe('UIStore', () => {
     toggleCommandPalette()
     expect(useUIStore.getState().commandPaletteOpen).toBe(false)
   })
+
+  it('opens an idea from the overview and forgets it on the next page', () => {
+    const { openIdea, openPage } = useUIStore.getState()
+    openIdea(7)
+    expect(useUIStore.getState()).toMatchObject({
+      page: 'ideas',
+      focusIdeaId: 7,
+    })
+    openPage('papers')
+    openPage('ideas')
+    expect(useUIStore.getState().focusIdeaId).toBeNull()
+  })
 })

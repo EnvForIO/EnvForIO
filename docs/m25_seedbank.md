@@ -13,7 +13,7 @@ Each step ends with a Windows build the user tries before the next one starts.
 | 3    | Paper library: DOI / arXiv lookup, reading status, notes, BibTeX; links from ideas with a relation                                                             | Paper library, Paper links                                                                         |
 | 4    | Overview page; export                                                                                                                                          | Overview page, Export                                                                              |
 
-Open question for step 4: the reference exports SQLite, JSON and PDF, but EnvIO's export was cut to CSV and ICS on 2026-11-19. Ask before building it.
+Step 4 export, 2026-11-19 user decision: JSON only (no SQLite copy, no PDF). The overview keeps the deadline list, and it includes project and task deadlines as well as idea deadlines.
 
 ## Step 1: ideas
 
@@ -36,3 +36,20 @@ Open question for step 4: the reference exports SQLite, JSON and PDF, but EnvIO'
 - BibTeX is generated locally (`domain/paper_ref.rs`): key `family + year + first title word`, `@article` / `@inproceedings` / `@misc` from the Crossref type.
 - UI: a Library page in the sidebar (status chips with counts, search, list, detail with BibTeX, DOI and arXiv links, abstract, reading notes and the ideas using it), and a Papers tab on ideas (search the library or paste a DOI to attach, relation and note per paper).
 - No PDFs (2026-11-19, user decision): the user keeps PDFs in Zotero, so the library keeps only the DOI and arXiv links. Step 3 first shipped download, import and open buttons; migration `0010_drop_paper_pdfs.sql` drops `pdf_url` and `has_pdf`. Files downloaded before that stay in `<app data>/papers/` and can be deleted by hand.
+
+## Step 4: overview and export
+
+- `service/research/overview.rs`:
+  - Four counts: unfinished ideas, plus open todos and open problems in unfinished ideas, and papers still to read.
+  - Ideas by status.
+  - Ideas being worked on (Researching, In progress, Writing), each with its step progress.
+  - Deadlines from ideas (except Submitted, Done and Dropped), projects that are not archived, and open tasks. Sorted by date, up to 40 rows, and anything overdue by more than 30 days is left out.
+  - Up to 20 open todos (dated ones first) and up to 20 open problems.
+- A "Research" page in the sidebar, placed before Ideas. Clicking a tile opens Ideas or the Library. Clicking a row opens its idea (`openIdea` sets `focusIdeaId`, which the Ideas page opens with), its project, or its task in the details pane.
+- "Export JSON" (`service/research/archive.rs`, the `export_research_json` command) writes one file:
+  - `format: "envio-research"`, `version: 1`
+  - the tags
+  - every idea with its notes, steps, links, todos, problems, log, and attached papers (each with its relation and note)
+  - the paper library
+
+  EnvIO does not import the file back.

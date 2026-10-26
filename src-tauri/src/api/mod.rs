@@ -10,6 +10,7 @@ pub mod ideas;
 pub mod papers;
 pub mod plans;
 pub mod projects;
+pub mod research;
 pub mod stats;
 pub mod tasks;
 pub mod timer;
