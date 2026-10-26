@@ -352,5 +352,22 @@
   "ideas.daysLeft_one": "{{count}} day left",
   "ideas.daysLeft_other": "{{count}} days left",
   "ideas.daysOver_one": "{{count}} day over",
-  "ideas.daysOver_other": "{{count}} days over"
+  "ideas.daysOver_other": "{{count}} days over",
+  "ideas.section.progress": "Progress",
+  "ideas.section.todos": "Todos",
+  "ideas.section.notes": "Notes",
+  "ideas.section.problems": "Problems",
+  "ideas.section.log": "Log",
+  "ideas.notesPlaceholder": "Markdown with LaTeX: $E = mc^2$, $$\\\\int_0^1 f(x)\\\\,dx$$, code blocks, tables…",
+  "ideas.notesEmpty": "Click to write notes (Markdown and LaTeX).",
+  "ideas.addTodo": "+ Add a todo, press Enter",
+  "ideas.due": "Due",
+  "ideas.deleteTodo": "Remove todo",
+  "ideas.addProblem": "+ What is blocking you? Press Enter",
+  "ideas.solutionPlaceholder": "How it was solved, or what to try",
+  "ideas.markSolved": "Mark solved",
+  "ideas.markUnsolved": "Mark not solved",
+  "ideas.deleteProblem": "Remove problem",
+  "ideas.addLog": "+ What happened today? Press Enter",
+  "ideas.deleteLog": "Remove entry"
 }

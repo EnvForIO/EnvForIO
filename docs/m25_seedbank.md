@@ -21,3 +21,10 @@ Open question for step 4: the reference exports SQLite, JSON and PDF, but EnvIO'
 - Statuses: Spark, Researching, In progress, Writing, Submitted, Done, On hold, Dropped. "Unfinished" = not Done or Dropped.
 - A new idea starts with the 8 default steps (literature review, hypothesis, experiment design, implementation, analysis, writing, submission prep, wrap-up); steps can be added, ticked (with the date) and removed.
 - UI: an Ideas page in the sidebar with filter chips (All / Pinned / Unfinished / each status / tags, with counts), a card list, and a detail column.
+
+## Step 2: inside an idea
+
+- Migration `0008_idea_parts.sql`: `ideas.notes`, `idea_todos` (title, optional due date, done), `idea_problems` (problem, solution, solved), `idea_logs` (date, text).
+- The idea detail ends in tabs: Progress (steps and links), Todos, Notes, Problems, Log, each with its count. Cards show open todos, open problems and log entries.
+- Notes are Markdown with LaTeX (`react-markdown`, `remark-gfm`, `remark-math`, `rehype-katex`): shown rendered, click to edit, saved on blur.
+- Problems list open ones first; a solution is saved when its box loses focus. Log entries are dated today and listed newest first.

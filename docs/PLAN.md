@@ -264,9 +264,9 @@ Numbered 2.5 so later phase references stay valid. Based on the official App Sto
 - [x] **List card**: title, one-line description, target venue, segmented progress bar, current step, days left, item counts, tags
 - [x] **Detail page**: status, priority, pin, target venue, title, description, tags; Overleaf or other links; sections for Progress, Todos, Thinking, Problems, Papers, Log
 - [x] **Progress checklist**: one research workflow per idea (the screenshot shows 8 default steps: literature review, hypothesis, experiment design, implementation, analysis, writing, submission prep, wrap-up); steps can be added; completion dates recorded; shows "Current: step (3/8)"
-- [ ] **Todos and problems**: action items with deadlines; blocking problems recorded with their solutions
-- [ ] **Progress log**
-- [ ] **Notes**: Markdown with LaTeX, code blocks and tables; click to edit
+- [x] **Todos and problems**: action items with deadlines; blocking problems recorded with their solutions
+- [x] **Progress log**
+- [x] **Notes**: Markdown with LaTeX, code blocks and tables; click to edit
 - [ ] **Paper library**: paste a DOI or arXiv link to fetch title, authors, year and abstract; reading status (including "To read") and notes; copy BibTeX in one click
 - [ ] **Paper links**: attach papers to ideas with a relation (Inspiration / Baseline / Competing work) and a note on why they matter
 - [ ] **PDF**: download open-access PDFs automatically; import local PDFs; open any time

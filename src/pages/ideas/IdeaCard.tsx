@@ -3,7 +3,13 @@
  * a segmented progress bar with the current step, days left and tags.
  */
 import { useTranslation } from 'react-i18next'
-import { FlagIcon, PinIcon } from 'lucide-react'
+import {
+  AlertTriangleIcon,
+  FlagIcon,
+  ListTodoIcon,
+  NotebookPenIcon,
+  PinIcon,
+} from 'lucide-react'
 import { useToday } from '@/api/tasks'
 import type { Idea } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
@@ -91,6 +97,24 @@ export function IdeaCard({
             {daysLeft >= 0
               ? t('ideas.daysLeft', { count: daysLeft })
               : t('ideas.daysOver', { count: -daysLeft })}
+          </span>
+        )}
+        {idea.openTodos > 0 && (
+          <span className="flex items-center gap-0.5">
+            <ListTodoIcon className="size-3" />
+            {idea.openTodos}
+          </span>
+        )}
+        {idea.openProblems > 0 && (
+          <span className="flex items-center gap-0.5 text-amber-600">
+            <AlertTriangleIcon className="size-3" />
+            {idea.openProblems}
+          </span>
+        )}
+        {idea.logCount > 0 && (
+          <span className="flex items-center gap-0.5">
+            <NotebookPenIcon className="size-3" />
+            {idea.logCount}
           </span>
         )}
         {idea.tags.map(tag => (

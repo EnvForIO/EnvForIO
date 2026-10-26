@@ -1,6 +1,6 @@
 /**
  * The right column of the Ideas page: status, priority, pin, venue,
- * deadline, tags, title, description, links and the research checklist.
+ * deadline, tags, title and description, then the tabbed sections.
  * Text saves when it loses focus; choices save at once.
  */
 import { useState } from 'react'
@@ -21,8 +21,7 @@ import { Textarea } from '@/components/ui/textarea'
 import type { Idea, IdeaStatus, IdeaUpdate } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { formatDate, parseDate } from '@/pages/tasks/dates'
-import { IdeaLinks } from './IdeaLinks'
-import { IdeaSteps } from './IdeaSteps'
+import { IdeaSections } from './IdeaSections'
 import { STATUS_COLOR, STATUSES } from './status'
 
 const toUpdate = (idea: Idea): IdeaUpdate => ({
@@ -174,8 +173,7 @@ function Form({ idea, onDeleted }: { idea: Idea; onDeleted: () => void }) {
         })}
       </div>
 
-      <IdeaLinks ideaId={idea.id} />
-      <IdeaSteps ideaId={idea.id} />
+      <IdeaSections idea={idea} />
     </div>
   )
 }

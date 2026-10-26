@@ -126,3 +126,78 @@ export const useDeleteIdeaLink = () =>
   useIdeaMutation(async (id: number) =>
     unwrapResult(await commands.deleteIdeaLink(id))
   )
+
+// ---------------------------------------------------------------------------
+// Notes, todos, problems and the log inside an idea
+
+export const useIdeaNotes = (id: number) =>
+  useQuery({
+    queryKey: ['ideas', 'notes', id] as const,
+    queryFn: async () => unwrapResult(await commands.getIdeaNotes(id)),
+  })
+
+export const useSetIdeaNotes = () =>
+  useIdeaMutation(async ({ id, notes }: { id: number; notes: string }) =>
+    unwrapResult(await commands.setIdeaNotes(id, notes))
+  )
+
+export const useIdeaTodos = (id: number) =>
+  useQuery({
+    queryKey: ['ideas', 'todos', id] as const,
+    queryFn: async () => unwrapResult(await commands.listIdeaTodos(id)),
+  })
+
+export const useAddIdeaTodo = () =>
+  useIdeaMutation(
+    async (a: { ideaId: number; title: string; dueDate: string | null }) =>
+      unwrapResult(await commands.addIdeaTodo(a.ideaId, a.title, a.dueDate))
+  )
+
+export const useSetIdeaTodoDone = () =>
+  useIdeaMutation(async ({ id, done }: { id: number; done: boolean }) =>
+    unwrapResult(await commands.setIdeaTodoDone(id, done))
+  )
+
+export const useDeleteIdeaTodo = () =>
+  useIdeaMutation(async (id: number) =>
+    unwrapResult(await commands.deleteIdeaTodo(id))
+  )
+
+export const useIdeaProblems = (id: number) =>
+  useQuery({
+    queryKey: ['ideas', 'problems', id] as const,
+    queryFn: async () => unwrapResult(await commands.listIdeaProblems(id)),
+  })
+
+export const useAddIdeaProblem = () =>
+  useIdeaMutation(
+    async ({ ideaId, problem }: { ideaId: number; problem: string }) =>
+      unwrapResult(await commands.addIdeaProblem(ideaId, problem))
+  )
+
+export const useUpdateIdeaProblem = () =>
+  useIdeaMutation(
+    async (a: { id: number; solution: string; solved: boolean }) =>
+      unwrapResult(await commands.updateIdeaProblem(a.id, a.solution, a.solved))
+  )
+
+export const useDeleteIdeaProblem = () =>
+  useIdeaMutation(async (id: number) =>
+    unwrapResult(await commands.deleteIdeaProblem(id))
+  )
+
+export const useIdeaLogs = (id: number) =>
+  useQuery({
+    queryKey: ['ideas', 'logs', id] as const,
+    queryFn: async () => unwrapResult(await commands.listIdeaLogs(id)),
+  })
+
+export const useAddIdeaLog = () =>
+  useIdeaMutation(async ({ ideaId, text }: { ideaId: number; text: string }) =>
+    unwrapResult(await commands.addIdeaLog(ideaId, text))
+  )
+
+export const useDeleteIdeaLog = () =>
+  useIdeaMutation(async (id: number) =>
+    unwrapResult(await commands.deleteIdeaLog(id))
+  )
