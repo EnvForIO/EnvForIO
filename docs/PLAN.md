@@ -267,9 +267,9 @@ Numbered 2.5 so later phase references stay valid. Based on the official App Sto
 - [x] **Todos and problems**: action items with deadlines; blocking problems recorded with their solutions
 - [x] **Progress log**
 - [x] **Notes**: Markdown with LaTeX, code blocks and tables; click to edit
-- [ ] **Paper library**: paste a DOI or arXiv link to fetch title, authors, year and abstract; reading status (including "To read") and notes; copy BibTeX in one click
-- [ ] **Paper links**: attach papers to ideas with a relation (Inspiration / Baseline / Competing work) and a note on why they matter
-- [ ] **PDF**: download open-access PDFs automatically; import local PDFs; open any time
+- [x] **Paper library**: paste a DOI or arXiv link to fetch title, authors, year and abstract; reading status (including "To read") and notes; copy BibTeX in one click
+- [x] **Paper links**: attach papers to ideas with a relation (Inspiration / Baseline / Competing work) and a note on why they matter
+- [x] **PDF**: download open-access PDFs automatically; import local PDFs; open any time
 - [ ] **Overview page**: idea counts by status, unfinished ideas, todos, open problems, papers to read; ideas in progress with progress; deadline list; todo and problem summary; export everything to PDF
 - [ ] **Export**: SQLite, JSON, PDF
 - [ ] **Light / dark**

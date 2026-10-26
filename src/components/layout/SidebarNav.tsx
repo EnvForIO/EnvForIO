@@ -7,6 +7,7 @@ import {
   CalendarDaysIcon,
   CalendarRangeIcon,
   ChartColumnIcon,
+  LibraryIcon,
   LightbulbIcon,
   ListChecksIcon,
   HouseIcon,
@@ -17,7 +18,7 @@ import {
 import { useTasks } from '@/api/tasks'
 import type { TaskView } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
-import { useUIStore } from '@/store/ui-store'
+import { useUIStore, type MainPage } from '@/store/ui-store'
 
 const VIEWS: { view: TaskView; icon: LucideIcon }[] = [
   { view: 'MyDay', icon: SunIcon },
@@ -56,13 +57,7 @@ function NavItem({ view, icon: Icon }: { view: TaskView; icon: LucideIcon }) {
   )
 }
 
-function PageItem({
-  page,
-  icon: Icon,
-}: {
-  page: 'calendar' | 'items' | 'stats' | 'ideas'
-  icon: LucideIcon
-}) {
+function PageItem({ page, icon: Icon }: { page: MainPage; icon: LucideIcon }) {
   const { t } = useTranslation()
   const open = useUIStore(state => state.page === page)
   const openPage = useUIStore(state => state.openPage)
@@ -91,6 +86,7 @@ export function SidebarNav() {
       <PageItem page="items" icon={ListChecksIcon} />
       <PageItem page="stats" icon={ChartColumnIcon} />
       <PageItem page="ideas" icon={LightbulbIcon} />
+      <PageItem page="papers" icon={LibraryIcon} />
     </nav>
   )
 }

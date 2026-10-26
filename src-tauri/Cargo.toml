@@ -34,6 +34,9 @@ tauri-plugin-os = "2"
 tauri-plugin-global-shortcut = "2"
 log = "0.4"
 regex = "1"
+# Paper lookups (Crossref, arXiv) and PDF downloads. native-tls is SChannel on
+# Windows, so cross-compiling needs no C crypto library.
+reqwest = { version = "0.13", default-features = false, features = ["native-tls", "json", "system-proxy"] }
 
 # Type-safe Tauri command bindings
 specta = { version = "=2.0.0-rc.22", features = ["derive", "serde_json"] }

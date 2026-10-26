@@ -8,6 +8,7 @@ import { CalendarPage } from './calendar/CalendarPage'
 import { ItemsPage } from './items/ItemsPage'
 import { StatsPage } from './stats/StatsPage'
 import { IdeasPage } from './ideas/IdeasPage'
+import { PapersPage } from './papers/PapersPage'
 
 export function MainPane() {
   const projectId = useUIStore(state => state.selectedProjectId)
@@ -16,6 +17,7 @@ export function MainPane() {
   if (page === 'items') return <ItemsPage />
   if (page === 'stats') return <StatsPage />
   if (page === 'ideas') return <IdeasPage />
+  if (page === 'papers') return <PapersPage />
   return projectId === null ? (
     <TaskListPage />
   ) : (

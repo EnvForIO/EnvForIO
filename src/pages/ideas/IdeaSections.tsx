@@ -1,28 +1,32 @@
 /**
  * The tabbed lower half of an idea: Progress (steps and links), Todos,
- * Notes, Problems and Log, each with its count.
+ * Notes, Problems, Papers and Log, each with its count.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useIdeaPapers } from '@/api/papers'
 import type { Idea } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { IdeaLinks } from './IdeaLinks'
 import { IdeaLog } from './IdeaLog'
 import { IdeaNotes } from './IdeaNotes'
+import { IdeaPapers } from './IdeaPapers'
 import { IdeaProblems } from './IdeaProblems'
 import { IdeaSteps } from './IdeaSteps'
 import { IdeaTodos } from './IdeaTodos'
 
-type Section = 'progress' | 'todos' | 'notes' | 'problems' | 'log'
+type Section = 'progress' | 'todos' | 'notes' | 'problems' | 'papers' | 'log'
 
 export function IdeaSections({ idea }: { idea: Idea }) {
   const { t } = useTranslation()
   const [section, setSection] = useState<Section>('progress')
+  const { data: papers = [] } = useIdeaPapers(idea.id)
   const tabs: { id: Section; count?: string }[] = [
     { id: 'progress', count: `${idea.stepsDone}/${idea.stepCount}` },
     { id: 'todos', count: String(idea.openTodos) },
     { id: 'notes' },
     { id: 'problems', count: String(idea.openProblems) },
+    { id: 'papers', count: String(papers.length) },
     { id: 'log', count: String(idea.logCount) },
   ]
 
@@ -57,6 +61,7 @@ export function IdeaSections({ idea }: { idea: Idea }) {
       {section === 'todos' && <IdeaTodos ideaId={idea.id} />}
       {section === 'notes' && <IdeaNotes ideaId={idea.id} />}
       {section === 'problems' && <IdeaProblems ideaId={idea.id} />}
+      {section === 'papers' && <IdeaPapers ideaId={idea.id} />}
       {section === 'log' && <IdeaLog ideaId={idea.id} />}
     </div>
   )

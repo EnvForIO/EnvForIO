@@ -787,6 +787,127 @@ async deleteIdeaLog(id: number) : Promise<Result<null, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+async listPapers(filter: PaperFilter) : Promise<Result<Paper[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_papers", { filter }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getPaper(id: number) : Promise<Result<Paper, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_paper", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async getPaperCounts() : Promise<Result<PaperCounts, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("get_paper_counts") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Add from a DOI, an arXiv id or link (looked up online), or a plain title.
+ */
+async addPaper(input: string) : Promise<Result<Paper, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_paper", { input }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async updatePaper(id: number, update: PaperUpdate) : Promise<Result<Paper, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("update_paper", { id, update }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async deletePaper(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("delete_paper", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async paperBibtex(id: number) : Promise<Result<string, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("paper_bibtex", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Download the open-access PDF the lookup found (arXiv, or a Crossref link).
+ */
+async downloadPaperPdf(id: number) : Promise<Result<Paper, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("download_paper_pdf", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async importPaperPdf(id: number, path: string) : Promise<Result<Paper, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("import_paper_pdf", { id, path }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Open the library copy in the default PDF reader.
+ */
+async openPaperPdf(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("open_paper_pdf", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listIdeaPapers(ideaId: number) : Promise<Result<IdeaPaper[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_idea_papers", { ideaId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async listPaperIdeas(paperId: number) : Promise<Result<PaperIdea[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_paper_ideas", { paperId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async linkPaper(ideaId: number, paperId: number, relation: PaperRelation, note: string) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("link_paper", { ideaId, paperId, relation, note }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async unlinkPaper(ideaId: number, paperId: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("unlink_paper", { ideaId, paperId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async getRunningTimer() : Promise<Result<RunningTimer | null, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("get_running_timer") };
@@ -868,6 +989,10 @@ export type AppError =
  */
 { type: "Invalid"; message: string } | 
 /**
+ * A lookup or download failed (offline, timeout, server error).
+ */
+{ type: "Network"; message: string } | 
+/**
  * SQLite failed. The message is for logs; the UI shows a generic error.
  */
 { type: "Database"; message: string }
@@ -923,6 +1048,10 @@ export type IdeaCounts = { all: number; pinned: number; unfinished: number; bySt
 export type IdeaFilter = { status: IdeaStatus | null; pinned: boolean; unfinished: boolean; tagId: number | null }
 export type IdeaLink = { id: number; ideaId: number; label: string; url: string }
 export type IdeaLog = { id: number; ideaId: number; date: string; text: string }
+/**
+ * A paper as attached to one idea.
+ */
+export type IdeaPaper = { paper: Paper; relation: PaperRelation; note: string }
 export type IdeaProblem = { id: number; ideaId: number; problem: string; solution: string; isSolved: boolean }
 /**
  * Where an idea is, from first spark to submission.
@@ -937,6 +1066,22 @@ export type IdeaUpdate = { title: string; description: string; status: IdeaStatu
 export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
+export type Paper = { id: number; title: string; authors: string[]; year: number | null; venue: string; kind: string; doi: string | null; arxivId: string | null; url: string; summary: string; pdfUrl: string | null; hasPdf: boolean; status: ReadingStatus; notes: string; ideaCount: number; createdAt: string }
+export type PaperCounts = { all: number; byStatus: ([ReadingStatus, number])[] }
+export type PaperFilter = { status: ReadingStatus | null; 
+/**
+ * Matches title, authors or venue.
+ */
+search: string | null }
+/**
+ * An idea a paper is attached to (shown on the paper).
+ */
+export type PaperIdea = { ideaId: number; title: string; relation: PaperRelation }
+export type PaperRelation = "Inspiration" | "Baseline" | "Competing" | "Reference"
+/**
+ * Everything the paper page edits.
+ */
+export type PaperUpdate = { title: string; authors: string[]; year: number | null; venue: string; status: ReadingStatus; notes: string }
 export type Period = "Week" | "Month" | "Year"
 export type PlanningSettings = { dayStart: string; level: boolean; earliestFirst: boolean }
 export type Project = { id: number; name: string; color: string; template: string; startDate: string | null; deadline: string | null; bufferDays: number; planDate: string | null; isArchived: boolean; sortOrder: number; taskCount: number; doneCount: number; estimateMinutes: number; doneEstimateMinutes: number }
@@ -948,6 +1093,7 @@ export type ProjectInput = { name: string; color: string; startDate: string | nu
 export type ProjectLine = { projectId: number; name: string; color: string; minutes: number; doneMinutes: number }
 export type ProjectTemplate = { id: string; modules: string[] }
 export type ProjectTime = { projectId: number | null; name: string | null; color: string | null; minutes: number; done: number }
+export type ReadingStatus = "ToRead" | "Reading" | "Read"
 /**
  * Error types for recovery operations (typed for frontend matching)
  */

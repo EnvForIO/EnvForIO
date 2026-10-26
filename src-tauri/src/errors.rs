@@ -13,6 +13,8 @@ pub enum AppError {
     NotFound { what: String, id: i64 },
     /// The input breaks a rule, e.g. an empty title.
     Invalid { message: String },
+    /// A lookup or download failed (offline, timeout, server error).
+    Network { message: String },
     /// SQLite failed. The message is for logs; the UI shows a generic error.
     Database { message: String },
 }
@@ -20,6 +22,12 @@ pub enum AppError {
 impl AppError {
     pub fn invalid(message: impl Into<String>) -> Self {
         Self::Invalid {
+            message: message.into(),
+        }
+    }
+
+    pub fn network(message: impl Into<String>) -> Self {
+        Self::Network {
             message: message.into(),
         }
     }
@@ -46,6 +54,7 @@ impl std::fmt::Display for AppError {
         match self {
             Self::NotFound { what, id } => write!(f, "{what} {id} not found"),
             Self::Invalid { message } => write!(f, "invalid input: {message}"),
+            Self::Network { message } => write!(f, "network error: {message}"),
             Self::Database { message } => write!(f, "database error: {message}"),
         }
     }

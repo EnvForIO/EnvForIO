@@ -28,3 +28,12 @@ Open question for step 4: the reference exports SQLite, JSON and PDF, but EnvIO'
 - The idea detail ends in tabs: Progress (steps and links), Todos, Notes, Problems, Log, each with its count. Cards show open todos, open problems and log entries.
 - Notes are Markdown with LaTeX (`react-markdown`, `remark-gfm`, `remark-math`, `rehype-katex`): shown rendered, click to edit, saved on blur.
 - Problems list open ones first; a solution is saved when its box loses focus. Log entries are dated today and listed newest first.
+
+## Step 3: paper library
+
+- Migration `0009_papers.sql`: `papers` (DOI and arXiv id unique, reading status, Markdown notes, `pdf_url`, `has_pdf`) and `idea_papers` (relation and note per idea).
+- Adding: paste a DOI (bare, `doi:` or a doi.org link) or an arXiv id or link. DOIs are looked up on Crossref, arXiv ids on the arXiv API (`service/papers/fetch.rs`, `reqwest` with native TLS, so SChannel on Windows). Anything else becomes a paper with that title. A DOI or arXiv id already in the library returns the existing paper.
+- BibTeX is generated locally (`domain/paper_ref.rs`): key `family + year + first title word`, `@article` / `@inproceedings` / `@misc` from the Crossref type.
+- PDFs live in `<app data>/papers/<id>.pdf`. "Download PDF" uses the arXiv PDF or a Crossref `application/pdf` link, and refuses anything that is not a PDF (paywalls return HTML). "Import PDF" copies a local file. "Open PDF" uses the default reader.
+- UI: a Library page in the sidebar (status chips with counts, search, list, detail with BibTeX, PDF, abstract, reading notes and the ideas using it), and a Papers tab on ideas (search the library or paste a DOI to attach, relation and note per paper).
+- No Unpaywall: its API requires an email address, and EnvIO sends no user details.
