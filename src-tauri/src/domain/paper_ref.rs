@@ -55,7 +55,6 @@ pub struct PaperMeta {
     pub arxiv_id: Option<String>,
     pub url: String,
     pub summary: String,
-    pub pdf_url: Option<String>,
 }
 
 static TAG: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"<[^>]+>").unwrap());

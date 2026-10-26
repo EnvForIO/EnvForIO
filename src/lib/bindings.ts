@@ -846,36 +846,6 @@ async paperBibtex(id: number) : Promise<Result<string, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
-/**
- * Download the open-access PDF the lookup found (arXiv, or a Crossref link).
- */
-async downloadPaperPdf(id: number) : Promise<Result<Paper, AppError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("download_paper_pdf", { id }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async importPaperPdf(id: number, path: string) : Promise<Result<Paper, AppError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("import_paper_pdf", { id, path }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-/**
- * Open the library copy in the default PDF reader.
- */
-async openPaperPdf(id: number) : Promise<Result<null, AppError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("open_paper_pdf", { id }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
 async listIdeaPapers(ideaId: number) : Promise<Result<IdeaPaper[], AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("list_idea_papers", { ideaId }) };
@@ -1066,7 +1036,7 @@ export type IdeaUpdate = { title: string; description: string; status: IdeaStatu
 export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
-export type Paper = { id: number; title: string; authors: string[]; year: number | null; venue: string; kind: string; doi: string | null; arxivId: string | null; url: string; summary: string; pdfUrl: string | null; hasPdf: boolean; status: ReadingStatus; notes: string; ideaCount: number; createdAt: string }
+export type Paper = { id: number; title: string; authors: string[]; year: number | null; venue: string; kind: string; doi: string | null; arxivId: string | null; url: string; summary: string; status: ReadingStatus; notes: string; ideaCount: number; createdAt: string }
 export type PaperCounts = { all: number; byStatus: ([ReadingStatus, number])[] }
 export type PaperFilter = { status: ReadingStatus | null; 
 /**

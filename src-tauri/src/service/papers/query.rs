@@ -96,7 +96,6 @@ pub fn bibtex(conn: &Connection, id: i64) -> AppResult<String> {
         arxiv_id: p.arxiv_id,
         url: p.url,
         summary: p.summary,
-        pdf_url: p.pdf_url,
     }))
 }
 
@@ -112,8 +111,8 @@ pub fn idea_papers(conn: &Connection, idea_id: i64) -> AppResult<Vec<IdeaPaper>>
         .query_map(params![idea_id], |r| {
             Ok(IdeaPaper {
                 paper: Paper::from_row(r)?,
-                relation: r.get(16)?,
-                note: r.get(17)?,
+                relation: r.get(14)?,
+                note: r.get(15)?,
             })
         })?
         .collect::<Result<_, _>>()?;

@@ -2,26 +2,15 @@
 //!
 //! The async commands never hold the database lock across a network call.
 
-use std::path::{Path, PathBuf};
-
-use tauri::{AppHandle, Manager, State};
-use tauri_plugin_opener::OpenerExt;
+use tauri::State;
 
 use crate::config::AppState;
 use crate::domain::paper_ref::{parse_ref, PaperMeta};
 use crate::entity::paper::{IdeaPaper, Paper, PaperIdea, PaperRelation};
-use crate::errors::{AppError, AppResult};
+use crate::errors::AppResult;
+use crate::service::papers::fetch;
 use crate::service::papers::mutation::{self, PaperUpdate};
 use crate::service::papers::query::{self, PaperCounts, PaperFilter};
-use crate::service::papers::{fetch, pdf};
-
-fn pdf_dir(app: &AppHandle) -> AppResult<PathBuf> {
-    let dir = app
-        .path()
-        .app_data_dir()
-        .map_err(|e| AppError::invalid(format!("no app data folder: {e}")))?;
-    Ok(dir.join("papers"))
-}
 
 #[tauri::command]
 #[specta::specta]
@@ -69,63 +58,14 @@ pub fn update_paper(state: State<'_, AppState>, id: i64, update: PaperUpdate) ->
 
 #[tauri::command]
 #[specta::specta]
-pub fn delete_paper(app: AppHandle, state: State<'_, AppState>, id: i64) -> AppResult<()> {
-    mutation::delete(&state.db(), id)?;
-    pdf::remove(&pdf_dir(&app)?, id);
-    Ok(())
+pub fn delete_paper(state: State<'_, AppState>, id: i64) -> AppResult<()> {
+    mutation::delete(&state.db(), id)
 }
 
 #[tauri::command]
 #[specta::specta]
 pub fn paper_bibtex(state: State<'_, AppState>, id: i64) -> AppResult<String> {
     query::bibtex(&state.db(), id)
-}
-
-/// Download the open-access PDF the lookup found (arXiv, or a Crossref link).
-#[tauri::command]
-#[specta::specta]
-pub async fn download_paper_pdf(
-    app: AppHandle,
-    state: State<'_, AppState>,
-    id: i64,
-) -> AppResult<Paper> {
-    let paper = query::get(&state.db(), id)?;
-    let url = paper.pdf_url.ok_or_else(|| {
-        AppError::invalid("no open-access PDF is known for this paper; import a local file")
-    })?;
-    let bytes = fetch::download_pdf(&url).await?;
-    pdf::save(&pdf_dir(&app)?, id, &bytes)?;
-    let db = state.db();
-    mutation::set_has_pdf(&db, id, true)?;
-    query::get(&db, id)
-}
-
-#[tauri::command]
-#[specta::specta]
-pub fn import_paper_pdf(
-    app: AppHandle,
-    state: State<'_, AppState>,
-    id: i64,
-    path: String,
-) -> AppResult<Paper> {
-    let db = state.db();
-    query::get(&db, id)?;
-    pdf::import(&pdf_dir(&app)?, id, Path::new(&path))?;
-    mutation::set_has_pdf(&db, id, true)?;
-    query::get(&db, id)
-}
-
-/// Open the library copy in the default PDF reader.
-#[tauri::command]
-#[specta::specta]
-pub fn open_paper_pdf(app: AppHandle, id: i64) -> AppResult<()> {
-    let path = pdf::path(&pdf_dir(&app)?, id);
-    if !path.exists() {
-        return Err(AppError::invalid("this paper has no PDF yet"));
-    }
-    app.opener()
-        .open_path(path.to_string_lossy(), None::<&str>)
-        .map_err(|e| AppError::invalid(format!("cannot open the PDF: {e}")))
 }
 
 #[tauri::command]

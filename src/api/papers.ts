@@ -65,10 +65,6 @@ export async function copyBibtex(id: number) {
   await writeText(unwrapResult(await commands.paperBibtex(id)))
 }
 
-export async function openPaperPdf(id: number) {
-  unwrapResult(await commands.openPaperPdf(id))
-}
-
 // ---------------------------------------------------------------------------
 // Writes
 
@@ -98,16 +94,6 @@ export const useUpdatePaper = () =>
 export const useDeletePaper = () =>
   usePaperMutation(async (id: number) =>
     unwrapResult(await commands.deletePaper(id))
-  )
-
-export const useDownloadPaperPdf = () =>
-  usePaperMutation(async (id: number) =>
-    unwrapResult(await commands.downloadPaperPdf(id))
-  )
-
-export const useImportPaperPdf = () =>
-  usePaperMutation(async ({ id, path }: { id: number; path: string }) =>
-    unwrapResult(await commands.importPaperPdf(id, path))
   )
 
 export const useLinkPaper = () =>

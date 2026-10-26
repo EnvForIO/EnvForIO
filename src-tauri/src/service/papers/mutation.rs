@@ -27,8 +27,8 @@ pub fn insert(conn: &Connection, meta: &PaperMeta) -> AppResult<Paper> {
     let now = now_timestamp();
     conn.execute(
         "INSERT INTO papers (title, authors, year, venue, kind, doi, arxiv_id, url, summary,
-                             pdf_url, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?11)",
+                             created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?10)",
         params![
             title,
             meta.authors.join("\n"),
@@ -43,7 +43,6 @@ pub fn insert(conn: &Connection, meta: &PaperMeta) -> AppResult<Paper> {
             meta.arxiv_id,
             meta.url,
             meta.summary,
-            meta.pdf_url,
             now
         ],
     )?;
@@ -95,14 +94,6 @@ pub fn delete(conn: &Connection, id: i64) -> AppResult<()> {
     if conn.execute("DELETE FROM papers WHERE id = ?1", params![id])? == 0 {
         return Err(AppError::not_found("paper", id));
     }
-    Ok(())
-}
-
-pub fn set_has_pdf(conn: &Connection, id: i64, has_pdf: bool) -> AppResult<()> {
-    conn.execute(
-        "UPDATE papers SET has_pdf = ?2 WHERE id = ?1",
-        params![id, has_pdf],
-    )?;
     Ok(())
 }
 

@@ -1,8 +1,8 @@
 /**
- * One paper in the library list: reading status, title, byline, and
- * whether it has a PDF and how many ideas use it.
+ * One paper in the library list: reading status, title, byline, and how
+ * many ideas use it.
  */
-import { FileTextIcon, LightbulbIcon } from 'lucide-react'
+import { LightbulbIcon } from 'lucide-react'
 import type { Paper } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { paperByline, READING_COLOR } from './format'
@@ -36,7 +36,6 @@ export function PaperRow({
       </div>
       <div className="flex items-center gap-2 ps-4 text-xs text-muted-foreground">
         <span className="min-w-0 flex-1 truncate">{paperByline(paper)}</span>
-        {paper.hasPdf && <FileTextIcon className="size-3 shrink-0" />}
         {paper.ideaCount > 0 && (
           <span className="flex shrink-0 items-center gap-0.5">
             <LightbulbIcon className="size-3" />

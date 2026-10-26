@@ -1,30 +1,23 @@
 /**
- * The right column of the Library: reading status, BibTeX, PDF, then the
+ * The right column of the Library: reading status and BibTeX, then the
  * editable title, authors, year and venue, links, abstract, reading notes
  * and the ideas that use the paper. Text saves when it loses focus.
+ * PDFs stay in Zotero; the DOI and arXiv links open the paper.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ClipboardCopyIcon,
-  DownloadIcon,
   ExternalLinkIcon,
-  FileTextIcon,
-  FileUpIcon,
   LightbulbIcon,
-  Loader2Icon,
   Trash2Icon,
 } from 'lucide-react'
-import { open } from '@tauri-apps/plugin-dialog'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { toast } from 'sonner'
 import {
   copyBibtex,
   errorText,
-  openPaperPdf,
   useDeletePaper,
-  useDownloadPaperPdf,
-  useImportPaperPdf,
   usePaper,
   usePaperIdeas,
   useUpdatePaper,
@@ -139,7 +132,6 @@ function Form({ paper, onDeleted }: { paper: Paper; onDeleted: () => void }) {
           <ClipboardCopyIcon className="size-3.5" />
           {t('papers.copyBibtex')}
         </Button>
-        <PdfButtons paper={paper} />
         <Button
           size="icon"
           variant="ghost"
@@ -219,62 +211,6 @@ function Form({ paper, onDeleted }: { paper: Paper; onDeleted: () => void }) {
       </section>
       <UsedIn paperId={paper.id} />
     </div>
-  )
-}
-
-/** Open the library copy, download the open-access PDF, or import a file. */
-function PdfButtons({ paper }: { paper: Paper }) {
-  const { t } = useTranslation()
-  const download = useDownloadPaperPdf()
-  const importPdf = useImportPaperPdf()
-
-  const pick = async () => {
-    const path = await open({
-      multiple: false,
-      filters: [{ name: 'PDF', extensions: ['pdf'] }],
-    })
-    if (typeof path === 'string')
-      importPdf.mutate({ id: paper.id, path }, { onError: fail })
-  }
-
-  return (
-    <>
-      {paper.hasPdf ? (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => openPaperPdf(paper.id).catch(fail)}
-        >
-          <FileTextIcon className="size-3.5" />
-          {t('papers.openPdf')}
-        </Button>
-      ) : (
-        paper.pdfUrl && (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={download.isPending}
-            onClick={() =>
-              download.mutate(paper.id, {
-                onSuccess: () => toast.success(t('papers.pdfSaved')),
-                onError: fail,
-              })
-            }
-          >
-            {download.isPending ? (
-              <Loader2Icon className="size-3.5 animate-spin" />
-            ) : (
-              <DownloadIcon className="size-3.5" />
-            )}
-            {t('papers.downloadPdf')}
-          </Button>
-        )
-      )}
-      <Button size="sm" variant="ghost" onClick={() => void pick()}>
-        <FileUpIcon className="size-3.5" />
-        {t('papers.importPdf')}
-      </Button>
-    </>
   )
 }
 

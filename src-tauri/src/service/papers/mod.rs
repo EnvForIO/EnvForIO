@@ -1,10 +1,9 @@
 //! The paper library (Seedbank): papers looked up by DOI or arXiv id or
-//! typed by hand, reading status, notes, BibTeX, PDFs, and papers attached
-//! to ideas. Network in `fetch`, files in `pdf`.
+//! typed by hand, reading status, notes, BibTeX, and papers attached to
+//! ideas. Network in `fetch`. PDFs stay in the user's reference manager.
 
 pub mod fetch;
 pub mod mutation;
-pub mod pdf;
 pub mod query;
 
 #[cfg(test)]

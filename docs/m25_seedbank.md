@@ -10,7 +10,7 @@ Each step ends with a Windows build the user tries before the next one starts.
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | 1    | Ideas: status, priority, pin, tags, target venue, deadline, links; the default 8-step research checklist; the Ideas page with filters, cards and a detail view | Idea pipeline, Status, Priority/pin/tags, Target venue, List card, Detail page, Progress checklist |
 | 2    | Inside an idea: todos with due dates, problems with solutions, progress log, Markdown + LaTeX notes                                                            | Todos and problems, Progress log, Notes                                                            |
-| 3    | Paper library: DOI / arXiv lookup, reading status, notes, BibTeX; links from ideas with a relation; PDFs                                                       | Paper library, Paper links, PDF                                                                    |
+| 3    | Paper library: DOI / arXiv lookup, reading status, notes, BibTeX; links from ideas with a relation                                                             | Paper library, Paper links                                                                         |
 | 4    | Overview page; export                                                                                                                                          | Overview page, Export                                                                              |
 
 Open question for step 4: the reference exports SQLite, JSON and PDF, but EnvIO's export was cut to CSV and ICS on 2026-11-19. Ask before building it.
@@ -31,9 +31,8 @@ Open question for step 4: the reference exports SQLite, JSON and PDF, but EnvIO'
 
 ## Step 3: paper library
 
-- Migration `0009_papers.sql`: `papers` (DOI and arXiv id unique, reading status, Markdown notes, `pdf_url`, `has_pdf`) and `idea_papers` (relation and note per idea).
+- Migration `0009_papers.sql`: `papers` (DOI and arXiv id unique, reading status, Markdown notes) and `idea_papers` (relation and note per idea).
 - Adding: paste a DOI (bare, `doi:` or a doi.org link) or an arXiv id or link. DOIs are looked up on Crossref, arXiv ids on the arXiv API (`service/papers/fetch.rs`, `reqwest` with native TLS, so SChannel on Windows). Anything else becomes a paper with that title. A DOI or arXiv id already in the library returns the existing paper.
 - BibTeX is generated locally (`domain/paper_ref.rs`): key `family + year + first title word`, `@article` / `@inproceedings` / `@misc` from the Crossref type.
-- PDFs live in `<app data>/papers/<id>.pdf`. "Download PDF" uses the arXiv PDF or a Crossref `application/pdf` link, and refuses anything that is not a PDF (paywalls return HTML). "Import PDF" copies a local file. "Open PDF" uses the default reader.
-- UI: a Library page in the sidebar (status chips with counts, search, list, detail with BibTeX, PDF, abstract, reading notes and the ideas using it), and a Papers tab on ideas (search the library or paste a DOI to attach, relation and note per paper).
-- No Unpaywall: its API requires an email address, and EnvIO sends no user details.
+- UI: a Library page in the sidebar (status chips with counts, search, list, detail with BibTeX, DOI and arXiv links, abstract, reading notes and the ideas using it), and a Papers tab on ideas (search the library or paste a DOI to attach, relation and note per paper).
+- No PDFs (2026-11-19, user decision): the user keeps PDFs in Zotero, so the library keeps only the DOI and arXiv links. Step 3 first shipped download, import and open buttons; migration `0010_drop_paper_pdfs.sql` drops `pdf_url` and `has_pdf`. Files downloaded before that stay in `<app data>/papers/` and can be deleted by hand.

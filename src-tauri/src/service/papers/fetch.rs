@@ -1,6 +1,5 @@
-//! Paper metadata from the public Crossref and arXiv APIs, and open-access
-//! PDF downloads. The parsers are plain functions so they are tested
-//! without the network.
+//! Paper metadata from the public Crossref and arXiv APIs. The parsers are
+//! plain functions so they are tested without the network.
 
 use std::sync::LazyLock;
 use std::time::Duration;
@@ -67,23 +66,6 @@ async fn arxiv(id: &str) -> AppResult<PaperMeta> {
     from_arxiv(&atom, id).ok_or_else(|| AppError::invalid(format!("arXiv has no paper {id}")))
 }
 
-/// Download a PDF; refuse anything that is not one (paywalls answer with HTML).
-pub async fn download_pdf(url: &str) -> AppResult<Vec<u8>> {
-    let response = client()?.get(url).send().await.map_err(network)?;
-    let bytes = response
-        .error_for_status()
-        .map_err(network)?
-        .bytes()
-        .await
-        .map_err(network)?;
-    if !bytes.starts_with(b"%PDF") {
-        return Err(AppError::invalid(
-            "the link did not return a PDF (it may need a subscription); import a local file instead",
-        ));
-    }
-    Ok(bytes.to_vec())
-}
-
 /// Percent-encode a DOI for a URL path, keeping its slashes.
 fn encode_doi(doi: &str) -> String {
     doi.bytes()
@@ -135,13 +117,6 @@ pub fn from_crossref(msg: &Value, doi: &str) -> PaperMeta {
     };
     let summary = plain_text(msg["abstract"].as_str().unwrap_or_default());
     let summary = summary.strip_prefix("Abstract ").unwrap_or(&summary);
-    let pdf_url = msg["link"].as_array().and_then(|links| {
-        links
-            .iter()
-            .find(|l| l["content-type"].as_str() == Some("application/pdf"))
-            .and_then(|l| l["URL"].as_str())
-            .map(str::to_string)
-    });
     PaperMeta {
         title: plain_text(first_str(&msg["title"])),
         authors,
@@ -154,7 +129,6 @@ pub fn from_crossref(msg: &Value, doi: &str) -> PaperMeta {
             .as_str()
             .map_or_else(|| format!("https://doi.org/{doi}"), str::to_string),
         summary: summary.to_string(),
-        pdf_url,
     }
 }
 
@@ -186,7 +160,6 @@ pub fn from_arxiv(atom: &str, id: &str) -> Option<PaperMeta> {
         arxiv_id: Some(id.to_string()),
         url: format!("https://arxiv.org/abs/{id}"),
         summary: tag(entry, "summary").unwrap_or_default(),
-        pdf_url: Some(format!("https://arxiv.org/pdf/{id}")),
     })
 }
 
@@ -206,11 +179,7 @@ mod tests {
             "container-title": ["Nature"],
             "type": "journal-article",
             "abstract": "<jats:title>Abstract</jats:title><jats:p>Proteins are essential.</jats:p>",
-            "URL": "https://doi.org/10.1038/s41586-021-03819-2",
-            "link": [
-                {"URL": "https://www.nature.com/x.html", "content-type": "text/html"},
-                {"URL": "https://www.nature.com/x.pdf", "content-type": "application/pdf"}
-            ]
+            "URL": "https://doi.org/10.1038/s41586-021-03819-2"
         });
         let meta = from_crossref(&msg, "10.1038/s41586-021-03819-2");
         assert_eq!(
@@ -223,10 +192,6 @@ mod tests {
             (Some(2021), "Nature", "article")
         );
         assert_eq!(meta.summary, "Proteins are essential.");
-        assert_eq!(
-            meta.pdf_url.as_deref(),
-            Some("https://www.nature.com/x.pdf")
-        );
     }
 
     #[test]
@@ -248,10 +213,6 @@ mod tests {
         assert_eq!(
             meta.summary,
             "The dominant sequence transduction models & more."
-        );
-        assert_eq!(
-            meta.pdf_url.as_deref(),
-            Some("https://arxiv.org/pdf/1706.03762")
         );
 
         let error = r#"<feed><entry><id>http://arxiv.org/api/errors#incorrect_id</id>

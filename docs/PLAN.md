@@ -269,7 +269,7 @@ Numbered 2.5 so later phase references stay valid. Based on the official App Sto
 - [x] **Notes**: Markdown with LaTeX, code blocks and tables; click to edit
 - [x] **Paper library**: paste a DOI or arXiv link to fetch title, authors, year and abstract; reading status (including "To read") and notes; copy BibTeX in one click
 - [x] **Paper links**: attach papers to ideas with a relation (Inspiration / Baseline / Competing work) and a note on why they matter
-- [x] **PDF**: download open-access PDFs automatically; import local PDFs; open any time
+- [x] ~~**PDF**: download open-access PDFs automatically; import local PDFs; open any time~~ (2026-11-19: removed by user decision; PDFs stay in Zotero, the library keeps DOI and arXiv links)
 - [ ] **Overview page**: idea counts by status, unfinished ideas, todos, open problems, papers to read; ideas in progress with progress; deadline list; todo and problem summary; export everything to PDF
 - [ ] **Export**: SQLite, JSON, PDF
 - [ ] **Light / dark**

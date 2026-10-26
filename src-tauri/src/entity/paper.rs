@@ -65,8 +65,6 @@ pub struct Paper {
     pub arxiv_id: Option<String>,
     pub url: String,
     pub summary: String,
-    pub pdf_url: Option<String>,
-    pub has_pdf: bool,
     pub status: ReadingStatus,
     pub notes: String,
     pub idea_count: i64,
@@ -75,7 +73,7 @@ pub struct Paper {
 
 /// The columns `Paper::from_row` reads, in order.
 pub const PAPER_COLUMNS: &str = "p.id, p.title, p.authors, p.year, p.venue, p.kind, p.doi, \
-     p.arxiv_id, p.url, p.summary, p.pdf_url, p.has_pdf, p.status, p.notes, \
+     p.arxiv_id, p.url, p.summary, p.status, p.notes, \
      (SELECT count(*) FROM idea_papers ip WHERE ip.paper_id = p.id), p.created_at";
 
 impl Paper {
@@ -92,12 +90,10 @@ impl Paper {
             arxiv_id: row.get(7)?,
             url: row.get(8)?,
             summary: row.get(9)?,
-            pdf_url: row.get(10)?,
-            has_pdf: row.get(11)?,
-            status: row.get(12)?,
-            notes: row.get(13)?,
-            idea_count: row.get(14)?,
-            created_at: row.get(15)?,
+            status: row.get(10)?,
+            notes: row.get(11)?,
+            idea_count: row.get(12)?,
+            created_at: row.get(13)?,
         })
     }
 }
