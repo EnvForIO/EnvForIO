@@ -1,7 +1,0 @@
-{
-  "$schema": "../gen/schemas/desktop-schema.json",
-  "identifier": "monitor-panel-capability",
-  "description": "The monitor panel at the screen edge",
-  "windows": ["monitor-panel"],
-  "permissions": ["core:default", "core:event:default"]
-}

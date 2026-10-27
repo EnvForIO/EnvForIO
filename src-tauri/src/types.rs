@@ -8,9 +8,6 @@ use std::sync::LazyLock;
 /// Default shortcut for the quick pane
 pub const DEFAULT_QUICK_PANE_SHORTCUT: &str = "CommandOrControl+Shift+.";
 
-/// Default shortcut that shows or hides the monitor panel.
-pub const DEFAULT_PANEL_SHORTCUT: &str = "Alt+Shift+G";
-
 /// Maximum size for recovery data files (10MB)
 pub const MAX_RECOVERY_DATA_BYTES: u32 = 10_485_760;
 
@@ -39,9 +36,6 @@ pub struct AppPreferences {
     /// Look of the Todo Duo widgets. Missing in files saved before it existed.
     #[serde(default)]
     pub duo_style: DuoStyle,
-    /// The monitor panel at the screen edge. Missing in files saved before it existed.
-    #[serde(default)]
-    pub monitor_panel: MonitorPanel,
 }
 
 // ============================================================================
@@ -83,65 +77,6 @@ pub struct DuoStyle {
     pub text_size: DuoTextSize,
 }
 
-// ============================================================================
-// Monitor panel (the Glance-style panel at a screen edge)
-// ============================================================================
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, Type)]
-#[serde(rename_all = "lowercase")]
-pub enum PanelEdge {
-    Left,
-    #[default]
-    Right,
-}
-
-/// How hard the pointer has to push into the edge (Glance's three levels).
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize, Type)]
-#[serde(rename_all = "lowercase")]
-pub enum PanelPush {
-    Light,
-    #[default]
-    Medium,
-    Firm,
-}
-
-impl PanelPush {
-    /// Raw mouse counts pushed past the edge that open the panel (Windows only).
-    #[cfg_attr(not(windows), allow(dead_code))]
-    pub fn pressure(self) -> i32 {
-        match self {
-            Self::Light => 50,
-            Self::Medium => 120,
-            Self::Firm => 260,
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Type)]
-#[serde(default, rename_all = "camelCase")]
-pub struct MonitorPanel {
-    /// Open the panel by pushing into the edge. The shortcut works either way.
-    pub open_on_push: bool,
-    pub edge: PanelEdge,
-    pub push: PanelPush,
-    /// Width in logical pixels.
-    pub width: u32,
-    /// None means the default shortcut.
-    pub shortcut: Option<String>,
-}
-
-impl Default for MonitorPanel {
-    fn default() -> Self {
-        Self {
-            open_on_push: true,
-            edge: PanelEdge::Right,
-            push: PanelPush::Medium,
-            width: 340,
-            shortcut: None,
-        }
-    }
-}
-
 impl Default for AppPreferences {
     fn default() -> Self {
         Self {
@@ -149,7 +84,6 @@ impl Default for AppPreferences {
             quick_pane_shortcut: None, // None means use default
             language: None,            // None means use system locale
             duo_style: DuoStyle::default(),
-            monitor_panel: MonitorPanel::default(),
         }
     }
 }

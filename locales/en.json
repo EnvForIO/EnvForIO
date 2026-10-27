@@ -443,20 +443,5 @@
   "monitor.disk": "Disk",
   "monitor.free": "{{size}} free",
   "monitor.processes": "Busiest programs",
-  "monitor.program": "Program",
-  "preferences.monitor": "Monitor",
-  "preferences.monitor.panel": "Panel at the screen edge",
-  "preferences.monitor.openOnPush": "Open by pushing into the edge",
-  "preferences.monitor.openOnPushDescription": "Keep pushing the pointer against the edge and the panel slides out; move away and it slides back. Passing over the edge does nothing.",
-  "preferences.monitor.edge": "Edge",
-  "preferences.monitor.edge.left": "Left",
-  "preferences.monitor.edge.right": "Right",
-  "preferences.monitor.push": "How hard to push",
-  "preferences.monitor.pushDescription": "A firmer push avoids opening it by accident.",
-  "preferences.monitor.push.light": "Light",
-  "preferences.monitor.push.medium": "Medium",
-  "preferences.monitor.push.firm": "Firm",
-  "preferences.monitor.width": "Width",
-  "preferences.monitor.shortcut": "Shortcut",
-  "preferences.monitor.shortcutDescription": "Shows or hides the panel on the screen under the pointer."
+  "monitor.program": "Program"
 }

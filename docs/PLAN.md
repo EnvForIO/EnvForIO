@@ -47,7 +47,7 @@ Sidebar entries (my proposal, not yet confirmed):
 | Library | Seedbank's paper library and reading list |
 | Feeds | RSS (Phase 4) |
 
-Small windows are satellites of the main window and share its data: Todo Duo's capsule and todo card, Glance's edge panel, a desktop calendar widget, and a quick-capture window opened by a global shortcut.
+Small windows are satellites of the main window and share its data: Todo Duo's capsule and todo card, a desktop calendar widget, and a quick-capture window opened by a global shortcut.
 
 ## Technical decisions
 
@@ -125,7 +125,7 @@ envio/
 ├─ src/                   Frontend: display and interaction only
 │  ├─ main.tsx            Picks a window from windows/ by URL (/, /capture, /duo ...)
 │  ├─ windows/            One folder per window; only assembles pages
-│  │  └─ main/  capture/  duo/  panel/  calendar-widget/
+│  │  └─ main/  capture/  duo/  calendar-widget/
 │  ├─ api/                The only way to call the backend; mirrors backend api/: tasks.ts  projects.ts ...
 │  ├─ pages/              Main window pages: my-day/  planned/  project/  calendar/  stats/  monitor/  feeds/
 │  ├─ layouts/            Three-pane layout, sidebar, title bar
@@ -280,15 +280,15 @@ Ideas and DayEcho projects are built separately, each with its own tables (decid
 
 ### Phase 3: Glance parity
 
-- [x] Push the mouse against the screen edge to slide the panel out; move away to hide; toggle with a shortcut
-- [ ] Drag the panel off the edge to make a desktop widget; snap back near the edge; can sit below other windows
-- [ ] Three looks
+- [x] ~~Push the mouse against the screen edge to slide the panel out; move away to hide; toggle with a shortcut~~ (2026-11-19: dropped by user decision; the monitor lives only on the main window's Monitor page)
+- [x] ~~Drag the panel off the edge to make a desktop widget; snap back near the edge; can sit below other windows~~ (2026-11-19: dropped by user decision; the monitor lives only on the main window's Monitor page)
+- [x] ~~Three looks~~ (2026-11-19: dropped by user decision; the monitor lives only on the main window's Monitor page); the main window follows the app theme
 - [x] Local monitoring: CPU, memory, disk, network, processes, GPU (CPU and board temperatures wait for a decision on a kernel driver)
 - [x] **Monitor data source behind a replaceable interface**, ready for Phase 4's WSL and SSH targets
 
 Not doing: game frame-rate overlay, lyrics, phone remote.
 
-Known gap: Glance draws natively, with a ~6 MB installer and ~55 MB RAM; Tauri with WebView will be noticeably heavier.
+Phase 3 ended with step 1 (2026-11-19): the user keeps the monitor in the main window only. The edge panel was built and then reverted, since a page in the main window covers how they check the machine.
 
 ### Phase 4: customize
 

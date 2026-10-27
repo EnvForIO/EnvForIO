@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Settings, Palette, Zap, CalendarClock, Activity } from 'lucide-react'
+import { Settings, Palette, Zap, CalendarClock } from 'lucide-react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -30,10 +30,8 @@ import { GeneralPane } from './panes/GeneralPane'
 import { AppearancePane } from './panes/AppearancePane'
 import { AdvancedPane } from './panes/AdvancedPane'
 import { PlanningPane } from './panes/PlanningPane'
-import { MonitorPane } from './panes/MonitorPane'
 
-type PreferencePane =
-  'general' | 'planning' | 'monitor' | 'appearance' | 'advanced'
+type PreferencePane = 'general' | 'planning' | 'appearance' | 'advanced'
 
 const navigationItems = [
   {
@@ -45,11 +43,6 @@ const navigationItems = [
     id: 'planning' as const,
     labelKey: 'preferences.planning',
     icon: CalendarClock,
-  },
-  {
-    id: 'monitor' as const,
-    labelKey: 'preferences.monitor',
-    icon: Activity,
   },
   {
     id: 'appearance' as const,
@@ -133,7 +126,6 @@ export function PreferencesDialog() {
             <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4 pt-0 max-h-[calc(600px-4rem)]">
               {activePane === 'general' && <GeneralPane />}
               {activePane === 'planning' && <PlanningPane />}
-              {activePane === 'monitor' && <MonitorPane />}
               {activePane === 'appearance' && <AppearancePane />}
               {activePane === 'advanced' && <AdvancedPane />}
             </div>
