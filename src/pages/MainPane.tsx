@@ -9,6 +9,7 @@ import { ItemsPage } from './items/ItemsPage'
 import { StatsPage } from './stats/StatsPage'
 import { IdeasPage } from './ideas/IdeasPage'
 import { PapersPage } from './papers/PapersPage'
+import { MonitorPage } from './monitor/MonitorPage'
 import { ResearchPage } from './research/ResearchPage'
 
 export function MainPane() {
@@ -20,6 +21,7 @@ export function MainPane() {
   if (page === 'research') return <ResearchPage />
   if (page === 'ideas') return <IdeasPage />
   if (page === 'papers') return <PapersPage />
+  if (page === 'monitor') return <MonitorPage />
   return projectId === null ? (
     <TaskListPage />
   ) : (

@@ -2,4 +2,5 @@
 //! satellite windows and their shortcuts.
 
 pub mod duo;
+pub mod monitor;
 pub mod tray;

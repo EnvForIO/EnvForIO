@@ -574,6 +574,18 @@ async getResearchOverview() : Promise<Result<ResearchOverview, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+async monitorInfo() : Promise<MachineInfo> {
+    return await TAURI_INVOKE("monitor_info");
+},
+/**
+ * The calling window starts or stops showing readings.
+ */
+async monitorWatch(on: boolean) : Promise<void> {
+    await TAURI_INVOKE("monitor_watch", { on });
+},
+async monitorLatest() : Promise<Sample | null> {
+    return await TAURI_INVOKE("monitor_latest");
+},
 async listIdeas(filter: IdeaFilter) : Promise<Result<Idea[], AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("list_ideas", { filter }) };
@@ -1010,6 +1022,7 @@ export type CheckIns = {
  * Days in a row (up to today) that met their line; days without a line don't break it.
  */
 streak: number; yesterday: DayResult | null; shortfall: number; days: DayResult[] }
+export type CpuSample = { usage: number; cores: number[]; frequencyMhz: number }
 /**
  * How much of one day's tasks are done: one heatmap cell.
  */
@@ -1019,6 +1032,8 @@ export type DayOverride = { date: string; minutes: number }
 export type DayResult = { date: string; line: number; done: number; met: boolean }
 export type Deadline = { kind: DeadlineKind; id: number; title: string; detail: string; date: string; daysLeft: number }
 export type DeadlineKind = "Idea" | "Project" | "Task"
+export type DiskIoSample = { read: number; written: number }
+export type Drive = { name: string; mount: string; total: number; available: number; removable: boolean }
 export type DuoFont = "system" | "serif" | "mono"
 export type DuoMaterial = "translucent" | "acrylic" | "mica" | "solid"
 export type DuoStyle = { material: DuoMaterial; font: DuoFont; text_size: DuoTextSize }
@@ -1027,6 +1042,8 @@ export type Export = { title: string; rows: ExportRow[] }
 export type ExportRow = { id: number; date: string | null; startTime: string | null; endTime: string | null; title: string; project: string | null; module: string | null; estimateMinutes: number | null; actualMinutes: number | null; dueDate: string | null; done: boolean; note: string }
 export type ExportScope = { kind: "Day"; date: string } | { kind: "Week"; date: string } | { kind: "Month"; date: string } | { kind: "Project"; id: number }
 export type ForecastDay = { date: string; minutes: number; capacity: number | null }
+export type GpuInfo = { index: number; name: string; memoryTotal: number | null }
+export type GpuSample = { index: number; name: string; usage: number | null; memoryUsed: number | null; memoryTotal: number | null; temperature: number | null; powerWatts: number | null; powerLimitWatts: number | null; fanPercent: number | null; clockMhz: number | null }
 export type Health = "Done" | "OnTrack" | "Tight" | "Behind" | "Overdue"
 export type Idea = { id: number; title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; stepCount: number; stepsDone: number; currentStep: string | null; openTodos: number; openProblems: number; logCount: number; tags: Tag[]; createdAt: string }
 /**
@@ -1056,7 +1073,10 @@ export type IdeaTodo = { id: number; ideaId: number; title: string; dueDate: str
 export type IdeaUpdate = { title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; tagIds: number[] }
 export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
+export type MachineInfo = { hostName: string; os: string; cpuBrand: string; logicalCores: number; physicalCores: number | null; memoryTotal: number; gpus: GpuInfo[] }
+export type MemorySample = { used: number; total: number; swapUsed: number; swapTotal: number }
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
+export type NetworkSample = { received: number; sent: number }
 export type OpenProblem = { id: number; ideaId: number; ideaTitle: string; problem: string }
 export type OpenTodo = { id: number; ideaId: number; ideaTitle: string; title: string; dueDate: string | null }
 export type Paper = { id: number; title: string; authors: string[]; year: number | null; venue: string; kind: string; doi: string | null; arxivId: string | null; url: string; summary: string; status: ReadingStatus; notes: string; ideaCount: number; createdAt: string }
@@ -1077,6 +1097,10 @@ export type PaperRelation = "Inspiration" | "Baseline" | "Competing" | "Referenc
 export type PaperUpdate = { title: string; authors: string[]; year: number | null; venue: string; status: ReadingStatus; notes: string }
 export type Period = "Week" | "Month" | "Year"
 export type PlanningSettings = { dayStart: string; level: boolean; earliestFirst: boolean }
+/**
+ * All processes of one program, added up (as Task Manager groups them).
+ */
+export type ProcessGroup = { name: string; count: number; cpu: number; memory: number; gpu: number | null }
 export type Project = { id: number; name: string; color: string; template: string; startDate: string | null; deadline: string | null; bufferDays: number; planDate: string | null; isArchived: boolean; sortOrder: number; taskCount: number; doneCount: number; estimateMinutes: number; doneEstimateMinutes: number }
 export type ProjectHealth = { projectId: number; ratio: number; samples: number; remaining: number; predictedRemaining: number; neededPerDay: number | null; health: Health }
 /**
@@ -1113,6 +1137,15 @@ export type RecoveryError =
 { type: "ParseError"; message: string }
 export type ResearchOverview = { byStatus: ([IdeaStatus, number])[]; unfinished: number; openTodos: number; openProblems: number; toRead: number; active: Idea[]; deadlines: Deadline[]; todos: OpenTodo[]; problems: OpenProblem[] }
 export type RunningTimer = { taskId: number; title: string; startedAt: string }
+export type Sample = { atMs: number; cpu: CpuSample; memory: MemorySample; gpus: GpuSample[]; 
+/**
+ * GPU use added up from the processes, for cards NVML cannot read.
+ */
+gpuFromProcesses: number | null; network: NetworkSample; disk: DiskIoSample; drives: Drive[]; 
+/**
+ * The busiest programs by CPU, memory and GPU (a few of each, merged).
+ */
+processes: ProcessGroup[] }
 export type Stats = { from: string; to: string; done: number; minutes: number; planned: number; plannedDone: number; activeDays: number; days: number; trend: Bucket[]; projects: ProjectTime[]; weekdays: Bucket[] }
 export type Tag = { id: number; name: string; color: string }
 export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string }

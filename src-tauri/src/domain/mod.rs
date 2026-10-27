@@ -2,6 +2,7 @@
 
 pub mod day;
 pub mod duration;
+pub mod monitor;
 pub mod paper_ref;
 pub mod safety_line;
 pub mod time_parse;

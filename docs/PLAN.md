@@ -283,8 +283,8 @@ Ideas and DayEcho projects are built separately, each with its own tables (decid
 - [ ] Push the mouse against the screen edge to slide the panel out; move away to hide; toggle with a shortcut
 - [ ] Drag the panel off the edge to make a desktop widget; snap back near the edge; can sit below other windows
 - [ ] Three looks
-- [ ] Local monitoring: CPU, memory, disk, network, processes, GPU
-- [ ] **Monitor data source behind a replaceable interface**, ready for Phase 4's WSL and SSH targets
+- [x] Local monitoring: CPU, memory, disk, network, processes, GPU (CPU and board temperatures wait for a decision on a kernel driver)
+- [x] **Monitor data source behind a replaceable interface**, ready for Phase 4's WSL and SSH targets
 
 Not doing: game frame-rate overlay, lyrics, phone remote.
 

@@ -14,6 +14,7 @@ mod desktop;
 mod domain;
 mod entity;
 mod errors;
+mod providers;
 mod service;
 mod types;
 mod utils;
@@ -122,6 +123,8 @@ pub fn run() {
 
             // Open the database before any window can call a command that needs it.
             app.manage(config::AppState::open(app.handle())?);
+            // Readings start only once a window watches them.
+            desktop::monitor::start(app.handle());
 
             // The tray keeps EnvIO reachable after its window is closed.
             #[cfg(desktop)]
