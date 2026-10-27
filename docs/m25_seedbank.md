@@ -53,3 +53,7 @@ Step 4 export, 2026-11-19 user decision: JSON only (no SQLite copy, no PDF). The
   - the paper library
 
   EnvIO does not import the file back.
+
+## Step 5: light and dark
+
+Nothing to build: Settings → Appearance → Theme (Light, Dark, System) comes from the template. The idea, library and overview pages use the theme tokens (`muted`, `border`, `primary`, `destructive`, the Markdown styles in `App.css`). The only fixed colours are the status, relation and priority dots, which are mid-tones readable on both backgrounds.
