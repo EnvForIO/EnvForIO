@@ -1015,7 +1015,11 @@ language: string | null;
 /**
  * Look of the Todo Duo widgets. Missing in files saved before it existed.
  */
-duo_style?: DuoStyle }
+duo_style?: DuoStyle; 
+/**
+ * The monitor panel at the screen edge. Missing in files saved before it existed.
+ */
+monitor_panel?: MonitorPanel }
 export type Bucket = { key: string; done: number; minutes: number }
 export type CheckIns = { 
 /**
@@ -1076,9 +1080,27 @@ export type JsonValue = null | boolean | number | string | JsonValue[] | Partial
 export type MachineInfo = { hostName: string; os: string; cpuBrand: string; logicalCores: number; physicalCores: number | null; memoryTotal: number; gpus: GpuInfo[] }
 export type MemorySample = { used: number; total: number; swapUsed: number; swapTotal: number }
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
+export type MonitorPanel = { 
+/**
+ * Open the panel by pushing into the edge. The shortcut works either way.
+ */
+openOnPush: boolean; edge: PanelEdge; push: PanelPush; 
+/**
+ * Width in logical pixels.
+ */
+width: number; 
+/**
+ * None means the default shortcut.
+ */
+shortcut: string | null }
 export type NetworkSample = { received: number; sent: number }
 export type OpenProblem = { id: number; ideaId: number; ideaTitle: string; problem: string }
 export type OpenTodo = { id: number; ideaId: number; ideaTitle: string; title: string; dueDate: string | null }
+export type PanelEdge = "left" | "right"
+/**
+ * How hard the pointer has to push into the edge (Glance's three levels).
+ */
+export type PanelPush = "light" | "medium" | "firm"
 export type Paper = { id: number; title: string; authors: string[]; year: number | null; venue: string; kind: string; doi: string | null; arxivId: string | null; url: string; summary: string; status: ReadingStatus; notes: string; ideaCount: number; createdAt: string }
 export type PaperCounts = { all: number; byStatus: ([ReadingStatus, number])[] }
 export type PaperFilter = { status: ReadingStatus | null; 

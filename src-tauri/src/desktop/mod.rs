@@ -3,4 +3,5 @@
 
 pub mod duo;
 pub mod monitor;
+pub mod panel;
 pub mod tray;

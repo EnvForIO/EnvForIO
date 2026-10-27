@@ -17,6 +17,11 @@ async function mount(): Promise<void> {
     renderDuo(root, windowName === 'duo-capsule' ? 'capsule' : 'card')
     return
   }
+  if (windowName === 'monitor-panel') {
+    const { renderMonitorPanel } = await import('./windows/monitor-panel')
+    renderMonitorPanel(root)
+    return
+  }
   if (windowName === 'quick-pane') {
     const { renderQuickPane } = await import('./windows/quick-pane')
     renderQuickPane(root)

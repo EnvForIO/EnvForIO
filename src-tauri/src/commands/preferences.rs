@@ -21,9 +21,9 @@ fn get_preferences_path(app: &AppHandle) -> Result<PathBuf, String> {
     Ok(app_data_dir.join("preferences.json"))
 }
 
-/// Load the saved quick pane shortcut from preferences, returning None on any failure.
+/// The saved preferences, or None on any failure (no file yet, unreadable).
 /// Used at startup before the full preferences system is available.
-pub fn load_quick_pane_shortcut(app: &AppHandle) -> Option<String> {
+pub fn load_saved(app: &AppHandle) -> Option<AppPreferences> {
     let path = get_preferences_path(app).ok()?;
     if !path.exists() {
         return None;
@@ -31,10 +31,14 @@ pub fn load_quick_pane_shortcut(app: &AppHandle) -> Option<String> {
     let contents = std::fs::read_to_string(&path)
         .inspect_err(|e| log::warn!("Failed to read preferences: {e}"))
         .ok()?;
-    let prefs: AppPreferences = serde_json::from_str(&contents)
+    serde_json::from_str(&contents)
         .inspect_err(|e| log::warn!("Failed to parse preferences: {e}"))
-        .ok()?;
-    prefs.quick_pane_shortcut
+        .ok()
+}
+
+/// Load the saved quick pane shortcut from preferences, returning None on any failure.
+pub fn load_quick_pane_shortcut(app: &AppHandle) -> Option<String> {
+    load_saved(app)?.quick_pane_shortcut
 }
 
 /// Simple greeting command for demonstration purposes.
@@ -112,5 +116,7 @@ pub async fn save_preferences(app: AppHandle, preferences: AppPreferences) -> Re
     }
 
     log::info!("Successfully saved preferences to {prefs_path:?}");
+    #[cfg(desktop)]
+    crate::desktop::panel::apply(&app, preferences.monitor_panel);
     Ok(())
 }

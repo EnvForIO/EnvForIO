@@ -69,7 +69,7 @@ pub fn run() {
                     tauri_plugin_window_state::StateFlags::all()
                         - tauri_plugin_window_state::StateFlags::VISIBLE,
                 )
-                .with_denylist(&["quick-pane", "duo-capsule", "duo-card"])
+                .with_denylist(&["quick-pane", "duo-capsule", "duo-card", "monitor-panel"])
                 .build(),
         );
     }
@@ -164,6 +164,13 @@ pub fn run() {
                     app.handle(),
                     shortcut_to_register,
                 )?;
+            }
+
+            // The monitor panel at the screen edge (hidden until pushed or its shortcut).
+            #[cfg(desktop)]
+            {
+                let saved = commands::preferences::load_saved(app.handle()).unwrap_or_default();
+                desktop::panel::create(app.handle(), saved.monitor_panel)?;
             }
 
             // Create the quick pane window (hidden) - must be done on main thread

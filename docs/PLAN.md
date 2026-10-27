@@ -280,7 +280,7 @@ Ideas and DayEcho projects are built separately, each with its own tables (decid
 
 ### Phase 3: Glance parity
 
-- [ ] Push the mouse against the screen edge to slide the panel out; move away to hide; toggle with a shortcut
+- [x] Push the mouse against the screen edge to slide the panel out; move away to hide; toggle with a shortcut
 - [ ] Drag the panel off the edge to make a desktop widget; snap back near the edge; can sit below other windows
 - [ ] Three looks
 - [x] Local monitoring: CPU, memory, disk, network, processes, GPU (CPU and board temperatures wait for a decision on a kernel driver)

@@ -48,6 +48,13 @@ export function usePreferences() {
             font: 'system',
             text_size: 'medium',
           },
+          monitor_panel: {
+            openOnPush: true,
+            edge: 'right',
+            push: 'medium',
+            width: 340,
+            shortcut: null,
+          },
         }
       }
 

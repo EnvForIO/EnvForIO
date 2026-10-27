@@ -33,3 +33,29 @@ Open question for later: CPU, motherboard and memory temperatures need a kernel 
 - Processes are grouped by program, as Task Manager does (`chrome.exe` ×30 is one row). CPU is shown as a share of the whole machine. Each second Rust sends the top 12 by CPU, by memory and by GPU, merged.
 - `desktop/monitor.rs` runs one sampling thread. It sleeps until a window calls `monitor_watch(true)`, then emits `monitor-sample` once a second until no window is watching. A window stops watching when its page unmounts or when it is hidden or minimized (`visibilitychange`).
 - UI: a Monitor page in the sidebar shows lanes for CPU (with a cell per thread), memory, each GPU, network and disk (with each drive's space), each with a one-minute chart, and below them the busiest programs, sortable by CPU, memory or GPU. The lanes live in `src/components/monitor/` so the edge panel can reuse them.
+
+## Step 2: the edge panel
+
+- `desktop/panel/`:
+  - `mod.rs`: the `monitor-panel` window (borderless, transparent, always on top, no taskbar button, never focused), plus opening, closing and the leave watcher.
+  - `detector.rs`: Glance's push detector, ported under MIT with credit.
+  - `edge.rs`: Windows only. Raw mouse input on a message-only window.
+  - `geometry.rs`: placement and the leave test.
+  - `shortcut.rs`.
+- Opening: Rust places the window along the chosen edge of the work area of the screen holding the pointer, at the panel's width times that screen's scale. It shows the window with `SW_SHOWNOACTIVATE`, so the window being worked in keeps focus, and emits `monitor-panel-opening`. The page slides in with CSS (260 ms).
+- Closing: `monitor-panel-closing`, the page slides out (180 ms), then Rust hides the window after 200 ms unless the panel opened again meanwhile.
+- Leaving: a thread looks at the pointer every 40 ms while the panel is open. Once the pointer has been on the panel and is more than 10 px off it, with no mouse button held, the panel closes. A panel opened by the shortcut waits for the pointer to come in first.
+- The edge:
+  - Only an outer edge of a screen counts; where screens meet, the pointer crosses into the next one.
+  - The 48 px at each end never trigger.
+  - Nothing opens while a fullscreen Direct3D game runs.
+  - After a push opens the panel, the pointer has to leave the edge before another push counts.
+  - Pens and remote sessions send no raw counts, so a timer opens the panel for them after the pointer rests on the edge for 300 ms.
+- Settings (Preferences > Monitor), saved as `monitor_panel` in `preferences.json` and applied by Rust on save:
+  - open by pushing (on by default)
+  - edge (right by default)
+  - how hard to push: light 50, medium 120 or firm 260 raw counts
+  - width (340 px by default)
+  - shortcut (`Alt+Shift+G` by default)
+- The panel shows the same lanes and process table as the Monitor page, in one column. Readings flow only while the panel window is visible.
+- Not yet: opening where two screens meet (Glance opens there after a 500 ms rest), and the top edge.
