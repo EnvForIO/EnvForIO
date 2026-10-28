@@ -586,6 +586,19 @@ async monitorWatch(on: boolean) : Promise<void> {
 async monitorLatest() : Promise<Sample | null> {
     return await TAURI_INVOKE("monitor_latest");
 },
+/**
+ * This PC, the running WSL distributions and the SSH config's hosts.
+ * Async: listing WSL runs wsl.exe, which should not block the UI thread.
+ */
+async monitorTargets() : Promise<MonitorTarget[]> {
+    return await TAURI_INVOKE("monitor_targets");
+},
+async monitorTarget() : Promise<MonitorTarget> {
+    return await TAURI_INVOKE("monitor_target");
+},
+async monitorSetTarget(target: MonitorTarget) : Promise<void> {
+    await TAURI_INVOKE("monitor_set_target", { target });
+},
 async listIdeas(filter: IdeaFilter) : Promise<Result<Idea[], AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("list_ideas", { filter }) };
@@ -1076,6 +1089,11 @@ export type JsonValue = null | boolean | number | string | JsonValue[] | Partial
 export type MachineInfo = { hostName: string; os: string; cpuBrand: string; logicalCores: number; physicalCores: number | null; memoryTotal: number; gpus: GpuInfo[] }
 export type MemorySample = { used: number; total: number; swapUsed: number; swapTotal: number }
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
+/**
+ * Which machine to watch: this PC, a running WSL distribution, or a host
+ * named in the user's SSH config.
+ */
+export type MonitorTarget = { kind: "local" } | { kind: "wsl"; distro: string } | { kind: "ssh"; host: string }
 export type NetworkSample = { received: number; sent: number }
 export type OpenProblem = { id: number; ideaId: number; ideaTitle: string; problem: string }
 export type OpenTodo = { id: number; ideaId: number; ideaTitle: string; title: string; dueDate: string | null }
@@ -1145,7 +1163,11 @@ gpuFromProcesses: number | null; network: NetworkSample; disk: DiskIoSample; dri
 /**
  * The busiest programs by CPU, memory and GPU (a few of each, merged).
  */
-processes: ProcessGroup[] }
+processes: ProcessGroup[]; 
+/**
+ * Why there are no readings: the connection failed or closed.
+ */
+error: string | null }
 export type Stats = { from: string; to: string; done: number; minutes: number; planned: number; plannedDone: number; activeDays: number; days: number; trend: Bucket[]; projects: ProjectTime[]; weekdays: Bucket[] }
 export type Tag = { id: number; name: string; color: string }
 export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string }

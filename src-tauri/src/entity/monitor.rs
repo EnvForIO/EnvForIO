@@ -6,11 +6,19 @@
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-/// Which machine to watch. Only the local one for now; Phase 4 adds WSL and SSH hosts.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, Type)]
+/// Which machine to watch: this PC, a running WSL distribution, or a host
+/// named in the user's SSH config.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Hash, Serialize, Deserialize, Type)]
+#[serde(tag = "kind", rename_all = "camelCase")]
 pub enum MonitorTarget {
     #[default]
     Local,
+    Wsl {
+        distro: String,
+    },
+    Ssh {
+        host: String,
+    },
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
@@ -114,4 +122,6 @@ pub struct Sample {
     pub drives: Vec<Drive>,
     /// The busiest programs by CPU, memory and GPU (a few of each, merged).
     pub processes: Vec<ProcessGroup>,
+    /// Why there are no readings: the connection failed or closed.
+    pub error: Option<String>,
 }

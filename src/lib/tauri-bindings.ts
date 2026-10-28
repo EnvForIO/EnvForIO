@@ -39,6 +39,7 @@ export type {
   IdeaLog,
   IdeaProblem,
   IdeaTodo,
+  MonitorTarget,
   GpuSample,
   MachineInfo,
   ProcessGroup,

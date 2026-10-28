@@ -84,7 +84,7 @@ impl MonitorSource for LocalSource {
         }
     }
 
-    fn sample(&mut self) -> Sample {
+    fn sample(&mut self) -> Option<Sample> {
         let elapsed = self.last.elapsed();
         self.last = Instant::now();
 
@@ -129,7 +129,7 @@ impl MonitorSource for LocalSource {
             (r + u.read_bytes, w + u.written_bytes)
         });
 
-        Sample {
+        Some(Sample {
             at_ms: SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .map(|d| d.as_millis() as u64)
@@ -157,7 +157,8 @@ impl MonitorSource for LocalSource {
             },
             drives: self.drives(),
             processes: busiest(groups, TOP),
-        }
+            error: None,
+        })
     }
 }
 
@@ -183,7 +184,7 @@ mod tests {
         let info = source.info();
         assert!(info.logical_cores > 0 && info.memory_total > 0);
         std::thread::sleep(std::time::Duration::from_millis(300));
-        let sample = source.sample();
+        let sample = source.sample().expect("the local source always reads");
         assert_eq!(sample.cpu.cores.len(), info.logical_cores as usize);
         assert!(!sample.processes.is_empty());
         println!("{sample:#?}");

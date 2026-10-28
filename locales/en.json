@@ -428,7 +428,7 @@
   "research.problems": "Open problems",
   "research.noProblems": "No open problems.",
   "monitor.title": "Monitor",
-  "monitor.pageTitle": "This machine",
+  "monitor.pageTitle": "Monitor",
   "monitor.waiting": "Reading the machine…",
   "monitor.cpu": "CPU",
   "monitor.threads_one": "{{count}} thread",
@@ -443,5 +443,9 @@
   "monitor.disk": "Disk",
   "monitor.free": "{{size}} free",
   "monitor.processes": "Busiest programs",
-  "monitor.program": "Program"
+  "monitor.program": "Program",
+  "monitor.thisPc": "This PC",
+  "monitor.group.wsl": "WSL (running)",
+  "monitor.group.ssh": "SSH hosts",
+  "monitor.unreachable": "Cannot read this machine. EnvIO retries every 10 seconds."
 }

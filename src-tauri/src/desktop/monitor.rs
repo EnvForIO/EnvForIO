@@ -1,8 +1,9 @@
-//! The monitor's sampling thread. It reads the machine once a second and
-//! emits `monitor-sample` to every window, but only while some window is
-//! watching: a window says so when it shows readings and again when it
-//! stops (closed, hidden or minimized), and with no watchers the thread
-//! sleeps until one arrives.
+//! The monitor's sampling thread. It reads the watched machine once a
+//! second and emits `monitor-sample` to every window, but only while some
+//! window is watching: a window says so when it shows readings and again
+//! when it stops (closed, hidden or minimized). With no watchers the
+//! source is paused (a remote session is closed) and the thread sleeps
+//! until one arrives.
 
 use std::collections::HashSet;
 use std::sync::{Arc, Condvar, Mutex};
@@ -19,6 +20,7 @@ pub const SAMPLE_EVENT: &str = "monitor-sample";
 const INTERVAL: Duration = Duration::from_secs(1);
 
 pub struct Monitor {
+    target: Mutex<MonitorTarget>,
     source: Mutex<Box<dyn MonitorSource>>,
     watchers: Mutex<HashSet<String>>,
     wake: Condvar,
@@ -41,6 +43,22 @@ impl Monitor {
         self.source.lock().unwrap().info()
     }
 
+    pub fn target(&self) -> MonitorTarget {
+        self.target.lock().unwrap().clone()
+    }
+
+    /// Watch another machine from now on; the previous source is dropped
+    /// (a remote session closes).
+    pub fn set_target(&self, target: MonitorTarget) {
+        let mut current = self.target.lock().unwrap();
+        if *current == target {
+            return;
+        }
+        *self.source.lock().unwrap() = factory::open(&target);
+        *self.latest.lock().unwrap() = None;
+        *current = target;
+    }
+
     /// The last sample, so a window that just opened has something to show.
     pub fn latest(&self) -> Option<Sample> {
         self.latest.lock().unwrap().clone()
@@ -48,12 +66,16 @@ impl Monitor {
 
     fn wait_for_watchers(&self) {
         let watchers = self.watchers.lock().unwrap();
+        if watchers.is_empty() {
+            self.source.lock().unwrap().pause();
+        }
         drop(self.wake.wait_while(watchers, |w| w.is_empty()).unwrap());
     }
 }
 
 pub fn start<R: Runtime>(app: &AppHandle<R>) {
     let monitor = Arc::new(Monitor {
+        target: Mutex::new(MonitorTarget::Local),
         source: Mutex::new(factory::open(&MonitorTarget::Local)),
         watchers: Mutex::new(HashSet::new()),
         wake: Condvar::new(),
@@ -66,10 +88,12 @@ pub fn start<R: Runtime>(app: &AppHandle<R>) {
         .spawn(move || loop {
             monitor.wait_for_watchers();
             let sample = monitor.source.lock().unwrap().sample();
-            if let Err(e) = app.emit(SAMPLE_EVENT, &sample) {
-                log::warn!("could not send a monitor sample: {e}");
+            if let Some(sample) = sample {
+                if let Err(e) = app.emit(SAMPLE_EVENT, &sample) {
+                    log::warn!("could not send a monitor sample: {e}");
+                }
+                *monitor.latest.lock().unwrap() = Some(sample);
             }
-            *monitor.latest.lock().unwrap() = Some(sample);
             thread::sleep(INTERVAL);
         })
         .expect("spawn the monitor thread");
