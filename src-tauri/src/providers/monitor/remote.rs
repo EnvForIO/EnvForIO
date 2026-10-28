@@ -143,7 +143,6 @@ fn read_rounds(stdout: impl std::io::Read, shared: &Mutex<Shared>, last_error: &
                 let round = parse_round(&section.join("\n"));
                 let now = Instant::now();
                 let mut s = shared.lock().unwrap();
-                let info = s.info.clone().unwrap_or_default();
                 let elapsed = previous
                     .as_ref()
                     .map_or(Duration::ZERO, |(_, at)| now - *at);
@@ -151,7 +150,6 @@ fn read_rounds(stdout: impl std::io::Read, shared: &Mutex<Shared>, last_error: &
                     previous.as_ref().map(|(r, _)| r),
                     &round,
                     elapsed,
-                    &info,
                     now_ms(),
                 ));
                 s.error = None;
@@ -253,11 +251,11 @@ mod tests {
         let s = last.expect("a sample within 4 s");
         assert_eq!(s.error, None);
         assert!(!s.cpu.cores.is_empty() && s.memory.total > 0);
-        assert!(!s.drives.is_empty() && !s.processes.is_empty());
+        assert!(!s.drives.is_empty());
         let info = source.info();
         assert!(!info.os.is_empty() && info.logical_cores > 0);
         println!(
-            "{info:#?}\ncpu {:.1}% cores {} mem {} drives {:?}\ngpus {:?}\ntop {:?}",
+            "{info:#?}\ncpu {:.1}% cores {} mem {} drives {:?}\ngpus {:?}",
             s.cpu.usage,
             s.cpu.cores.len(),
             s.memory.used,
@@ -265,11 +263,6 @@ mod tests {
             s.gpus
                 .iter()
                 .map(|g| (&g.name, g.usage, g.memory_used))
-                .collect::<Vec<_>>(),
-            s.processes
-                .iter()
-                .take(5)
-                .map(|p| (&p.name, p.cpu, p.memory))
                 .collect::<Vec<_>>()
         );
     }

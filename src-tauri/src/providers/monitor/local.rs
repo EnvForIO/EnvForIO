@@ -1,36 +1,19 @@
-//! The machine EnvIO runs on, read with `sysinfo` (CPU, memory, drives,
-//! network, processes) and NVML (NVIDIA cards).
+//! The machine EnvIO runs on, read with `sysinfo` (CPU, memory, drives)
+//! and NVML (NVIDIA cards). Network traffic and the process list are not
+//! read (2026-11-19, user decision).
 
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
-use sysinfo::{
-    CpuRefreshKind, DiskRefreshKind, Disks, MemoryRefreshKind, Networks, ProcessRefreshKind,
-    ProcessesToUpdate, System,
-};
+use sysinfo::{CpuRefreshKind, DiskRefreshKind, Disks, MemoryRefreshKind, System};
 
 use super::base::MonitorSource;
 use super::nvidia::Nvidia;
-use crate::domain::monitor::{
-    busiest, gpu_from_processes, group_processes, per_second, ProcessRow,
-};
-use crate::entity::monitor::{
-    CpuSample, DiskIoSample, Drive, MachineInfo, MemorySample, NetworkSample, Sample,
-};
-
-/// How many leaders by CPU, memory and GPU are sent each second.
-const TOP: usize = 12;
-
-/// Adapters that carry traffic another adapter also counts: the loopback,
-/// and Hyper-V's virtual switches (WSL, Docker) in front of the real one.
-fn counted(interface: &str) -> bool {
-    let name = interface.to_lowercase();
-    !(name.starts_with("lo") || name.contains("loopback") || name.starts_with("vethernet"))
-}
+use crate::domain::monitor::per_second;
+use crate::entity::monitor::{CpuSample, DiskIoSample, Drive, MachineInfo, MemorySample, Sample};
 
 pub struct LocalSource {
     system: System,
     disks: Disks,
-    networks: Networks,
     nvidia: Option<Nvidia>,
     last: Instant,
 }
@@ -43,8 +26,6 @@ impl LocalSource {
             system,
             disks: Disks::new_with_refreshed_list()
                 .unwrap_or_else(|_| Disks::new().expect("sysinfo supports this OS")),
-            networks: Networks::new_with_refreshed_list()
-                .unwrap_or_else(|_| Networks::new().expect("sysinfo supports this OS")),
             nvidia: Nvidia::open(),
             last: Instant::now(),
         }
@@ -91,16 +72,10 @@ impl MonitorSource for LocalSource {
         let s = &mut self.system;
         s.refresh_cpu_specifics(CpuRefreshKind::nothing().with_usage().with_frequency());
         s.refresh_memory_specifics(MemoryRefreshKind::everything());
-        s.refresh_processes_specifics(
-            ProcessesToUpdate::All,
-            true,
-            ProcessRefreshKind::nothing().with_cpu().with_memory(),
-        );
         self.disks.refresh_specifics(
             true,
             DiskRefreshKind::nothing().with_storage().with_io_usage(),
         );
-        self.networks.refresh(true);
 
         let cpus = s.cpus();
         let frequency_mhz = if cpus.is_empty() {
@@ -108,22 +83,6 @@ impl MonitorSource for LocalSource {
         } else {
             cpus.iter().map(|c| c.frequency()).sum::<u64>() / cpus.len() as u64
         };
-        let rows = s.processes().values().map(|p| ProcessRow {
-            name: p.name().to_string_lossy().into_owned(),
-            cpu: p.cpu_usage(),
-            memory: p.memory(),
-            gpu: p.gpu_usage(),
-        });
-        let groups = group_processes(rows, cpus.len());
-        let from_processes = gpu_from_processes(&groups);
-
-        let (received, sent) = self
-            .networks
-            .iter()
-            .filter(|(name, _)| counted(&name.to_string_lossy()))
-            .fold((0, 0), |(r, t), (_, n)| {
-                (r + n.received(), t + n.transmitted())
-            });
         let (read, written) = self.disks.iter().fold((0, 0), |(r, w), d| {
             let u = d.usage();
             (r + u.read_bytes, w + u.written_bytes)
@@ -146,17 +105,11 @@ impl MonitorSource for LocalSource {
                 swap_total: s.total_swap(),
             },
             gpus: self.nvidia.as_ref().map(Nvidia::sample).unwrap_or_default(),
-            gpu_from_processes: from_processes,
-            network: NetworkSample {
-                received: per_second(received, elapsed),
-                sent: per_second(sent, elapsed),
-            },
             disk: DiskIoSample {
                 read: per_second(read, elapsed),
                 written: per_second(written, elapsed),
             },
             drives: self.drives(),
-            processes: busiest(groups, TOP),
             error: None,
         })
     }
@@ -165,16 +118,6 @@ impl MonitorSource for LocalSource {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn virtual_and_loopback_adapters_are_not_counted_twice() {
-        assert!(counted("Ethernet"));
-        assert!(counted("Wi-Fi"));
-        assert!(counted("eth0"));
-        assert!(!counted("lo"));
-        assert!(!counted("Loopback Pseudo-Interface 1"));
-        assert!(!counted("vEthernet (WSL (Hyper-V firewall))"));
-    }
 
     /// Reads this machine; ignored by default because CI machines differ.
     #[test]
@@ -186,7 +129,6 @@ mod tests {
         std::thread::sleep(std::time::Duration::from_millis(300));
         let sample = source.sample().expect("the local source always reads");
         assert_eq!(sample.cpu.cores.len(), info.logical_cores as usize);
-        assert!(!sample.processes.is_empty());
         println!("{sample:#?}");
     }
 }

@@ -1094,7 +1094,6 @@ export type Module = { id: number; projectId: number; name: string; sortOrder: n
  * named in the user's SSH config.
  */
 export type MonitorTarget = { kind: "local" } | { kind: "wsl"; distro: string } | { kind: "ssh"; host: string }
-export type NetworkSample = { received: number; sent: number }
 export type OpenProblem = { id: number; ideaId: number; ideaTitle: string; problem: string }
 export type OpenTodo = { id: number; ideaId: number; ideaTitle: string; title: string; dueDate: string | null }
 export type Paper = { id: number; title: string; authors: string[]; year: number | null; venue: string; kind: string; doi: string | null; arxivId: string | null; url: string; summary: string; status: ReadingStatus; notes: string; ideaCount: number; createdAt: string }
@@ -1115,10 +1114,6 @@ export type PaperRelation = "Inspiration" | "Baseline" | "Competing" | "Referenc
 export type PaperUpdate = { title: string; authors: string[]; year: number | null; venue: string; status: ReadingStatus; notes: string }
 export type Period = "Week" | "Month" | "Year"
 export type PlanningSettings = { dayStart: string; level: boolean; earliestFirst: boolean }
-/**
- * All processes of one program, added up (as Task Manager groups them).
- */
-export type ProcessGroup = { name: string; count: number; cpu: number; memory: number; gpu: number | null }
 export type Project = { id: number; name: string; color: string; template: string; startDate: string | null; deadline: string | null; bufferDays: number; planDate: string | null; isArchived: boolean; sortOrder: number; taskCount: number; doneCount: number; estimateMinutes: number; doneEstimateMinutes: number }
 export type ProjectHealth = { projectId: number; ratio: number; samples: number; remaining: number; predictedRemaining: number; neededPerDay: number | null; health: Health }
 /**
@@ -1155,15 +1150,11 @@ export type RecoveryError =
 { type: "ParseError"; message: string }
 export type ResearchOverview = { byStatus: ([IdeaStatus, number])[]; unfinished: number; openTodos: number; openProblems: number; toRead: number; active: Idea[]; deadlines: Deadline[]; todos: OpenTodo[]; problems: OpenProblem[] }
 export type RunningTimer = { taskId: number; title: string; startedAt: string }
-export type Sample = { atMs: number; cpu: CpuSample; memory: MemorySample; gpus: GpuSample[]; 
 /**
- * GPU use added up from the processes, for cards NVML cannot read.
+ * One second's readings. Network traffic and the process list are not
+ * read (2026-11-19, user decision).
  */
-gpuFromProcesses: number | null; network: NetworkSample; disk: DiskIoSample; drives: Drive[]; 
-/**
- * The busiest programs by CPU, memory and GPU (a few of each, merged).
- */
-processes: ProcessGroup[]; 
+export type Sample = { atMs: number; cpu: CpuSample; memory: MemorySample; gpus: GpuSample[]; disk: DiskIoSample; drives: Drive[]; 
 /**
  * Why there are no readings: the connection failed or closed.
  */

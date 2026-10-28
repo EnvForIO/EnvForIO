@@ -42,7 +42,6 @@ export type {
   MonitorTarget,
   GpuSample,
   MachineInfo,
-  ProcessGroup,
   Sample,
   Deadline,
   DeadlineKind,

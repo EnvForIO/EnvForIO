@@ -31,8 +31,6 @@ export const COLOR = {
   cpu: '#3b82f6',
   memory: '#a855f7',
   gpu: '#22c55e',
-  received: '#06b6d4',
-  sent: '#f97316',
   read: '#eab308',
   written: '#ef4444',
 } as const

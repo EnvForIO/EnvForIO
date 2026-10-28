@@ -15,3 +15,5 @@ Open question for later: CPU, motherboard and memory temperatures need a kernel 
 - Processes are grouped by program, as Task Manager does (`chrome.exe` ×30 is one row). CPU is shown as a share of the whole machine. Each second Rust sends the top 12 by CPU, by memory and by GPU, merged.
 - `desktop/monitor.rs` runs one sampling thread. It sleeps until a window calls `monitor_watch(true)`, then emits `monitor-sample` once a second until no window is watching. A window stops watching when its page unmounts or when it is hidden or minimized (`visibilitychange`).
 - UI: a Monitor page in the sidebar shows lanes for CPU (with a cell per thread), memory, each GPU, network and disk (with each drive's space), each with a one-minute chart, and below them the busiest programs, sortable by CPU, memory or GPU. The lanes live in `src/components/monitor/`.
+
+2026-11-19, after phase 4 step 1: the network lane and the process list were removed at the user's request and are no longer read (see `docs/m4_custom.md`).

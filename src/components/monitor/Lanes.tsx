@@ -1,7 +1,7 @@
 /**
  * The machine's readings as lanes: CPU (with each thread), memory, each
- * GPU, network and disk (with each drive's space). Reads the monitor
- * store; the caller runs useMonitorFeed.
+ * GPU, and disk (with each drive's space). Reads the monitor store; the
+ * caller runs useMonitorFeed.
  */
 import { useTranslation } from 'react-i18next'
 import { useMachineInfo } from '@/api/monitor'
@@ -108,32 +108,6 @@ export function Lanes() {
       {now.gpus.map(gpu => (
         <GpuLane key={gpu.index} gpu={gpu} history={history} />
       ))}
-      {now.gpus.length === 0 && now.gpuFromProcesses !== null && (
-        <Lane
-          title={t('monitor.gpu')}
-          value={percent(now.gpuFromProcesses)}
-          details={[t('monitor.gpuFromProcesses')]}
-          series={[
-            {
-              values: pick(history, s => s.gpuFromProcesses ?? 0),
-              color: COLOR.gpu,
-            },
-          ]}
-          max={100}
-        />
-      )}
-      <Lane
-        title={t('monitor.network')}
-        value={`↓ ${rate(now.network.received)}`}
-        details={[`↑ ${rate(now.network.sent)}`]}
-        series={[
-          {
-            values: pick(history, s => s.network.received),
-            color: COLOR.received,
-          },
-          { values: pick(history, s => s.network.sent), color: COLOR.sent },
-        ]}
-      />
       <Lane
         title={t('monitor.disk')}
         value={`R ${rate(now.disk.read)}`}

@@ -75,13 +75,6 @@ pub struct GpuSample {
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
 #[serde(rename_all = "camelCase")]
-pub struct NetworkSample {
-    pub received: u64, // per second
-    pub sent: u64,
-}
-
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
-#[serde(rename_all = "camelCase")]
 pub struct DiskIoSample {
     pub read: u64, // per second
     pub written: u64,
@@ -97,17 +90,8 @@ pub struct Drive {
     pub removable: bool,
 }
 
-/// All processes of one program, added up (as Task Manager groups them).
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct ProcessGroup {
-    pub name: String,
-    pub count: u32,
-    pub cpu: f32,
-    pub memory: u64,
-    pub gpu: Option<f32>,
-}
-
+/// One second's readings. Network traffic and the process list are not
+/// read (2026-11-19, user decision).
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Sample {
@@ -115,13 +99,8 @@ pub struct Sample {
     pub cpu: CpuSample,
     pub memory: MemorySample,
     pub gpus: Vec<GpuSample>,
-    /// GPU use added up from the processes, for cards NVML cannot read.
-    pub gpu_from_processes: Option<f32>,
-    pub network: NetworkSample,
     pub disk: DiskIoSample,
     pub drives: Vec<Drive>,
-    /// The busiest programs by CPU, memory and GPU (a few of each, merged).
-    pub processes: Vec<ProcessGroup>,
     /// Why there are no readings: the connection failed or closed.
     pub error: Option<String>,
 }
