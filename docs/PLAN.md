@@ -292,7 +292,7 @@ Phase 3 ended with step 1 (2026-11-19): the user keeps the monitor in the main w
 
 ### Phase 4: customize
 
-Order by what is most wanted; no need to finish everything at once.
+Picked and ordered by the user on 2026-11-19; steps in `docs/m4_custom.md`.
 
 - [ ] **Kanban view** as another view of a project
 - [ ] **Monitor target picker**: defaults to `Local`; can switch to `WSL` or an SSH host (read from `~/.ssh/config`), like picking an environment; the panel shows whichever machine is selected; only the selected target is polled
@@ -302,7 +302,7 @@ Order by what is most wanted; no need to finish everything at once.
 - [ ] **Read-only external calendars**: add an ICS link, fetched on a schedule
 - [ ] **RSS**: for low-volume sources such as Quanta Magazine; add and remove feeds, list with cover images, read / unread, open in browser, add to todos in one click, scheduled refresh
 - [ ] **Connect the parts**: tasks from deadlines flow into Today; completion feeds the heatmap
-- [ ] **macOS version**
+- [ ] ~~**macOS version**~~ (2026-11-19: not now, by user decision)
 
 ## Safety line algorithm
 
@@ -321,7 +321,7 @@ The idea in my own words; the implementation is written from scratch.
 1. **Sidebar entries** are my proposal and not yet confirmed.
 2. **Directory structure**: the skeleton, LokiSharp naming and "all logic in Rust" are decided; the exact resources and the names of `desktop/` and the frontend folders are my proposal.
 3. **Todo Duo's capsule and todo card windows**: I keep them by default as desktop windows beside the main window. If the main window makes them unnecessary, most of Phase 1 goes away.
-4. **CPU and motherboard temperature, power and fans**: needs a kernel driver and admin rights; GPU temperature is unaffected and will be there.
+4. ~~**CPU and motherboard temperature, power and fans**~~: needs a kernel driver and admin rights. 2026-11-19: not wanted, by user decision. GPU temperature comes from NVML.
 5. **Glance workbench items**: Markdown notes (I suggest not), quick launch, clipboard station, global search and quick look, media control. Glance's todo block duplicates Phase 1 and is not done.
 6. **Calendar's three forms** (scheduling calendar, desktop widget, external subscriptions) are my proposal and not yet confirmed.
 7. **Phase order** defaults to Todo Duo → DayEcho → Seedbank → Glance.
