@@ -1,8 +1,9 @@
 /**
- * A minute of one or two readings as lines with a faint fill. `max` fixes
- * the scale (100 for percentages); without it the scale follows the
- * highest value shown, as traffic charts do.
+ * A minute of one or two readings as lines over a fill that fades
+ * downwards. `max` fixes the scale (100 for percentages); without it the
+ * scale follows the highest value shown, as traffic charts do.
  */
+import { useId } from 'react'
 import { HISTORY } from '@/store/monitor-store'
 
 const W = 120
@@ -23,6 +24,7 @@ export function Sparkline({
   max?: number
   className?: string
 }) {
+  const id = useId()
   const top = max ?? Math.max(1, ...series.flatMap(s => s.values))
   return (
     <svg
@@ -30,6 +32,14 @@ export function Sparkline({
       preserveAspectRatio="none"
       className={className ?? 'h-10 w-full'}
     >
+      <defs>
+        {series.map(({ color }, i) => (
+          <linearGradient key={i} id={`${id}-${i}`} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity={0.35} />
+            <stop offset="100%" stopColor={color} stopOpacity={0} />
+          </linearGradient>
+        ))}
+      </defs>
       {series.map(({ values, color }, i) => {
         if (values.length < 2) return null
         const points = path(values, top)
@@ -39,14 +49,14 @@ export function Sparkline({
           <g key={i}>
             <polygon
               points={`${first},${H} ${line} ${W},${H}`}
-              fill={color}
-              fillOpacity={0.12}
+              fill={`url(#${id}-${i})`}
             />
             <polyline
               points={line}
               fill="none"
               stroke={color}
               strokeWidth={1.5}
+              strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"
             />
           </g>

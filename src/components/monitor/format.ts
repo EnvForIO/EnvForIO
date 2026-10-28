@@ -34,3 +34,34 @@ export const COLOR = {
   read: '#eab308',
   written: '#ef4444',
 } as const
+
+/** How worrying a percentage is: under 70 fine, under 90 warn, else bad. */
+export type Level = 'ok' | 'warn' | 'bad'
+export const level = (pct: number): Level =>
+  pct < 70 ? 'ok' : pct < 90 ? 'warn' : 'bad'
+
+/** A round axis top at or above `v`: 1, 2 or 5 times a power of ten. */
+export function niceMax(v: number): number {
+  if (v <= 0) return 1
+  const step = 10 ** Math.floor(Math.log10(v))
+  for (const m of [1, 2, 5, 10]) if (m * step >= v) return m * step
+  return 10 * step
+}
+
+const SPARK = '▁▂▃▄▅▆▇█'
+
+/** Values as block characters, 0..max mapped onto ▁..█. */
+export const sparkText = (values: number[], max = 100) =>
+  values
+    .map(v => SPARK[Math.min(7, Math.max(0, Math.round((v / max) * 7)))])
+    .join('')
+
+/** How many of `width` cells a percentage fills (at least one above 0). */
+export const cells = (pct: number, width: number) =>
+  pct <= 0 ? 0 : Math.min(width, Math.max(1, Math.round((pct / 100) * width)))
+
+/** The last `n` values of one reading, padded with zeros in front. */
+export const lastN = (values: number[], n: number) =>
+  values.length >= n
+    ? values.slice(-n)
+    : [...Array<number>(n - values.length).fill(0), ...values]
