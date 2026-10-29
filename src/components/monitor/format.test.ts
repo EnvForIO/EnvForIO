@@ -1,5 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { bytes, ghz, level, niceMax, percent, rate, share } from './format'
+import {
+  LEVEL_COLOR,
+  bytes,
+  ghz,
+  level,
+  pctColor,
+  percent,
+  rate,
+  share,
+  tempLevel,
+} from './format'
 
 describe('monitor format', () => {
   it('sizes step by 1024 with one decimal below 100', () => {
@@ -18,10 +28,19 @@ describe('monitor format', () => {
     expect(share(1, 0)).toBe(0)
   })
 
-  it('levels and axis tops', () => {
-    expect([level(10), level(75), level(95)]).toEqual(['ok', 'warn', 'bad'])
-    expect([niceMax(0), niceMax(7), niceMax(130), niceMax(4000)]).toEqual([
-      1, 10, 200, 5000,
+  it('colour follows the value: green low, yellow from 70, red from 90', () => {
+    expect([level(0), level(69.9), level(70), level(89.9), level(90)]).toEqual([
+      'ok',
+      'ok',
+      'warn',
+      'warn',
+      'bad',
     ])
+    expect([tempLevel(65), tempLevel(70), tempLevel(85)]).toEqual([
+      'ok',
+      'warn',
+      'bad',
+    ])
+    expect(pctColor(95)).toBe(LEVEL_COLOR.bad)
   })
 })

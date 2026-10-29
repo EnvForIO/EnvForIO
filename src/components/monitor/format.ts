@@ -26,24 +26,27 @@ export const ghz = (mhz: number) => `${(mhz / 1000).toFixed(2)} GHz`
 export const share = (used: number, total: number) =>
   total > 0 ? (used / total) * 100 : 0
 
-/** Colours per reading, the same in every look and theme. */
-export const COLOR = {
-  cpu: '#3b82f6',
-  memory: '#a855f7',
-  gpu: '#22c55e',
-  read: '#eab308',
-  written: '#ef4444',
-} as const
-
-/** How worrying a percentage is: under 70 fine, under 90 warn, else bad. */
+/**
+ * Colour follows the value, as Grafana's thresholds do: a reading is
+ * green while low, yellow from the warning threshold, red from the
+ * critical one (user decision 2026-11-19). Grafana's classic palette.
+ */
 export type Level = 'ok' | 'warn' | 'bad'
+export const LEVEL_COLOR: Record<Level, string> = {
+  ok: '#56a64b',
+  warn: '#e0b400',
+  bad: '#e02f44',
+}
+
+/** A percentage: under 70 fine, under 90 warn, else bad. */
 export const level = (pct: number): Level =>
   pct < 70 ? 'ok' : pct < 90 ? 'warn' : 'bad'
 
-/** A round axis top at or above `v`: 1, 2 or 5 times a power of ten. */
-export function niceMax(v: number): number {
-  if (v <= 0) return 1
-  const step = 10 ** Math.floor(Math.log10(v))
-  for (const m of [1, 2, 5, 10]) if (m * step >= v) return m * step
-  return 10 * step
-}
+/** A GPU temperature in °C: under 70 fine, under 85 warn, else bad. */
+export const tempLevel = (celsius: number): Level =>
+  celsius < 70 ? 'ok' : celsius < 85 ? 'warn' : 'bad'
+
+export const pctColor = (pct: number) => LEVEL_COLOR[level(pct)]
+
+/** Readings with no "too high" (disk speed): neutral, never a warning colour. */
+export const NEUTRAL = { read: '#3274d9', written: '#a352cc' } as const
