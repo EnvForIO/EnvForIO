@@ -574,30 +574,51 @@ async getResearchOverview() : Promise<Result<ResearchOverview, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
-async monitorInfo() : Promise<MachineInfo> {
-    return await TAURI_INVOKE("monitor_info");
-},
 /**
  * The calling window starts or stops showing readings.
  */
 async monitorWatch(on: boolean) : Promise<void> {
     await TAURI_INVOKE("monitor_watch", { on });
 },
-async monitorLatest() : Promise<Sample | null> {
+async monitorLatest() : Promise<MachineSample[]> {
     return await TAURI_INVOKE("monitor_latest");
 },
 /**
- * This PC, the running WSL distributions and the SSH config's hosts.
- * Async: listing WSL runs wsl.exe, which should not block the UI thread.
+ * What a machine on the overview is; None if it is not on the overview.
+ */
+async monitorInfo(target: MonitorTarget) : Promise<MachineInfo | null> {
+    return await TAURI_INVOKE("monitor_info", { target });
+},
+/**
+ * Machines that can be added: This PC, running WSL distributions, SSH
+ * config hosts. Async: listing WSL runs wsl.exe.
  */
 async monitorTargets() : Promise<MonitorTarget[]> {
     return await TAURI_INVOKE("monitor_targets");
 },
-async monitorTarget() : Promise<MonitorTarget> {
-    return await TAURI_INVOKE("monitor_target");
+async listMachines() : Promise<Result<MonitorTarget[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_machines") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 },
-async monitorSetTarget(target: MonitorTarget) : Promise<void> {
-    await TAURI_INVOKE("monitor_set_target", { target });
+async addMachine(target: MonitorTarget) : Promise<Result<MonitorTarget[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_machine", { target }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async removeMachine(target: MonitorTarget) : Promise<Result<MonitorTarget[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("remove_machine", { target }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 },
 async listIdeas(filter: IdeaFilter) : Promise<Result<Idea[], AppError>> {
     try {
@@ -1087,6 +1108,10 @@ export type IdeaUpdate = { title: string; description: string; status: IdeaStatu
 export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type MachineInfo = { hostName: string; os: string; cpuBrand: string; logicalCores: number; physicalCores: number | null; memoryTotal: number; gpus: GpuInfo[] }
+/**
+ * One machine's readings, as sent to the UI in each second's batch.
+ */
+export type MachineSample = { target: MonitorTarget; sample: Sample }
 export type MemorySample = { used: number; total: number; swapUsed: number; swapTotal: number }
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
 /**

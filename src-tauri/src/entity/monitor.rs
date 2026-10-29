@@ -90,6 +90,14 @@ pub struct Drive {
     pub removable: bool,
 }
 
+/// One machine's readings, as sent to the UI in each second's batch.
+#[derive(Debug, Clone, PartialEq, Serialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct MachineSample {
+    pub target: MonitorTarget,
+    pub sample: Sample,
+}
+
 /// One second's readings. Network traffic and the process list are not
 /// read (2026-11-19, user decision).
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]

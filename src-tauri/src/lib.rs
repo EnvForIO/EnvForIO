@@ -122,9 +122,11 @@ pub fn run() {
             log::info!("Application starting up");
 
             // Open the database before any window can call a command that needs it.
-            app.manage(config::AppState::open(app.handle())?);
-            // Readings start only once a window watches them.
-            desktop::monitor::start(app.handle());
+            let state = config::AppState::open(app.handle())?;
+            let machines = service::machines::list(&state.db()).unwrap_or_default();
+            app.manage(state);
+            // The overview's machines are read only once a window watches them.
+            desktop::monitor::start(app.handle(), machines);
 
             // The tray keeps EnvIO reachable after its window is closed.
             #[cfg(desktop)]

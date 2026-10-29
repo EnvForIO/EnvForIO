@@ -40,6 +40,7 @@ export type {
   IdeaProblem,
   IdeaTodo,
   MonitorTarget,
+  MachineSample,
   GpuSample,
   MachineInfo,
   Sample,

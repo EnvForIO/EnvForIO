@@ -4,6 +4,7 @@ pub mod capacity;
 pub mod days;
 pub mod export;
 pub mod ideas;
+pub mod machines;
 pub mod papers;
 pub mod plans;
 pub mod projects;

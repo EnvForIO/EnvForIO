@@ -1,6 +1,7 @@
 /**
  * How monitor readings read: sizes in 1024 steps labelled KB/MB/GB as
- * Windows' Task Manager does, rates per second, whole percentages.
+ * Windows' Task Manager does, rates per second, whole percentages, and the
+ * colours that say how a value is doing.
  */
 
 const UNITS = ['B', 'KB', 'MB', 'GB', 'TB']
@@ -27,15 +28,16 @@ export const share = (used: number, total: number) =>
   total > 0 ? (used / total) * 100 : 0
 
 /**
- * Colour follows the value, as Grafana's thresholds do: a reading is
- * green while low, yellow from the warning threshold, red from the
- * critical one (user decision 2026-11-19). Grafana's classic palette.
+ * Colour follows the value, as Grafana's thresholds do: green while low,
+ * yellow from the warning threshold, red from the critical one (user
+ * decision 2026-11-19). Apple's system colours, with a darker yellow so
+ * it reads as text on white.
  */
 export type Level = 'ok' | 'warn' | 'bad'
 export const LEVEL_COLOR: Record<Level, string> = {
-  ok: '#56a64b',
-  warn: '#e0b400',
-  bad: '#e02f44',
+  ok: '#34c759',
+  warn: '#e6a700',
+  bad: '#ff3b30',
 }
 
 /** A percentage: under 70 fine, under 90 warn, else bad. */
@@ -48,5 +50,26 @@ export const tempLevel = (celsius: number): Level =>
 
 export const pctColor = (pct: number) => LEVEL_COLOR[level(pct)]
 
-/** Readings with no "too high" (disk speed): neutral, never a warning colour. */
-export const NEUTRAL = { read: '#3274d9', written: '#a352cc' } as const
+/** The heatmap scale (DCGM style): pale green at 0, green, yellow, red at 100. */
+const HEAT: [number, [number, number, number]][] = [
+  [0, [232, 246, 236]],
+  [50, [52, 199, 89]],
+  [75, [255, 204, 0]],
+  [100, [255, 59, 48]],
+]
+
+export function heat(pct: number): string {
+  const p = Math.min(100, Math.max(0, pct))
+  let previous: (typeof HEAT)[number] | undefined
+  for (const stop of HEAT) {
+    const [to, b] = stop
+    if (previous && p <= to) {
+      const [from, a] = previous
+      const f = (p - from) / (to - from)
+      const mix = a.map((c, j) => Math.round(c + ((b[j] ?? c) - c) * f))
+      return `rgb(${mix.join(', ')})`
+    }
+    previous = stop
+  }
+  return p <= 0 ? 'rgb(232, 246, 236)' : 'rgb(255, 59, 48)'
+}

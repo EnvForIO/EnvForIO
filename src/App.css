@@ -65,6 +65,23 @@
   }
 }
 
+/* The Monitor page: Apple's light grey canvas with white tiles (user
+   decision 2026-11-19), Apple's dark greys in dark mode. */
+.monitor {
+  --m-canvas: #f5f5f7;
+  --m-tile: #ffffff;
+  --m-line: #e5e5ea;
+  --m-muted: #86868b;
+  --m-track: #f2f2f7;
+}
+.dark .monitor {
+  --m-canvas: #000000;
+  --m-tile: #1c1c1e;
+  --m-line: #2c2c2e;
+  --m-muted: #8e8e93;
+  --m-track: #2c2c2e;
+}
+
 /* Rendered Markdown (idea notes). Tailwind resets headings and lists, so put them back. */
 .markdown h1 {
   font-size: 1.25rem;
