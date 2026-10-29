@@ -4,8 +4,8 @@
  * and the window is visible. A machine that cannot be reached shows why
  * instead of empty charts.
  *
- * Four looks for the user to compare (2026-11-19): Grafana, wandb,
- * terminal (nvitop / btop) and cards. The one not picked go once chosen.
+ * Two looks (user decision 2026-11-19, after comparing four): Grafana in
+ * its light theme, and cards.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,14 +13,12 @@ import { AlertTriangleIcon } from 'lucide-react'
 import { useMachineInfo, useMonitorFeed } from '@/api/monitor'
 import { CardsView } from '@/components/monitor/cards/CardsView'
 import { GrafanaView } from '@/components/monitor/grafana/GrafanaView'
-import { TerminalView } from '@/components/monitor/terminal/TerminalView'
-import { WandbView } from '@/components/monitor/wandb/WandbView'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { useMonitorStore } from '@/store/monitor-store'
 import { TargetPicker } from './TargetPicker'
 
-const LOOKS = ['grafana', 'wandb', 'terminal', 'cards'] as const
+const LOOKS = ['grafana', 'cards'] as const
 type Look = (typeof LOOKS)[number]
 const KEY = 'envio.monitor.look'
 
@@ -35,8 +33,6 @@ function savedLook(): Look {
 
 function View({ look }: { look: Look }) {
   if (look === 'grafana') return <GrafanaView />
-  if (look === 'wandb') return <WandbView />
-  if (look === 'terminal') return <TerminalView />
   return <CardsView />
 }
 

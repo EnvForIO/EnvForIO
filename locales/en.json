@@ -445,8 +445,6 @@
   "monitor.group.ssh": "SSH hosts",
   "monitor.unreachable": "Cannot read this machine. EnvIO retries every 10 seconds.",
   "monitor.look.grafana": "Grafana",
-  "monitor.look.wandb": "wandb",
-  "monitor.look.terminal": "Terminal",
   "monitor.look.cards": "Cards",
   "monitor.utilisation": "Utilisation",
   "monitor.temperature": "Temperature",

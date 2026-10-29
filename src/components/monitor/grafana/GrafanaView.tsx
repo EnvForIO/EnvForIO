@@ -1,7 +1,7 @@
 /**
  * The Grafana look: stat panels on top (CPU, memory, each GPU, the
  * fullest drive), gauges per GPU, then time series for usage, memory and
- * disk I/O, and a bar gauge per drive. Dark whatever the app theme is.
+ * disk I/O, and a bar gauge per drive. Grafana's light theme (dark in dark mode).
  */
 import { useTranslation } from 'react-i18next'
 import { useMachineInfo } from '@/api/monitor'
@@ -39,7 +39,7 @@ export function GrafanaView() {
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-md p-2"
+      className="grafana flex flex-col gap-2 rounded-md p-2"
       style={{ background: G.page }}
     >
       <div className="grid grid-cols-[repeat(auto-fill,minmax(11rem,1fr))] gap-2">

@@ -1,16 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  bytes,
-  cells,
-  ghz,
-  lastN,
-  level,
-  niceMax,
-  percent,
-  rate,
-  share,
-  sparkText,
-} from './format'
+import { bytes, ghz, level, niceMax, percent, rate, share } from './format'
 
 describe('monitor format', () => {
   it('sizes step by 1024 with one decimal below 100', () => {
@@ -29,16 +18,10 @@ describe('monitor format', () => {
     expect(share(1, 0)).toBe(0)
   })
 
-  it('levels, axis tops and text bars', () => {
+  it('levels and axis tops', () => {
     expect([level(10), level(75), level(95)]).toEqual(['ok', 'warn', 'bad'])
     expect([niceMax(0), niceMax(7), niceMax(130), niceMax(4000)]).toEqual([
       1, 10, 200, 5000,
     ])
-    expect(sparkText([0, 50, 100])).toBe('▁▅█')
-    expect([cells(0, 20), cells(1, 20), cells(50, 20), cells(150, 20)]).toEqual(
-      [0, 1, 10, 20]
-    )
-    expect(lastN([1, 2], 4)).toEqual([0, 0, 1, 2])
-    expect(lastN([1, 2, 3], 2)).toEqual([2, 3])
   })
 })

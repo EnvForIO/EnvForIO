@@ -65,6 +65,24 @@
   }
 }
 
+/* The Monitor page's Grafana look: Grafana's light theme, its dark theme in dark mode. */
+.grafana {
+  --g-page: #f4f5f5;
+  --g-panel: #ffffff;
+  --g-border: #dcdee0;
+  --g-grid: #e9ebec;
+  --g-text: #24292e;
+  --g-muted: #6e7380;
+}
+.dark .grafana {
+  --g-page: #111217;
+  --g-panel: #181b1f;
+  --g-border: #2c3235;
+  --g-grid: #24292e;
+  --g-text: #ccccdc;
+  --g-muted: #8e8e9e;
+}
+
 /* Rendered Markdown (idea notes). Tailwind resets headings and lists, so put them back. */
 .markdown h1 {
   font-size: 1.25rem;

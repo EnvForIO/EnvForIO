@@ -47,21 +47,3 @@ export function niceMax(v: number): number {
   for (const m of [1, 2, 5, 10]) if (m * step >= v) return m * step
   return 10 * step
 }
-
-const SPARK = '▁▂▃▄▅▆▇█'
-
-/** Values as block characters, 0..max mapped onto ▁..█. */
-export const sparkText = (values: number[], max = 100) =>
-  values
-    .map(v => SPARK[Math.min(7, Math.max(0, Math.round((v / max) * 7)))])
-    .join('')
-
-/** How many of `width` cells a percentage fills (at least one above 0). */
-export const cells = (pct: number, width: number) =>
-  pct <= 0 ? 0 : Math.min(width, Math.max(1, Math.round((pct / 100) * width)))
-
-/** The last `n` values of one reading, padded with zeros in front. */
-export const lastN = (values: number[], n: number) =>
-  values.length >= n
-    ? values.slice(-n)
-    : [...Array<number>(n - values.length).fill(0), ...values]

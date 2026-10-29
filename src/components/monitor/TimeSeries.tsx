@@ -1,8 +1,8 @@
 /**
  * A minute of one or more readings as lines over a y axis with gridlines
  * and a time axis (-60 s .. now), drawn at the container's real width so
- * text is not stretched. Grafana and wandb both use it, with their own
- * colours; Grafana adds a legend with each series' last and max values.
+ * text is not stretched. Used by the Grafana look, with its colours and
+ * a legend of each series' last and max values.
  */
 import { useEffect, useRef, useState } from 'react'
 import { HISTORY } from '@/store/monitor-store'

@@ -1,23 +1,25 @@
 /**
- * Grafana's dark dashboard colours (its default dark theme), used whatever
- * the app theme is, as Grafana panels look the same on any desk. Threshold
- * colours are Grafana's green / yellow / red.
+ * Grafana's dashboard colours. The neutrals (canvas, panel, border, grid,
+ * text) are CSS variables set in App.css under `.grafana`: Grafana's light
+ * theme, and its dark theme when the app is dark (user decision
+ * 2026-11-19: light). Series and threshold colours are Grafana's classic
+ * palette, which reads on both.
  */
 import type { Level } from '../format'
 
 export const G = {
-  page: '#111217',
-  panel: '#181b1f',
-  border: '#2c3235',
-  grid: '#24292e',
-  text: '#ccccdc',
-  muted: '#8e8e9e',
-  blue: '#5794f2',
-  purple: '#b877d9',
-  green: '#73bf69',
-  orange: '#ff9830',
-  yellow: '#fade2a',
-  red: '#f2495c',
+  page: 'var(--g-page)',
+  panel: 'var(--g-panel)',
+  border: 'var(--g-border)',
+  grid: 'var(--g-grid)',
+  text: 'var(--g-text)',
+  muted: 'var(--g-muted)',
+  blue: '#3274d9',
+  purple: '#a352cc',
+  green: '#56a64b',
+  orange: '#ff780a',
+  yellow: '#e0b400',
+  red: '#e02f44',
 } as const
 
 /** Grafana's chart colours for the shared TimeSeries. */
