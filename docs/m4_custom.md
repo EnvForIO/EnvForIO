@@ -46,3 +46,10 @@ The user asked for two levels: a coarse result for several machines, and a detai
 - Overview (`components/monitor/overview/`): a summary line (online, GPUs, busy GPUs at 50 % or more, machines needing attention), "Add machine" (This PC, running WSL, SSH config hosts not added yet), and a tile per machine: name, kind, status, GPU summary ("8 × A100-SXM4-80GB"), a block per GPU on the heatmap scale with its use, CPU, memory and the hottest GPU. Unreachable machines are greyed with when they were last seen.
 - Detail (`components/monitor/detail/`): back link, name, GPUs / CPU / OS, status, "Remove from overview"; a tile per GPU (use, temperature, a minute's curve, VRAM, power); a GPU × time heatmap of the last minute (a CPU row on machines without GPUs); CPU with a cell per thread on the heatmap scale; memory, swap, each drive and disk speed.
 - Look: `.monitor` CSS variables in App.css (Apple light grey canvas `#f5f5f7`, white tiles, `#e5e5ea` lines; Apple's dark greys in dark mode); threshold colours Apple green / a darker yellow / red; heatmap scale pale green → green → yellow → red.
+
+## Step 2: GPU programs, as nvitop lists them (2026-11-20)
+
+- Each `GpuSample` carries `processes: Vec<GpuProcess>` (PID, user, command, VRAM, seconds running). Compute programs only: graphics programs (the desktop, browsers) are left out. This is the one exception to "no process list": only the GPUs' programs are read.
+- This PC: NVML's `running_compute_processes`, then sysinfo refreshes just those PIDs for user, command and run time. Under Windows' WDDM driver NVML never reports a program's VRAM, so it reads "–".
+- Linux machines: `remote.sh` adds `uuid` to the GPU query, prints `nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory` under `@apps` and `ps -ww -o pid=,user:32=,etimes=,args=` for those PIDs under `@ps`; `parse.rs` ties programs to cards by uuid. A PID that `ps` cannot see (a container's own) keeps only what nvidia-smi knows. WSL's nvidia-smi lists no programs.
+- Detail: a "GPU programs" table under the GPU tiles (GPU, PID, user, VRAM, running time, command), heaviest first on each card.

@@ -14,6 +14,7 @@ const gpu = (name: string, usage: number, temperature: number): GpuSample => ({
   powerLimitWatts: null,
   fanPercent: null,
   clockMhz: null,
+  processes: [],
 })
 
 const sample = (cpu: number, gpus: GpuSample[]): Sample => ({

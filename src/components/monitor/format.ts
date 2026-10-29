@@ -23,6 +23,17 @@ export const percent = (n: number) => `${Math.round(n)}%`
 
 export const ghz = (mhz: number) => `${(mhz / 1000).toFixed(2)} GHz`
 
+/** How long a program has run, two units at most: 45s, 12m, 3h 05m, 2d 4h. */
+export function duration(secs: number): string {
+  const m = Math.floor(secs / 60)
+  const h = Math.floor(m / 60)
+  const d = Math.floor(h / 24)
+  if (d > 0) return `${d}d ${h % 24}h`
+  if (h > 0) return `${h}h ${String(m % 60).padStart(2, '0')}m`
+  if (m > 0) return `${m}m`
+  return `${secs}s`
+}
+
 /** used of total as a percentage; 0 when the total is unknown. */
 export const share = (used: number, total: number) =>
   total > 0 ? (used / total) * 100 : 0

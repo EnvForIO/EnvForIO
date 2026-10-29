@@ -1,6 +1,7 @@
 /**
  * One machine in detail: back to the overview, its name, GPUs and status;
- * a tile per GPU; the GPU heatmap beside CPU and storage. A machine that
+ * a tile per GPU and the programs on them; the GPU heatmap beside CPU and
+ * storage. A machine that
  * cannot be read says why. It can be taken off the overview from here.
  */
 import { useTranslation } from 'react-i18next'
@@ -12,6 +13,7 @@ import { useMonitorStore } from '@/store/monitor-store'
 import { gpuSummary, status, targetId } from '../machine'
 import { StatusPill } from '../parts'
 import { useMachineLabel } from '../useMachineLabel'
+import { GpuProcesses } from './GpuProcesses'
 import { GpuTile } from './GpuTile'
 import { Heatmap } from './Heatmap'
 import { CpuTile, StorageTile } from './SystemTiles'
@@ -98,6 +100,7 @@ export function Detail({
               ))}
             </div>
           )}
+          {now.gpus.length > 0 && <GpuProcesses gpus={now.gpus} />}
           <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
             <Heatmap history={history} />
             <div className="flex flex-col gap-3">

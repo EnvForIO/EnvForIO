@@ -2,7 +2,7 @@
 //! parse are skipped: a busybox `df` or a kernel with extra columns should
 //! cost a reading, not the whole sample.
 
-use crate::entity::monitor::GpuSample;
+use crate::entity::monitor::{GpuProcess, GpuSample};
 
 /// Jiffies a CPU spent busy, out of all it counted.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -112,12 +112,14 @@ fn df(fields: &[&str]) -> Option<DfRow> {
 }
 
 /// nvidia-smi csv: index, name, util, mem used, mem total (MiB), temp,
-/// power draw, power limit, fan, graphics clock. "[N/A]" reads as None.
-fn gpu(line: &str) -> Option<GpuSample> {
+/// power draw, power limit, fan, graphics clock, uuid. "[N/A]" reads as
+/// None. The uuid ties the card to its programs in `@apps`.
+fn gpu(line: &str) -> Option<(GpuSample, String)> {
     let f: Vec<&str> = line.split(',').map(str::trim).collect();
     let num = |i: usize| f.get(i).and_then(|v| v.parse::<f64>().ok());
     let mib = |i: usize| num(i).map(|v| (v * 1024.0 * 1024.0) as u64);
-    Some(GpuSample {
+    let uuid = f.get(10).map(|v| v.to_string()).unwrap_or_default();
+    let sample = GpuSample {
         index: f.first()?.parse().ok()?,
         name: f.get(1)?.to_string(),
         usage: num(2).map(|v| v as f32),
@@ -128,12 +130,40 @@ fn gpu(line: &str) -> Option<GpuSample> {
         power_limit_watts: num(7).map(|v| v as f32),
         fan_percent: num(8).map(|v| v as u32),
         clock_mhz: num(9).map(|v| v as u32),
-    })
+        processes: Vec::new(),
+    };
+    Some((sample, uuid))
+}
+
+/// "gpu_uuid, pid, used_memory (MiB)"
+fn app(line: &str) -> Option<(String, GpuProcess)> {
+    let f: Vec<&str> = line.split(',').map(str::trim).collect();
+    let process = GpuProcess {
+        pid: f.get(1)?.parse().ok()?,
+        gpu_memory: f
+            .get(2)
+            .and_then(|v| v.parse::<u64>().ok())
+            .map(|mib| mib * 1024 * 1024),
+        ..GpuProcess::default()
+    };
+    Some((f.first()?.to_string(), process))
+}
+
+/// "pid user seconds command with its arguments"
+fn ps(line: &str) -> Option<(u32, String, Option<u64>, String)> {
+    let mut f = line.split_whitespace();
+    let pid = f.next()?.parse().ok()?;
+    let user = f.next()?.to_string();
+    let secs = f.next()?.parse().ok();
+    Some((pid, user, secs, f.collect::<Vec<_>>().join(" ")))
 }
 
 /// The text of one round, section markers included.
 pub fn parse_round(text: &str) -> Round {
     let mut round = Round::default();
+    let mut uuids = Vec::new();
+    let mut apps = Vec::new();
+    let mut procs = Vec::new();
     let mut section = "";
     for line in text.lines() {
         if let Some(name) = line.strip_prefix('@') {
@@ -152,9 +182,27 @@ pub fn parse_round(text: &str) -> Round {
             "mem" => meminfo(&mut round, line),
             "disk" => round.disks.extend(disk(&fields)),
             "df" => round.df.extend(df(&fields)),
-            "gpu" => round.gpus.extend(gpu(line)),
+            "gpu" => {
+                if let Some((sample, uuid)) = gpu(line) {
+                    round.gpus.push(sample);
+                    uuids.push(uuid);
+                }
+            }
+            "apps" => apps.extend(app(line)),
+            "ps" => procs.extend(ps(line)),
             _ => {}
         }
+    }
+    for (uuid, mut process) in apps {
+        let Some(i) = uuids.iter().position(|u| *u == uuid) else {
+            continue;
+        };
+        if let Some((_, user, secs, command)) = procs.iter().find(|p| p.0 == process.pid) {
+            process.user = user.clone();
+            process.running_secs = *secs;
+            process.command = command.clone();
+        }
+        round.gpus[i].processes.push(process);
     }
     round
 }
@@ -182,7 +230,12 @@ SwapFree:        1500000 kB
 /dev/sdb1 xfs 2000000 0 2000000 0% /data sets
 tmpfs tmpfs 100 0 100 0% /run
 @gpu
-0, NVIDIA A100-SXM4-80GB, 45, 1024, 81920, 55, 210.50, 400.00, [N/A], 1410
+0, NVIDIA A100-SXM4-80GB, 45, 1024, 81920, 55, 210.50, 400.00, [N/A], 1410, GPU-aaa
+@apps
+GPU-aaa, 4242, 1000
+GPU-aaa, 777, [N/A]
+@ps
+ 4242 alice     3600 python train.py --lr  0.1
 ";
 
     #[test]
@@ -207,6 +260,37 @@ tmpfs tmpfs 100 0 100 0% /run
         assert_eq!(gpu.name, "NVIDIA A100-SXM4-80GB");
         assert_eq!(gpu.memory_total, Some(81920 * 1024 * 1024));
         assert_eq!((gpu.fan_percent, gpu.clock_mhz), (None, Some(1410)));
+    }
+
+    #[test]
+    fn programs_are_tied_to_their_card_and_process() {
+        let r = parse_round(ROUND);
+        let procs = &r.gpus[0].processes;
+        assert_eq!(procs.len(), 2);
+        assert_eq!(
+            procs[0],
+            GpuProcess {
+                pid: 4242,
+                user: "alice".into(),
+                command: "python train.py --lr 0.1".into(),
+                gpu_memory: Some(1000 * 1024 * 1024),
+                running_secs: Some(3600),
+            }
+        );
+        // Not in ps (another PID namespace): only what nvidia-smi knows.
+        assert_eq!((procs[1].pid, procs[1].user.as_str()), (777, ""));
+        assert_eq!(procs[1].gpu_memory, None);
+    }
+
+    #[test]
+    fn a_card_without_a_uuid_still_reads() {
+        let r = parse_round(
+            "@gpu
+0, RTX 3080, 5, 10, 10240, 40, 20, 320, 0, 300
+",
+        );
+        assert_eq!(r.gpus.len(), 1);
+        assert!(r.gpus[0].processes.is_empty());
     }
 
     #[test]

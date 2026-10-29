@@ -12,6 +12,8 @@
 //! @disk      /proc/diskstats
 //! @df        df -kPT without its header
 //! @gpu       nvidia-smi --query-gpu=... csv, if there is nvidia-smi
+//! @apps      nvidia-smi --query-compute-apps=gpu_uuid,pid,used_memory csv
+//! @ps        ps pid, user, seconds running, command of those PIDs
 //! @end
 //! ```
 //!

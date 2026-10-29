@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   LEVEL_COLOR,
   bytes,
+  duration,
   ghz,
   level,
   pctColor,
@@ -26,6 +27,13 @@ describe('monitor format', () => {
     expect(ghz(3600)).toBe('3.60 GHz')
     expect(share(1, 4)).toBe(25)
     expect(share(1, 0)).toBe(0)
+  })
+
+  it('run times keep two units at most', () => {
+    expect(duration(45)).toBe('45s')
+    expect(duration(12 * 60 + 30)).toBe('12m')
+    expect(duration(3 * 3600 + 5 * 60)).toBe('3h 05m')
+    expect(duration(2 * 86400 + 4 * 3600 + 59)).toBe('2d 4h')
   })
 
   it('colour follows the value: green low, yellow from 70, red from 90', () => {

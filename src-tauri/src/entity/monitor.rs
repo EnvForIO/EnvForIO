@@ -58,6 +58,19 @@ pub struct MemorySample {
     pub swap_total: u64,
 }
 
+/// A compute program on a GPU, as nvitop lists it. The user, command and
+/// run time come from the process table and are empty when it cannot be
+/// read (a container's own PIDs, another user's process on Windows).
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct GpuProcess {
+    pub pid: u32,
+    pub user: String,
+    pub command: String,
+    pub gpu_memory: Option<u64>,
+    pub running_secs: Option<u64>,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct GpuSample {
@@ -71,6 +84,9 @@ pub struct GpuSample {
     pub power_limit_watts: Option<f32>,
     pub fan_percent: Option<u32>,
     pub clock_mhz: Option<u32>,
+    /// Compute programs only: graphics programs (the desktop, browsers)
+    /// are not what a researcher looks for here.
+    pub processes: Vec<GpuProcess>,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
@@ -98,8 +114,8 @@ pub struct MachineSample {
     pub sample: Sample,
 }
 
-/// One second's readings. Network traffic and the process list are not
-/// read (2026-11-19, user decision).
+/// One second's readings. Network traffic and the machine's whole process
+/// list are not read (2026-11-19, user decision); GPU programs are.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Sample {

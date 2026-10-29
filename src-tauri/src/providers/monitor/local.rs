@@ -1,20 +1,27 @@
 //! The machine EnvIO runs on, read with `sysinfo` (CPU, memory, drives)
-//! and NVML (NVIDIA cards). Network traffic and the process list are not
-//! read (2026-11-19, user decision).
+//! and NVML (NVIDIA cards). Network traffic and the whole process list are
+//! not read (2026-11-19, user decision); only the GPUs' programs are looked
+//! up, for their user, command and run time.
 
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
-use sysinfo::{CpuRefreshKind, DiskRefreshKind, Disks, MemoryRefreshKind, System};
+use sysinfo::{
+    CpuRefreshKind, DiskRefreshKind, Disks, MemoryRefreshKind, Pid, ProcessRefreshKind,
+    ProcessesToUpdate, System, UpdateKind, Users,
+};
 
 use super::base::MonitorSource;
 use super::nvidia::Nvidia;
 use crate::domain::monitor::per_second;
-use crate::entity::monitor::{CpuSample, DiskIoSample, Drive, MachineInfo, MemorySample, Sample};
+use crate::entity::monitor::{
+    CpuSample, DiskIoSample, Drive, GpuSample, MachineInfo, MemorySample, Sample,
+};
 
 pub struct LocalSource {
     system: System,
     disks: Disks,
     nvidia: Option<Nvidia>,
+    users: Option<Users>,
     last: Instant,
 }
 
@@ -27,6 +34,7 @@ impl LocalSource {
             disks: Disks::new_with_refreshed_list()
                 .unwrap_or_else(|_| Disks::new().expect("sysinfo supports this OS")),
             nvidia: Nvidia::open(),
+            users: None, // read the first time a GPU program shows up
             last: Instant::now(),
         }
     }
@@ -43,6 +51,50 @@ impl LocalSource {
                 removable: d.is_removable(),
             })
             .collect()
+    }
+
+    /// Fills in each GPU program's user, command and run time.
+    fn describe(&mut self, gpus: &mut [GpuSample]) {
+        let pids: Vec<Pid> = gpus
+            .iter()
+            .flat_map(|g| &g.processes)
+            .map(|p| Pid::from_u32(p.pid))
+            .collect();
+        if pids.is_empty() {
+            return;
+        }
+        self.system.refresh_processes_specifics(
+            ProcessesToUpdate::Some(&pids),
+            true,
+            ProcessRefreshKind::nothing()
+                .with_user(UpdateKind::OnlyIfNotSet)
+                .with_cmd(UpdateKind::OnlyIfNotSet),
+        );
+        let users = self.users.get_or_insert_with(|| {
+            Users::new_with_refreshed_list()
+                .unwrap_or_else(|_| Users::new().expect("sysinfo supports this OS"))
+        });
+        for p in gpus.iter_mut().flat_map(|g| &mut g.processes) {
+            let Some(proc) = self.system.process(Pid::from_u32(p.pid)) else {
+                continue;
+            };
+            let cmd: Vec<String> = proc
+                .cmd()
+                .iter()
+                .map(|a| a.to_string_lossy().into_owned())
+                .collect();
+            p.command = if cmd.is_empty() {
+                proc.name().to_string_lossy().into_owned()
+            } else {
+                cmd.join(" ")
+            };
+            p.running_secs = Some(proc.run_time());
+            p.user = proc
+                .user_id()
+                .and_then(|id| users.get_user_by_id(id))
+                .map(|u| u.name().to_string())
+                .unwrap_or_default();
+        }
     }
 }
 
@@ -68,6 +120,8 @@ impl MonitorSource for LocalSource {
     fn sample(&mut self) -> Option<Sample> {
         let elapsed = self.last.elapsed();
         self.last = Instant::now();
+        let mut gpus = self.nvidia.as_ref().map(Nvidia::sample).unwrap_or_default();
+        self.describe(&mut gpus);
 
         let s = &mut self.system;
         s.refresh_cpu_specifics(CpuRefreshKind::nothing().with_usage().with_frequency());
@@ -104,7 +158,7 @@ impl MonitorSource for LocalSource {
                 swap_used: s.used_swap(),
                 swap_total: s.total_swap(),
             },
-            gpus: self.nvidia.as_ref().map(Nvidia::sample).unwrap_or_default(),
+            gpus,
             disk: DiskIoSample {
                 read: per_second(read, elapsed),
                 written: per_second(written, elapsed),

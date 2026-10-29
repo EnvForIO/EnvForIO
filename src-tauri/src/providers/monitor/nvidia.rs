@@ -4,9 +4,10 @@
 //! cards often have no fan), so each is an `Option`.
 
 use nvml_wrapper::enum_wrappers::device::{Clock, TemperatureSensor};
+use nvml_wrapper::enums::device::UsedGpuMemory;
 use nvml_wrapper::Nvml;
 
-use crate::entity::monitor::{GpuInfo, GpuSample};
+use crate::entity::monitor::{GpuInfo, GpuProcess, GpuSample};
 
 pub struct Nvidia {
     nvml: Nvml,
@@ -52,6 +53,19 @@ impl Nvidia {
                     power_limit_watts: device.enforced_power_limit().ok().map(watts),
                     fan_percent: device.fan_speed(0).ok(),
                     clock_mhz: device.clock_info(Clock::Graphics).ok(),
+                    processes: device
+                        .running_compute_processes()
+                        .unwrap_or_default()
+                        .into_iter()
+                        .map(|p| GpuProcess {
+                            pid: p.pid,
+                            gpu_memory: match p.used_gpu_memory {
+                                UsedGpuMemory::Used(b) => Some(b),
+                                UsedGpuMemory::Unavailable => None, // always under WDDM
+                            },
+                            ..GpuProcess::default()
+                        })
+                        .collect(),
                 })
             })
             .collect()

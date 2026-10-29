@@ -1077,7 +1077,18 @@ export type ExportRow = { id: number; date: string | null; startTime: string | n
 export type ExportScope = { kind: "Day"; date: string } | { kind: "Week"; date: string } | { kind: "Month"; date: string } | { kind: "Project"; id: number }
 export type ForecastDay = { date: string; minutes: number; capacity: number | null }
 export type GpuInfo = { index: number; name: string; memoryTotal: number | null }
-export type GpuSample = { index: number; name: string; usage: number | null; memoryUsed: number | null; memoryTotal: number | null; temperature: number | null; powerWatts: number | null; powerLimitWatts: number | null; fanPercent: number | null; clockMhz: number | null }
+/**
+ * A compute program on a GPU, as nvitop lists it. The user, command and
+ * run time come from the process table and are empty when it cannot be
+ * read (a container's own PIDs, another user's process on Windows).
+ */
+export type GpuProcess = { pid: number; user: string; command: string; gpuMemory: number | null; runningSecs: number | null }
+export type GpuSample = { index: number; name: string; usage: number | null; memoryUsed: number | null; memoryTotal: number | null; temperature: number | null; powerWatts: number | null; powerLimitWatts: number | null; fanPercent: number | null; clockMhz: number | null; 
+/**
+ * Compute programs only: graphics programs (the desktop, browsers)
+ * are not what a researcher looks for here.
+ */
+processes: GpuProcess[] }
 export type Health = "Done" | "OnTrack" | "Tight" | "Behind" | "Overdue"
 export type Idea = { id: number; title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; stepCount: number; stepsDone: number; currentStep: string | null; openTodos: number; openProblems: number; logCount: number; tags: Tag[]; createdAt: string }
 /**
@@ -1176,8 +1187,8 @@ export type RecoveryError =
 export type ResearchOverview = { byStatus: ([IdeaStatus, number])[]; unfinished: number; openTodos: number; openProblems: number; toRead: number; active: Idea[]; deadlines: Deadline[]; todos: OpenTodo[]; problems: OpenProblem[] }
 export type RunningTimer = { taskId: number; title: string; startedAt: string }
 /**
- * One second's readings. Network traffic and the process list are not
- * read (2026-11-19, user decision).
+ * One second's readings. Network traffic and the machine's whole process
+ * list are not read (2026-11-19, user decision); GPU programs are.
  */
 export type Sample = { atMs: number; cpu: CpuSample; memory: MemorySample; gpus: GpuSample[]; disk: DiskIoSample; drives: Drive[]; 
 /**

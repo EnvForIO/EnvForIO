@@ -24,7 +24,15 @@ while :; do
   df -kPT 2>/dev/null | tail -n +2
   if [ -n "$GPU" ]; then
     echo @gpu
-    "$GPU" --query-gpu=index,name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw,power.limit,fan.speed,clocks.gr --format=csv,noheader,nounits 2>/dev/null
+    "$GPU" --query-gpu=index,name,utilization.gpu,memory.used,memory.total,temperature.gpu,power.draw,power.limit,fan.speed,clocks.gr,uuid --format=csv,noheader,nounits 2>/dev/null
+    APPS=$("$GPU" --query-compute-apps=gpu_uuid,pid,used_memory --format=csv,noheader,nounits 2>/dev/null)
+    echo @apps
+    echo "$APPS"
+    PIDS=$(echo "$APPS" | cut -d, -f2 | tr -d ' ' | grep -E '^[0-9]+$' | paste -sd, -)
+    if [ -n "$PIDS" ]; then
+      echo @ps
+      ps -ww -o pid=,user:32=,etimes=,args= -p "$PIDS" 2>/dev/null
+    fi
   fi
   echo @end
   sleep 1
