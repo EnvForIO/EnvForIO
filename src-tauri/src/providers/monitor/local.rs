@@ -1,7 +1,7 @@
 //! The machine EnvIO runs on, read with `sysinfo` (CPU, memory, drives)
 //! and NVML (NVIDIA cards). Network traffic and the whole process list are
 //! not read (2026-11-19, user decision); only the GPUs' programs are looked
-//! up, for their user, command and run time.
+//! up, for their user and run time.
 
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
@@ -53,7 +53,7 @@ impl LocalSource {
             .collect()
     }
 
-    /// Fills in each GPU program's user, command and run time.
+    /// Fills in each GPU program's user and run time.
     fn describe(&mut self, gpus: &mut [GpuSample]) {
         let pids: Vec<Pid> = gpus
             .iter()
@@ -66,9 +66,7 @@ impl LocalSource {
         self.system.refresh_processes_specifics(
             ProcessesToUpdate::Some(&pids),
             true,
-            ProcessRefreshKind::nothing()
-                .with_user(UpdateKind::OnlyIfNotSet)
-                .with_cmd(UpdateKind::OnlyIfNotSet),
+            ProcessRefreshKind::nothing().with_user(UpdateKind::OnlyIfNotSet),
         );
         let users = self.users.get_or_insert_with(|| {
             Users::new_with_refreshed_list()
@@ -77,16 +75,6 @@ impl LocalSource {
         for p in gpus.iter_mut().flat_map(|g| &mut g.processes) {
             let Some(proc) = self.system.process(Pid::from_u32(p.pid)) else {
                 continue;
-            };
-            let cmd: Vec<String> = proc
-                .cmd()
-                .iter()
-                .map(|a| a.to_string_lossy().into_owned())
-                .collect();
-            p.command = if cmd.is_empty() {
-                proc.name().to_string_lossy().into_owned()
-            } else {
-                cmd.join(" ")
             };
             p.running_secs = Some(proc.run_time());
             p.user = proc

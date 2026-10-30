@@ -1078,11 +1078,11 @@ export type ExportScope = { kind: "Day"; date: string } | { kind: "Week"; date: 
 export type ForecastDay = { date: string; minutes: number; capacity: number | null }
 export type GpuInfo = { index: number; name: string; memoryTotal: number | null }
 /**
- * A compute program on a GPU, as nvitop lists it. The user, command and
- * run time come from the process table and are empty when it cannot be
- * read (a container's own PIDs, another user's process on Windows).
+ * A compute program on a GPU: PID, user, VRAM and run time (the command
+ * is not shown, user decision 2026-11-20). The user is empty when no
+ * source on the machine tells it.
  */
-export type GpuProcess = { pid: number; user: string; command: string; gpuMemory: number | null; runningSecs: number | null }
+export type GpuProcess = { pid: number; user: string; gpuMemory: number | null; runningSecs: number | null }
 export type GpuSample = { index: number; name: string; usage: number | null; memoryUsed: number | null; memoryTotal: number | null; temperature: number | null; powerWatts: number | null; powerLimitWatts: number | null; fanPercent: number | null; clockMhz: number | null; 
 /**
  * Compute programs only: graphics programs (the desktop, browsers)

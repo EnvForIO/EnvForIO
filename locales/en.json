@@ -437,7 +437,6 @@
   "monitor.gpu": "GPU",
   "monitor.vram": "VRAM",
   "monitor.otherUser": "Other user",
-  "monitor.hiddenProgram": "This server hides other users' processes (/proc mounted with hidepid), so only the PID and VRAM are known.",
   "monitor.fan": "Fan",
   "monitor.thisPc": "This PC",
   "monitor.group.wsl": "WSL (running)",

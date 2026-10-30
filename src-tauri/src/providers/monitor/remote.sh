@@ -11,6 +11,7 @@ uname -sr
 grep -m1 'model name' /proc/cpuinfo | cut -d: -f2
 grep -c '^processor' /proc/cpuinfo
 GPU=$(command -v nvidia-smi)
+OWNERS=/var/lib/lab-gpustat-cache
 
 while :; do
   echo @sample
@@ -31,7 +32,13 @@ while :; do
     PIDS=$(echo "$APPS" | cut -d, -f2 | tr -d ' ' | grep -E '^[0-9]+$' | paste -sd, -)
     if [ -n "$PIDS" ]; then
       echo @ps
-      ps -ww -o pid=,user:32=,etimes=,args= -p "$PIDS" 2>/dev/null
+      ps -o pid=,user:32=,etimes= -p "$PIDS" 2>/dev/null
+    fi
+    # Lab servers that hide other users' processes (/proc hidepid) often
+    # keep root's gpustat output for the login banner; it names the owners.
+    if [ -r "$OWNERS" ]; then
+      echo @owners
+      cat "$OWNERS"
     fi
   fi
   echo @end

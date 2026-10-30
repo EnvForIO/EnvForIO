@@ -93,7 +93,7 @@ export function Detail({
       ) : (
         <>
           {now.gpus.length > 0 && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(13rem,1fr))] gap-3">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-3">
               {now.gpus.map(g => (
                 <GpuTile key={g.index} gpu={g} history={history} />
               ))}

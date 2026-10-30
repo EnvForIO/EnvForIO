@@ -58,15 +58,14 @@ pub struct MemorySample {
     pub swap_total: u64,
 }
 
-/// A compute program on a GPU, as nvitop lists it. The user, command and
-/// run time come from the process table and are empty when it cannot be
-/// read (a container's own PIDs, another user's process on Windows).
+/// A compute program on a GPU: PID, user, VRAM and run time (the command
+/// is not shown, user decision 2026-11-20). The user is empty when no
+/// source on the machine tells it.
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct GpuProcess {
     pub pid: u32,
     pub user: String,
-    pub command: String,
     pub gpu_memory: Option<u64>,
     pub running_secs: Option<u64>,
 }

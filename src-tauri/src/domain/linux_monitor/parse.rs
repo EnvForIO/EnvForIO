@@ -149,13 +149,29 @@ fn app(line: &str) -> Option<(String, GpuProcess)> {
     Some((f.first()?.to_string(), process))
 }
 
-/// "pid user seconds command with its arguments"
-fn ps(line: &str) -> Option<(u32, String, Option<u64>, String)> {
+/// "pid user seconds"
+fn ps(line: &str) -> Option<(u32, String, Option<u64>)> {
     let mut f = line.split_whitespace();
     let pid = f.next()?.parse().ok()?;
     let user = f.next()?.to_string();
-    let secs = f.next()?.parse().ok();
-    Some((pid, user, secs, f.collect::<Vec<_>>().join(" ")))
+    Some((pid, user, f.next().and_then(|s| s.parse().ok())))
+}
+
+/// gpustat's line "[0] name | 77°C, 100 % | 28.2 / 48.0 GB | alice/123(28.1G) bob:python/456(1G)":
+/// each program after the last "|" as (pid, user).
+fn owners(line: &str) -> Vec<(u32, String)> {
+    let Some((_, programs)) = line.rsplit_once('|') else {
+        return Vec::new();
+    };
+    programs
+        .split_whitespace()
+        .filter_map(|p| {
+            let (who, rest) = p.rsplit_once('/')?;
+            let pid = rest.split('(').next()?.parse().ok()?;
+            let user = who.split(':').next()?;
+            (!user.is_empty()).then(|| (pid, user.to_string()))
+        })
+        .collect()
 }
 
 /// The text of one round, section markers included.
@@ -164,6 +180,7 @@ pub fn parse_round(text: &str) -> Round {
     let mut uuids = Vec::new();
     let mut apps = Vec::new();
     let mut procs = Vec::new();
+    let mut owned = Vec::new();
     let mut section = "";
     for line in text.lines() {
         if let Some(name) = line.strip_prefix('@') {
@@ -190,6 +207,7 @@ pub fn parse_round(text: &str) -> Round {
             }
             "apps" => apps.extend(app(line)),
             "ps" => procs.extend(ps(line)),
+            "owners" => owned.extend(owners(line)),
             _ => {}
         }
     }
@@ -197,10 +215,11 @@ pub fn parse_round(text: &str) -> Round {
         let Some(i) = uuids.iter().position(|u| *u == uuid) else {
             continue;
         };
-        if let Some((_, user, secs, command)) = procs.iter().find(|p| p.0 == process.pid) {
+        if let Some((_, user, secs)) = procs.iter().find(|p| p.0 == process.pid) {
             process.user = user.clone();
             process.running_secs = *secs;
-            process.command = command.clone();
+        } else if let Some((_, user)) = owned.iter().find(|o| o.0 == process.pid) {
+            process.user = user.clone();
         }
         round.gpus[i].processes.push(process);
     }
@@ -235,7 +254,9 @@ tmpfs tmpfs 100 0 100 0% /run
 GPU-aaa, 4242, 1000
 GPU-aaa, 777, [N/A]
 @ps
- 4242 alice     3600 python train.py --lr  0.1
+ 4242 alice     3600
+@owners
+[0] NVIDIA A100-SXM4-80GB | 55°C,  45 % | 1.0 / 80.0 GB | alice/4242(1.0G) bob:python/777(2.0G)
 ";
 
     #[test]
@@ -272,14 +293,22 @@ GPU-aaa, 777, [N/A]
             GpuProcess {
                 pid: 4242,
                 user: "alice".into(),
-                command: "python train.py --lr 0.1".into(),
                 gpu_memory: Some(1000 * 1024 * 1024),
                 running_secs: Some(3600),
             }
         );
-        // Not in ps (another PID namespace): only what nvidia-smi knows.
-        assert_eq!((procs[1].pid, procs[1].user.as_str()), (777, ""));
-        assert_eq!(procs[1].gpu_memory, None);
+        // Hidden from ps (hidepid): the user comes from root's gpustat cache.
+        assert_eq!((procs[1].pid, procs[1].user.as_str()), (777, "bob"));
+        assert_eq!((procs[1].gpu_memory, procs[1].running_secs), (None, None));
+    }
+
+    #[test]
+    fn gpustat_lines_name_each_programs_owner() {
+        assert_eq!(
+            owners("[1] RTX 4090 D | 77°C, 100 % | 14.6 / 48.0 GB | sachith/1280265(14.6G)"),
+            vec![(1_280_265, "sachith".to_string())]
+        );
+        assert!(owners("[2] RTX 4090 D | 30°C,   0 % |  0.0 / 48.0 GB |").is_empty());
     }
 
     #[test]
