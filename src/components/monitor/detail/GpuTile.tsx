@@ -1,6 +1,6 @@
 /**
  * One GPU in the detail: its use as a big number in its threshold colour,
- * temperature, a minute's curve, VRAM and power.
+ * temperature, a minute's curve, VRAM and power, then its programs.
  */
 import { useTranslation } from 'react-i18next'
 import type { GpuSample, Sample } from '@/lib/tauri-bindings'
@@ -8,6 +8,7 @@ import { LEVEL_COLOR, bytes, pctColor, share, tempLevel } from '../format'
 import { gpuName } from '../machine'
 import { Meter, Tile } from '../parts'
 import { Sparkline } from '../Sparkline'
+import { GpuPrograms } from './GpuPrograms'
 
 export function GpuTile({
   gpu,
@@ -69,6 +70,7 @@ export function GpuTile({
         )}
       </div>
       <Meter value={vram} color={pctColor(vram)} />
+      <GpuPrograms processes={gpu.processes} />
     </Tile>
   )
 }
