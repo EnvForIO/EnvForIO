@@ -443,6 +443,7 @@
   "monitor.user": "User",
   "monitor.runTime": "Running",
   "monitor.command": "Command",
+  "monitor.noCommand": "The machine does not say (the program may run in a container).",
   "monitor.fan": "Fan",
   "monitor.thisPc": "This PC",
   "monitor.group.wsl": "WSL (running)",
