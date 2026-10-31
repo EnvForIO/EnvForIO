@@ -2,10 +2,13 @@
  * One machine on the overview, the coarse result: name, kind, status, a
  * block per GPU coloured by its use (heatmap scale) with the number under
  * it, then CPU, memory and the hottest GPU. A machine that cannot be read
- * is greyed out with when it was last seen. Click to open its detail.
+ * is greyed out with when it was last seen. Click to open its detail;
+ * right-click for a native menu to open it or take it off the overview.
  */
 import { useTranslation } from 'react-i18next'
-import { useMachineInfo } from '@/api/monitor'
+import { toast } from 'sonner'
+import { useMachineInfo, useRemoveMachine } from '@/api/monitor'
+import { showContextMenu } from '@/lib/context-menu'
 import type { MonitorTarget } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { useMonitorStore } from '@/store/monitor-store'
@@ -68,11 +71,27 @@ export function MachineTile({
   const hot = hottest(now)
   const memory = now ? share(now.memory.used, now.memory.total) : 0
   const gpus = now?.gpus ?? []
+  const remove = useRemoveMachine()
+
+  const openMenu = (e: React.MouseEvent) => {
+    e.preventDefault()
+    void showContextMenu([
+      { id: 'open', label: t('monitor.openDetail'), action: onOpen },
+      { type: 'separator' },
+      {
+        id: 'remove',
+        label: t('monitor.remove'),
+        action: () =>
+          remove.mutate(target, { onError: e => toast.error(String(e)) }),
+      },
+    ])
+  }
 
   return (
     <button
       type="button"
       onClick={onOpen}
+      onContextMenu={openMenu}
       className={cn(
         'flex min-h-44 min-w-0 flex-col gap-2 rounded-[14px] border border-[var(--m-line)] bg-[var(--m-tile)] px-3.5 py-3 text-start transition-colors hover:border-[var(--m-muted)]',
         offline && 'opacity-60'

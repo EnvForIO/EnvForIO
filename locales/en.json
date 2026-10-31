@@ -437,6 +437,7 @@
   "monitor.gpu": "GPU",
   "monitor.vram": "VRAM",
   "monitor.otherUser": "Other user",
+  "monitor.openDetail": "Open details",
   "monitor.fan": "Fan",
   "monitor.thisPc": "This PC",
   "monitor.group.wsl": "WSL (running)",
