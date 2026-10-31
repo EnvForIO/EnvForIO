@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangleIcon, ChevronLeftIcon } from 'lucide-react'
 import { useMachineInfo, useRemoveMachine } from '@/api/monitor'
 import { Button } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import type { MonitorTarget } from '@/lib/tauri-bindings'
 import { useMonitorStore } from '@/store/monitor-store'
 import { gpuSummary, status, targetId } from '../machine'
@@ -18,6 +19,16 @@ import { Heatmap } from './Heatmap'
 import { CpuTile, StorageTile } from './SystemTiles'
 
 const NO_HISTORY: never[] = []
+
+/** GPUs in even rows of at most four (8 cards read 4 + 4, never 3 + 3 + 2). */
+const GPU_COLUMNS: Record<number, string> = {
+  1: 'grid-cols-1 md:grid-cols-2',
+  2: 'grid-cols-1 md:grid-cols-2',
+  3: 'grid-cols-1 md:grid-cols-3',
+  4: 'grid-cols-1 md:grid-cols-2 xl:grid-cols-4',
+  5: 'grid-cols-1 md:grid-cols-3',
+  6: 'grid-cols-1 md:grid-cols-3',
+}
 
 export function Detail({
   target,
@@ -93,7 +104,12 @@ export function Detail({
       ) : (
         <>
           {now.gpus.length > 0 && (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-3">
+            <div
+              className={cn(
+                'grid gap-3',
+                GPU_COLUMNS[now.gpus.length] ?? GPU_COLUMNS[4]
+              )}
+            >
               {now.gpus.map(g => (
                 <GpuTile key={g.index} gpu={g} history={history} />
               ))}

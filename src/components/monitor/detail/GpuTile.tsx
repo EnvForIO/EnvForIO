@@ -1,6 +1,6 @@
 /**
- * One GPU in the detail: its use as a big number in its threshold colour,
- * temperature, a minute's curve, VRAM and power, then its programs.
+ * One GPU in the detail: its use as a big number in its threshold colour
+ * beside a minute's curve, temperature, VRAM and power, then its programs.
  */
 import { useTranslation } from 'react-i18next'
 import type { GpuSample, Sample } from '@/lib/tauri-bindings'
@@ -26,50 +26,54 @@ export function GpuTile({
   )
 
   return (
-    <Tile className="flex flex-col gap-1.5">
+    <Tile className="flex flex-col gap-2">
       <div className="flex items-baseline gap-2 text-[11px] text-[var(--m-muted)]">
         <span className="truncate">
           GPU {gpu.index} · {gpuName(gpu.name)}
         </span>
         {gpu.temperature !== null && (
           <span
-            className="ms-auto shrink-0"
+            className="ms-auto shrink-0 tabular-nums"
             style={{ color: LEVEL_COLOR[tempLevel(gpu.temperature)] }}
           >
             {gpu.temperature}°C
           </span>
         )}
       </div>
-      <p
-        className="text-4xl leading-none font-medium tracking-tight tabular-nums"
-        style={{ color }}
-      >
-        {gpu.usage === null ? '–' : Math.round(usage)}
-        {gpu.usage !== null && <span className="text-lg">%</span>}
-      </p>
-      <Sparkline
-        series={[{ values, color }]}
-        max={100}
-        className="h-8 w-full"
-      />
-      <div className="flex text-[11px] text-[var(--m-muted)] tabular-nums">
-        <span>
-          {t('monitor.vram')}{' '}
-          {gpu.memoryUsed === null
-            ? '–'
-            : `${bytes(gpu.memoryUsed)} / ${bytes(gpu.memoryTotal ?? 0)}`}
-        </span>
-        {gpu.powerWatts !== null && (
-          <span className="ms-auto">
-            {Math.round(gpu.powerWatts)}
-            {gpu.powerLimitWatts
-              ? ` / ${Math.round(gpu.powerLimitWatts)}`
-              : ''}{' '}
-            W
-          </span>
-        )}
+      <div className="flex items-end gap-3">
+        <p
+          className="w-[4.5ch] shrink-0 text-4xl leading-none font-medium tracking-tight tabular-nums"
+          style={{ color }}
+        >
+          {gpu.usage === null ? '–' : Math.round(usage)}
+          {gpu.usage !== null && <span className="text-base">%</span>}
+        </p>
+        <Sparkline
+          series={[{ values, color }]}
+          max={100}
+          className="h-9 min-w-0 flex-1"
+        />
       </div>
-      <Meter value={vram} color={pctColor(vram)} />
+      <div className="flex flex-col gap-1">
+        <div className="flex text-[11px] text-[var(--m-muted)] tabular-nums">
+          <span>
+            {t('monitor.vram')}{' '}
+            {gpu.memoryUsed === null
+              ? '–'
+              : `${bytes(gpu.memoryUsed)} / ${bytes(gpu.memoryTotal ?? 0)}`}
+          </span>
+          {gpu.powerWatts !== null && (
+            <span className="ms-auto">
+              {Math.round(gpu.powerWatts)}
+              {gpu.powerLimitWatts
+                ? ` / ${Math.round(gpu.powerLimitWatts)}`
+                : ''}{' '}
+              W
+            </span>
+          )}
+        </div>
+        <Meter value={vram} color={pctColor(vram)} />
+      </div>
       <GpuPrograms processes={gpu.processes} />
     </Tile>
   )
