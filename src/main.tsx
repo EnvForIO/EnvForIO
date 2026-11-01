@@ -6,6 +6,9 @@
  * each one only loads its own code and styles.
  */
 import ReactDOM from 'react-dom/client'
+import { disableBrowserMenu } from './lib/browser-menu'
+
+disableBrowserMenu()
 
 const windowName =
   new URLSearchParams(window.location.search).get('window') ?? 'main'
