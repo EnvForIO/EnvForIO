@@ -2,33 +2,13 @@
 //! plain functions so they are tested without the network.
 
 use std::sync::LazyLock;
-use std::time::Duration;
 
 use regex::Regex;
 use serde_json::Value;
 
 use crate::domain::paper_ref::{plain_text, PaperMeta, PaperRef};
 use crate::errors::{AppError, AppResult};
-
-// A generic client name: no user details leave the machine.
-const USER_AGENT: &str = concat!(
-    "EnvIO/",
-    env!("CARGO_PKG_VERSION"),
-    " (desktop research app)"
-);
-
-fn client() -> AppResult<reqwest::Client> {
-    reqwest::Client::builder()
-        .user_agent(USER_AGENT)
-        .timeout(Duration::from_secs(40))
-        .build()
-        .map_err(network)
-}
-
-fn network(e: reqwest::Error) -> AppError {
-    log::warn!("network error: {e}");
-    AppError::network(e.to_string())
-}
+use crate::service::net::{client, network};
 
 pub async fn lookup(paper: &PaperRef) -> AppResult<PaperMeta> {
     match paper {

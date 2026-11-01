@@ -23,6 +23,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../../migrations/0009_papers.sql"),
     include_str!("../../migrations/0010_drop_paper_pdfs.sql"),
     include_str!("../../migrations/0011_machines.sql"),
+    include_str!("../../migrations/0012_conferences.sql"),
 ];
 
 /// Open (or create) the database file and migrate it.

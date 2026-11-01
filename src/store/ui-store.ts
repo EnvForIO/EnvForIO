@@ -38,7 +38,14 @@ interface UIState {
 
 /** The full pages the middle pane can show instead of a list or project. */
 export type MainPage =
-  'calendar' | 'items' | 'stats' | 'research' | 'ideas' | 'papers' | 'monitor'
+  | 'calendar'
+  | 'items'
+  | 'stats'
+  | 'research'
+  | 'conferences'
+  | 'ideas'
+  | 'papers'
+  | 'monitor'
 
 export const useUIStore = create<UIState>()(
   devtools(

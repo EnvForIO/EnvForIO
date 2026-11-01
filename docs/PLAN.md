@@ -297,7 +297,7 @@ Picked and ordered by the user on 2026-11-19; steps in `docs/m4_custom.md`.
 - [ ] **Kanban view** as another view of a project
 - [ ] **Monitor target picker**: defaults to `Local`; can switch to `WSL` or an SSH host (read from `~/.ssh/config`), like picking an environment; the panel shows whichever machine is selected; only the selected target is polled
 - [ ] **nvitop-style GPU panel**: per-GPU utilisation, memory, temperature, power, fan; per-process GPU, memory, user and command. Remote hosts are read by running `nvidia-smi` over SSH; nothing is installed on the server
-- [ ] **Research deadlines**: a conference deadline calendar that creates a project with each stage's dates when a conference is picked; templates for submissions, grants, proposals, defences; AoE time zone conversion
+- [ ] **Research deadlines** (conference part done 2026-11-20, see m4_custom.md step 3): a conference deadline calendar that creates a project with each stage's dates when a conference is picked; templates for submissions, grants, proposals, defences; AoE time zone conversion
 - [ ] **Desktop calendar widget**: a compact month view marking busy days and deadlines
 - [ ] **Read-only external calendars**: add an ICS link, fetched on a schedule
 - [ ] **RSS**: for low-volume sources such as Quanta Magazine; add and remove feeds, list with cover images, read / unread, open in browser, add to todos in one click, scheduled refresh

@@ -11,6 +11,7 @@ import { IdeasPage } from './ideas/IdeasPage'
 import { PapersPage } from './papers/PapersPage'
 import { MonitorPage } from './monitor/MonitorPage'
 import { ResearchPage } from './research/ResearchPage'
+import { ConferencesPage } from './conferences/ConferencesPage'
 
 export function MainPane() {
   const projectId = useUIStore(state => state.selectedProjectId)
@@ -19,6 +20,7 @@ export function MainPane() {
   if (page === 'items') return <ItemsPage />
   if (page === 'stats') return <StatsPage />
   if (page === 'research') return <ResearchPage />
+  if (page === 'conferences') return <ConferencesPage />
   if (page === 'ideas') return <IdeasPage />
   if (page === 'papers') return <PapersPage />
   if (page === 'monitor') return <MonitorPage />

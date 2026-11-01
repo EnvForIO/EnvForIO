@@ -620,6 +620,44 @@ async removeMachine(target: MonitorTarget) : Promise<Result<MonitorTarget[], App
     else return { status: "error", error: e  as any };
 }
 },
+async listConferences() : Promise<Result<ConferenceList, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_conferences") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Downloads ccfddl's list again and returns it.
+ */
+async refreshConferences() : Promise<Result<ConferenceList, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("refresh_conferences") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async followConference(key: string, on: boolean) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("follow_conference", { key, on }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Plans a submission to one round of an edition (see `conferences::plan`).
+ */
+async planConference(key: string, editionId: string, stage: number) : Promise<Result<Project, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("plan_conference", { key, editionId, stage }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async listIdeas(filter: IdeaFilter) : Promise<Result<Idea[], AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("list_ideas", { filter }) };
@@ -1056,6 +1094,12 @@ export type CheckIns = {
  * Days in a row (up to today) that met their line; days without a line don't break it.
  */
 streak: number; yesterday: DayResult | null; shortfall: number; days: DayResult[] }
+export type Conference = { key: string; title: string; description: string; area: string; ccf: string; core: string; followed: boolean; editions: Edition[] }
+export type ConferenceList = { 
+/**
+ * When the list was last downloaded (RFC 3339); None = never.
+ */
+fetchedAt: string | null; conferences: Conference[] }
 export type CpuSample = { usage: number; cores: number[]; frequencyMhz: number }
 /**
  * How much of one day's tasks are done: one heatmap cell.
@@ -1072,6 +1116,14 @@ export type DuoFont = "system" | "serif" | "mono"
 export type DuoMaterial = "translucent" | "acrylic" | "mica" | "solid"
 export type DuoStyle = { material: DuoMaterial; font: DuoFont; text_size: DuoTextSize }
 export type DuoTextSize = "small" | "medium" | "large"
+/**
+ * One year of a conference.
+ */
+export type Edition = { id: string; year: number; link: string; date: string; place: string; timezone: string; stages: Stage[]; 
+/**
+ * The project planned for this edition, if the user made one.
+ */
+projectId?: number | null }
 export type Export = { title: string; rows: ExportRow[] }
 export type ExportRow = { id: number; date: string | null; startTime: string | null; endTime: string | null; title: string; project: string | null; module: string | null; estimateMinutes: number | null; actualMinutes: number | null; dueDate: string | null; done: boolean; note: string }
 export type ExportScope = { kind: "Day"; date: string } | { kind: "Week"; date: string } | { kind: "Month"; date: string } | { kind: "Project"; id: number }
@@ -1195,6 +1247,10 @@ export type Sample = { atMs: number; cpu: CpuSample; memory: MemorySample; gpus:
  * Why there are no readings: the connection failed or closed.
  */
 error: string | null }
+/**
+ * One round of submission: an optional abstract deadline, then the paper.
+ */
+export type Stage = { abstractAt: number | null; deadlineAt: number | null; comment: string }
 export type Stats = { from: string; to: string; done: number; minutes: number; planned: number; plannedDone: number; activeDays: number; days: number; trend: Bucket[]; projects: ProjectTime[]; weekdays: Bucket[] }
 export type Tag = { id: number; name: string; color: string }
 export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string }
