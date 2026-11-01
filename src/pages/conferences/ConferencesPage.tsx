@@ -12,7 +12,13 @@ import { useConferences, useRefreshConferences } from '@/api/conferences'
 import { errorText } from '@/api/papers'
 import { FilterChip } from '@/components/FilterChip'
 import { Button } from '@/components/ui/button'
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { Conference } from '@/lib/tauri-bindings'
 import { DeadlineCard } from './DeadlineCard'
 import { ConferenceRow } from './ConferenceRow'
@@ -21,6 +27,8 @@ import { AREAS, nextRound } from './deadline'
 /** How many search results to draw at once. */
 const SHOWN = 100
 const RANKS = ['A', 'B', 'C'] as const
+/** The area picker's "every area" value (Radix Select has no empty value). */
+const ALL = 'all'
 
 /** The time, again each minute, for the countdowns. */
 function useNow(): number {
@@ -47,7 +55,7 @@ export function ConferencesPage() {
   const { data } = useConferences()
   const refresh = useRefreshConferences()
   const [search, setSearch] = useState('')
-  const [area, setArea] = useState('')
+  const [area, setArea] = useState(ALL)
   const [rank, setRank] = useState<string | null>(null)
 
   const download = () =>
@@ -62,7 +70,7 @@ export function ConferencesPage() {
         (q === '' ||
           c.title.toLowerCase().includes(q) ||
           c.description.toLowerCase().includes(q)) &&
-        (area === '' || c.area === area) &&
+        (area === ALL || c.area === area) &&
         (rank === null || c.ccf === rank)
     )
     .sort(bySoonest(now))
@@ -134,29 +142,30 @@ export function ConferencesPage() {
               {t('conferences.find')}
             </h2>
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-1.5 rounded-md border px-2">
+              <div className="flex h-8 items-center gap-1.5 rounded-md border px-2 shadow-xs">
                 <SearchIcon className="size-3.5 text-muted-foreground" />
                 <input
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder={t('conferences.search')}
-                  className="h-8 w-48 bg-transparent text-sm outline-none"
+                  className="h-full w-48 bg-transparent text-sm outline-none"
                 />
               </div>
-              <NativeSelect
-                value={area}
-                onChange={e => setArea(e.target.value)}
-                className="h-8 text-sm"
-              >
-                <NativeSelectOption value="">
-                  {t('conferences.allAreas')}
-                </NativeSelectOption>
-                {AREAS.map(a => (
-                  <NativeSelectOption key={a} value={a}>
-                    {t(`conferences.area.${a}`)}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelect>
+              <Select value={area} onValueChange={setArea}>
+                <SelectTrigger size="sm" className="w-56">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL}>
+                    {t('conferences.allAreas')}
+                  </SelectItem>
+                  {AREAS.map(a => (
+                    <SelectItem key={a} value={a}>
+                      {t(`conferences.area.${a}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FilterChip
                 active={rank === null}
                 onClick={() => setRank(null)}
