@@ -4,4 +4,5 @@
 pub mod calendars;
 pub mod duo;
 pub mod monitor;
+pub mod month_widget;
 pub mod tray;

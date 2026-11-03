@@ -16,6 +16,7 @@ import { useCalendarTasks, useDayNotes, useDayOverrides } from '@/api/calendar'
 import { useProjects } from '@/api/projects'
 import { useToday } from '@/api/tasks'
 import { Button } from '@/components/ui/button'
+import { useUIStore } from '@/store/ui-store'
 import type { Task } from '@/lib/tauri-bindings'
 import { parseDate } from '@/pages/tasks/dates'
 import { calendarRange, shiftAnchor, type CalendarMode } from './calendar-range'
@@ -30,14 +31,24 @@ const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
 export function CalendarPage() {
   const today = useToday()
+  // Opened from the desktop widget: start on that day (a new day remounts).
+  const focus = useUIStore(state => state.calendarDate)
   // Wait for Rust's "today" so the first view opens on the right month.
-  return today ? <CalendarBody today={today} /> : null
+  return today ? (
+    <CalendarBody key={focus ?? 'today'} today={today} focus={focus} />
+  ) : null
 }
 
-function CalendarBody({ today }: { today: string }) {
+function CalendarBody({
+  today,
+  focus,
+}: {
+  today: string
+  focus: string | null
+}) {
   const { t } = useTranslation()
   const [mode, setMode] = useState<CalendarMode>('month')
-  const [anchor, setAnchor] = useState<string | null>(null) // null = follow today
+  const [anchor, setAnchor] = useState<string | null>(focus) // null = follow today
   const [openDay, setOpenDay] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
   const [subscriptions, setSubscriptions] = useState(false)

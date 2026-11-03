@@ -1114,6 +1114,29 @@ async enterMiniMode() : Promise<void> {
  */
 async leaveMiniMode() : Promise<void> {
     await TAURI_INVOKE("leave_mini_mode");
+},
+/**
+ * Hide the desktop calendar widget (its close button); the tray brings it back.
+ */
+async hideMonthWidget() : Promise<void> {
+    await TAURI_INVOKE("hide_month_widget");
+},
+/**
+ * Open the main window's calendar at a day (double-click in the widget).
+ */
+async openCalendarDay(date: string) : Promise<void> {
+    await TAURI_INVOKE("open_calendar_day", { date });
+},
+/**
+ * Each day's marks for the desktop calendar widget, `from` to `to` inclusive.
+ */
+async monthMarks(from: string, to: string) : Promise<Result<DayMarks[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("month_marks", { from, to }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
 }
 }
 
@@ -1182,6 +1205,21 @@ export type CpuSample = { usage: number; cores: number[]; frequencyMhz: number }
  * How much of one day's tasks are done: one heatmap cell.
  */
 export type DayCompletion = { date: string; total: number; done: number }
+export type DayItem = { kind: DayItemKind; title: string; color: string; done: boolean }
+export type DayItemKind = "ProjectDeadline" | "TaskDue" | "Conference" | "Scheduled"
+export type DayMarks = { date: string; 
+/**
+ * Estimated minutes of the tasks scheduled on this day.
+ */
+plannedMinutes: number; 
+/**
+ * Minutes available that day (weekday default or override); None = not set.
+ */
+availableMinutes: number | null; 
+/**
+ * Deadlines first, then scheduled tasks.
+ */
+items: DayItem[] }
 export type DayNote = { date: string; text: string }
 export type DayOverride = { date: string; minutes: number }
 export type DayResult = { date: string; line: number; done: number; met: boolean }

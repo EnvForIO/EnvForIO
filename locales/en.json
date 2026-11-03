@@ -530,5 +530,11 @@
   "calendars.urlPlaceholder": "ICS link (https:// or webcal://)",
   "calendars.outlookHint": "Outlook: Settings → Calendar → Shared calendars → Publish a calendar, then copy the ICS link.",
   "calendars.subscribe": "Subscribe",
-  "calendars.refresh": "Refresh now"
+  "calendars.refresh": "Refresh now",
+  "month.hide": "Hide (bring it back from the tray menu)",
+  "month.nothing": "Nothing on this day",
+  "month.kind.ProjectDeadline": "project due",
+  "month.kind.TaskDue": "due",
+  "month.kind.Conference": "conference",
+  "month.kind.Scheduled": "planned"
 }

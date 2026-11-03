@@ -7,6 +7,7 @@ pub mod days;
 pub mod export;
 pub mod ideas;
 pub mod machines;
+pub mod month;
 pub mod net;
 pub mod papers;
 pub mod plans;

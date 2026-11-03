@@ -6,6 +6,7 @@ use crate::config::AppState;
 use crate::entity::task::Task;
 use crate::errors::AppResult;
 use crate::service::days::{self, DayNote};
+use crate::service::month::{self, DayMarks};
 use crate::service::tasks::schedule;
 
 #[tauri::command]
@@ -56,4 +57,15 @@ pub fn list_day_notes(
 #[specta::specta]
 pub fn set_day_note(state: State<'_, AppState>, date: String, text: String) -> AppResult<()> {
     days::set_note(&state.db(), &date, &text)
+}
+
+/// Each day's marks for the desktop calendar widget, `from` to `to` inclusive.
+#[tauri::command]
+#[specta::specta]
+pub fn month_marks(
+    state: State<'_, AppState>,
+    from: String,
+    to: String,
+) -> AppResult<Vec<DayMarks>> {
+    month::marks(&state.db(), &from, &to)
 }

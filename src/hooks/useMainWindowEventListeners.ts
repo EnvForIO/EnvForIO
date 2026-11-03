@@ -17,6 +17,16 @@ export function useMainWindowEventListeners() {
 
   useKeyboardShortcuts(commandContext)
 
+  // The desktop calendar widget asks to open the calendar at a day.
+  useEffect(() => {
+    const stop = listen<string>('open-calendar-day', event => {
+      useUIStore.getState().openCalendarAt(event.payload)
+    })
+    return () => {
+      void stop.then(unlisten => unlisten())
+    }
+  }, [])
+
   // Listen for quick pane submissions (cross-window event)
   useEffect(() => {
     let isMounted = true

@@ -18,6 +18,8 @@ interface UIState {
   focusIdeaId: number | null
   /** The task open in the details pane, or null when it is closed. */
   selectedTaskId: number | null
+  /** The day the calendar page opens on (set from the desktop widget). */
+  calendarDate: string | null
   /** How a project page shows its tasks: grouped by module, or as a board. */
   projectView: 'list' | 'board'
 
@@ -37,6 +39,7 @@ interface UIState {
   openPage: (page: MainPage) => void
   openIdea: (id: number) => void
   setProjectView: (view: 'list' | 'board') => void
+  openCalendarAt: (date: string) => void
 }
 
 /** The full pages the middle pane can show instead of a list or project. */
@@ -64,6 +67,7 @@ export const useUIStore = create<UIState>()(
       focusIdeaId: null,
       selectedTaskId: null,
       projectView: 'list',
+      calendarDate: null,
 
       toggleLeftSidebar: () =>
         set(
@@ -165,6 +169,19 @@ export const useUIStore = create<UIState>()(
           },
           undefined,
           'openIdea'
+        ),
+
+      openCalendarAt: date =>
+        set(
+          {
+            page: 'calendar',
+            calendarDate: date,
+            selectedProjectId: null,
+            selectedTaskId: null,
+            rightSidebarVisible: false,
+          },
+          undefined,
+          'openCalendarAt'
         ),
 
       setProjectView: view =>
