@@ -39,6 +39,8 @@ export type {
   IdeaLog,
   IdeaProblem,
   IdeaTodo,
+  Calendar,
+  CalendarEvent,
   Conference,
   ConferenceList,
   Edition,

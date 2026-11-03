@@ -295,11 +295,11 @@ Phase 3 ended with step 1 (2026-11-19): the user keeps the monitor in the main w
 Picked and ordered by the user on 2026-11-19; steps in `docs/m4_custom.md`.
 
 - [x] **Kanban view** as another view of a project
-- [ ] **Monitor target picker**: defaults to `Local`; can switch to `WSL` or an SSH host (read from `~/.ssh/config`), like picking an environment; the panel shows whichever machine is selected; only the selected target is polled
-- [ ] **nvitop-style GPU panel**: per-GPU utilisation, memory, temperature, power, fan; per-process GPU, memory, user and command. Remote hosts are read by running `nvidia-smi` over SSH; nothing is installed on the server
+- [x] **Monitor target picker** (2026-11-20: became an overview of machines added by hand, m4_custom.md steps 1–1b): defaults to `Local`; can switch to `WSL` or an SSH host (read from `~/.ssh/config`), like picking an environment; the panel shows whichever machine is selected; only the selected target is polled
+- [x] **nvitop-style GPU panel** (2026-11-20: programs with user, PID, VRAM and run time in each GPU tile; no command, by user decision): per-GPU utilisation, memory, temperature, power, fan; per-process GPU, memory, user and command. Remote hosts are read by running `nvidia-smi` over SSH; nothing is installed on the server
 - [ ] **Research deadlines** (conference part done 2026-11-20, see m4_custom.md step 3): a conference deadline calendar that creates a project with each stage's dates when a conference is picked; templates for submissions, grants, proposals, defences; AoE time zone conversion
 - [ ] **Desktop calendar widget**: a compact month view marking busy days and deadlines
-- [ ] **Read-only external calendars**: add an ICS link, fetched on a schedule
+- [x] **Read-only external calendars** (2026-11-20, m4_custom.md step 6): add an ICS link, fetched on a schedule
 - [ ] **RSS**: for low-volume sources such as Quanta Magazine; add and remove feeds, list with cover images, read / unread, open in browser, add to todos in one click, scheduled refresh
 - [x] **Connect the parts** (2026-11-20, m4_custom.md step 4): tasks from deadlines flow into Today; completion feeds the heatmap
 - [ ] ~~**macOS version**~~ (2026-11-19: not now, by user decision)

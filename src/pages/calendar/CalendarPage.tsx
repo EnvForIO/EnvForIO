@@ -1,11 +1,17 @@
 /**
  * Month and week calendar with a "To schedule" list on the right.
  * Drag tasks between days and the list; double-click or right-click a day
- * for its note, its available time and a new task.
+ * for its note, its available time and a new task. Events of subscribed
+ * calendars (read-only ICS links, "Calendars" button) show above tasks.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
+import {
+  CalendarPlusIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from 'lucide-react'
+import { useCalendarEvents, useCalendarSync } from '@/api/calendars'
 import { useCalendarTasks, useDayNotes, useDayOverrides } from '@/api/calendar'
 import { useProjects } from '@/api/projects'
 import { useToday } from '@/api/tasks'
@@ -16,6 +22,8 @@ import { calendarRange, shiftAnchor, type CalendarMode } from './calendar-range'
 import { DayCell } from './DayCell'
 import { DayDialog } from './DayDialog'
 import { UnscheduledPanel } from './UnscheduledPanel'
+import { CalendarsDialog } from './CalendarsDialog'
+import { dayEnd, dayStart, eventsOn } from './events'
 import { ExportDialog } from '@/pages/export/ExportDialog'
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
@@ -32,8 +40,14 @@ function CalendarBody({ today }: { today: string }) {
   const [anchor, setAnchor] = useState<string | null>(null) // null = follow today
   const [openDay, setOpenDay] = useState<string | null>(null)
   const [exporting, setExporting] = useState(false)
+  const [subscriptions, setSubscriptions] = useState(false)
   const current = anchor ?? today
   const range = calendarRange(mode, current)
+  useCalendarSync()
+  const { data: events = [] } = useCalendarEvents(
+    dayStart(range.from),
+    dayEnd(range.to)
+  )
   const { data: tasks = [] } = useCalendarTasks(range.from, range.to)
   const { data: notes = [] } = useDayNotes(range.from, range.to)
   const { data: overrides = [] } = useDayOverrides(range.from, range.to)
@@ -59,6 +73,14 @@ function CalendarBody({ today }: { today: string }) {
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="flex items-center gap-2 px-4 py-3">
           <h1 className="flex-1 text-xl font-semibold">{title}</h1>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSubscriptions(true)}
+          >
+            <CalendarPlusIcon className="size-4" />
+            {t('calendars.button')}
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => setExporting(true)}>
             {t('export.button')}
           </Button>
@@ -108,6 +130,7 @@ function CalendarBody({ today }: { today: string }) {
               outside={mode === 'month' && parseDate(date).getMonth() !== month}
               tall={mode === 'week'}
               tasks={tasksOn(date)}
+              events={eventsOn(events, date)}
               note={noteOn.get(date)}
               override={overrideOn.get(date)}
               colors={colors}
@@ -117,6 +140,7 @@ function CalendarBody({ today }: { today: string }) {
         </div>
       </div>
       <UnscheduledPanel colors={colors} />
+      <CalendarsDialog open={subscriptions} onOpenChange={setSubscriptions} />
       <ExportDialog
         scope={{ kind: mode === 'month' ? 'Month' : 'Week', date: current }}
         open={exporting}

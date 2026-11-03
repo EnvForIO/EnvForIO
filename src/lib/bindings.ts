@@ -631,6 +631,61 @@ async removeMachine(target: MonitorTarget) : Promise<Result<MonitorTarget[], App
     else return { status: "error", error: e  as any };
 }
 },
+async listCalendars() : Promise<Result<Calendar[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_calendars") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Subscribes and downloads it at once (a failed first download is kept
+ * as the calendar's error, not refused, so the link can be fixed later).
+ */
+async addCalendar(name: string, url: string, color: string) : Promise<Result<Calendar[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_calendar", { name, url, color }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async updateCalendar(id: number, name: string, color: string, visible: boolean) : Promise<Result<Calendar, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("update_calendar", { id, name, color, visible }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async removeCalendar(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("remove_calendar", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async refreshCalendars() : Promise<Result<Calendar[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("refresh_calendars") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Events of visible calendars overlapping `from_ms`..`to_ms` (Unix ms).
+ */
+async listCalendarEvents(fromMs: number, toMs: number) : Promise<Result<CalendarEvent[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_calendar_events", { fromMs, toMs }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async listConferences() : Promise<Result<ConferenceList, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("list_conferences") };
@@ -1109,6 +1164,8 @@ language: string | null;
  */
 duo_style?: DuoStyle }
 export type Bucket = { key: string; done: number; minutes: number }
+export type Calendar = { id: number; name: string; url: string; color: string; isVisible: boolean; fetchedAt: string | null; error: string | null; eventCount: number }
+export type CalendarEvent = { id: number; calendarId: number; color: string; title: string; location: string; startMs: number; endMs: number; allDay: boolean }
 export type CheckIns = { 
 /**
  * Days in a row (up to today) that met their line; days without a line don't break it.

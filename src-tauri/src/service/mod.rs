@@ -1,5 +1,6 @@
 //! Business logic, one folder per resource. The only layer that writes SQL.
 
+pub mod calendars;
 pub mod capacity;
 pub mod conferences;
 pub mod days;

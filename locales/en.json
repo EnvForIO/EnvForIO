@@ -515,5 +515,20 @@
   "projects.stage.Todo": "To do",
   "projects.stage.Doing": "Doing",
   "projects.stage.Done": "Done",
-  "projects.addTask": "Add a task"
+  "projects.addTask": "Add a task",
+  "calendars.button": "Calendars",
+  "calendars.title": "Subscribed calendars",
+  "calendars.description": "Read-only calendars from ICS links, such as Outlook or a course timetable. They are downloaded when EnvIO starts and every hour.",
+  "calendars.failed": "Last download failed: {{error}}",
+  "calendars.updated_one": "{{count}} event · updated {{time}}",
+  "calendars.updated_other": "{{count}} events · updated {{time}}",
+  "calendars.notYet": "Not downloaded yet",
+  "calendars.show": "Show on the calendar",
+  "calendars.remove": "Remove",
+  "calendars.add": "Add a calendar",
+  "calendars.namePlaceholder": "Name, e.g. Work",
+  "calendars.urlPlaceholder": "ICS link (https:// or webcal://)",
+  "calendars.outlookHint": "Outlook: Settings → Calendar → Shared calendars → Publish a calendar, then copy the ICS link.",
+  "calendars.subscribe": "Subscribe",
+  "calendars.refresh": "Refresh now"
 }

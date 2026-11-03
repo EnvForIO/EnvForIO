@@ -1,6 +1,6 @@
 /**
  * One day on the calendar: date, available time if it differs from the
- * usual, the note, and its tasks. Drop a task to schedule it here;
+ * usual, the note, events of subscribed calendars, and its tasks. Drop a task to schedule it here;
  * right-click for a new task, the note and the day's available time.
  */
 import { useState } from 'react'
@@ -8,8 +8,9 @@ import { useTranslation } from 'react-i18next'
 import { useScheduleTask } from '@/api/calendar'
 import { showContextMenu } from '@/lib/context-menu'
 import { formatMinutes } from '@/lib/duration'
-import type { Task } from '@/lib/tauri-bindings'
+import type { CalendarEvent, Task } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
+import { EventChip } from './EventChip'
 import { TASK_DRAG_TYPE, TaskChip } from './TaskChip'
 
 interface Props {
@@ -18,6 +19,7 @@ interface Props {
   outside: boolean // belongs to the previous or next month in month view
   tall: boolean // week view
   tasks: Task[]
+  events: CalendarEvent[] // of subscribed calendars, read-only
   note: string | undefined
   override: number | undefined // available minutes set for this date only
   colors: Map<number, string>
@@ -25,8 +27,8 @@ interface Props {
 }
 
 export function DayCell(props: Props) {
-  const { date, today, outside, tall, tasks, note, override, colors, onOpen } =
-    props
+  const { date, today, outside, tall, tasks, events, note, override } = props
+  const { colors, onOpen } = props
   const { t } = useTranslation()
   const scheduleTask = useScheduleTask()
   const [dropping, setDropping] = useState(false)
@@ -85,6 +87,9 @@ export function DayCell(props: Props) {
           {note}
         </p>
       )}
+      {events.map(e => (
+        <EventChip key={e.id} event={e} date={date} />
+      ))}
       {tasks.map(task => (
         <TaskChip
           key={task.id}
