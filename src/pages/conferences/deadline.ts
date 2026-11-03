@@ -77,6 +77,26 @@ export function when(ms: number, now: number): string {
   })
 }
 
+/**
+ * The conference an idea's venue names: its title or ccfddl key, any case
+ * ("MICCAI", "miccai", "MX/miccai"); null for a journal or an unknown name.
+ */
+export function findVenue(
+  conferences: Conference[],
+  venue: string
+): Conference | null {
+  const name = venue.trim().toLowerCase()
+  if (name === '') return null
+  return (
+    conferences.find(
+      c =>
+        c.title.toLowerCase() === name ||
+        c.key.toLowerCase() === name ||
+        c.key.toLowerCase().split('/').at(-1) === name
+    ) ?? null
+  )
+}
+
 /** ccfddl's area codes. */
 export const AREAS = [
   'AI',

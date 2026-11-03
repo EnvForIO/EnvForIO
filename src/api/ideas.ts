@@ -1,14 +1,18 @@
 /**
  * Ideas (Seedbank): the only place the frontend calls the idea commands.
- * Every write refetches everything under ['ideas'] (list, counts, detail).
+ * Every write refetches everything under ['ideas'] (list, counts, detail)
+ * and under ['tasks']: an idea's todos are tasks, and linking an idea to a
+ * project moves them; other windows hear about it too.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { emit } from '@tauri-apps/api/event'
 import {
   commands,
   unwrapResult,
   type IdeaFilter,
   type IdeaUpdate,
 } from '@/lib/tauri-bindings'
+import { TASKS_CHANGED } from './tasks'
 
 export const ideaKeys = {
   all: ['ideas'] as const,
@@ -64,7 +68,11 @@ function useIdeaMutation<Args, Out>(run: (args: Args) => Promise<Out>) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: run,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ideaKeys.all }),
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: ideaKeys.all })
+      await queryClient.invalidateQueries({ queryKey: ['tasks'] })
+      await emit(TASKS_CHANGED)
+    },
   })
 }
 
@@ -76,6 +84,12 @@ export const useCreateIdea = () =>
 export const useUpdateIdea = () =>
   useIdeaMutation(async ({ id, update }: { id: number; update: IdeaUpdate }) =>
     unwrapResult(await commands.updateIdea(id, update))
+  )
+
+export const useSetIdeaProject = () =>
+  useIdeaMutation(
+    async ({ id, projectId }: { id: number; projectId: number | null }) =>
+      unwrapResult(await commands.setIdeaProject(id, projectId))
   )
 
 export const useDeleteIdea = () =>

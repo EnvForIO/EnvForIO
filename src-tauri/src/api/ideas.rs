@@ -137,6 +137,16 @@ pub fn set_idea_notes(state: State<'_, AppState>, idea_id: i64, notes: String) -
 
 #[tauri::command]
 #[specta::specta]
+pub fn set_idea_project(
+    state: State<'_, AppState>,
+    id: i64,
+    project_id: Option<i64>,
+) -> AppResult<Idea> {
+    mutation::set_project(&mut state.db(), id, project_id)
+}
+
+#[tauri::command]
+#[specta::specta]
 pub fn list_idea_todos(state: State<'_, AppState>, idea_id: i64) -> AppResult<Vec<IdeaTodo>> {
     notes::todos(&state.db(), idea_id)
 }

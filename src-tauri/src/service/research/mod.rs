@@ -73,7 +73,16 @@ mod tests {
             .iter()
             .map(|d| (d.title.as_str(), d.days_left))
             .collect();
-        assert_eq!(dates, vec![("Review", 1), ("Thesis", 11), ("stomata", 12)]);
+        // An idea's dated todo is a task, so it is a deadline too.
+        assert_eq!(
+            dates,
+            vec![
+                ("Review", 1),
+                ("rerun baseline", 6),
+                ("Thesis", 11),
+                ("stomata", 12)
+            ]
+        );
         assert_eq!(o.todos[0].idea_title, "stomata");
         assert_eq!(o.problems[0].problem, "noisy labels");
     }

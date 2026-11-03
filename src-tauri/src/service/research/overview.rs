@@ -82,7 +82,7 @@ pub fn overview(conn: &Connection, today: &str) -> AppResult<ResearchOverview> {
     let counts = ideas::counts(conn)?;
     let count = |sql: &str| conn.query_row(sql, [], |r| r.get::<_, i64>(0));
     let open_todos = count(&format!(
-        "SELECT count(*) FROM idea_todos d JOIN ideas i ON i.id = d.idea_id
+        "SELECT count(*) FROM tasks d JOIN ideas i ON i.id = d.idea_id
          WHERE d.done_at IS NULL AND {UNFINISHED}"
     ))?;
     let open_problems = count(&format!(
@@ -124,8 +124,9 @@ fn deadlines(conn: &Connection, today: &str) -> AppResult<Vec<Deadline>> {
          SELECT 'Project', id, name, '', deadline FROM projects
            WHERE deadline >= ?1 AND is_archived = 0
          UNION ALL
-         SELECT 'Task', t.id, t.title, coalesce(p.name, ''), t.due_date
+         SELECT 'Task', t.id, t.title, coalesce(p.name, i.title, ''), t.due_date
            FROM tasks t LEFT JOIN projects p ON p.id = t.project_id
+                        LEFT JOIN ideas i ON i.id = t.idea_id
            WHERE t.due_date >= ?1 AND t.done_at IS NULL
          ORDER BY 5, 1, 2 LIMIT 40",
     )?;
@@ -163,7 +164,7 @@ fn deadlines(conn: &Connection, today: &str) -> AppResult<Vec<Deadline>> {
 fn todos(conn: &Connection) -> AppResult<Vec<OpenTodo>> {
     let mut stmt = conn.prepare(&format!(
         "SELECT d.id, i.id, i.title, d.title, d.due_date
-         FROM idea_todos d JOIN ideas i ON i.id = d.idea_id
+         FROM tasks d JOIN ideas i ON i.id = d.idea_id
          WHERE d.done_at IS NULL AND {UNFINISHED}
          ORDER BY d.due_date IS NULL, d.due_date, i.priority DESC, d.sort_order LIMIT ?1"
     ))?;

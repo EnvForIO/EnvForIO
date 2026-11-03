@@ -51,8 +51,18 @@ export function useFollowConference() {
 
 export const usePlanConference = () =>
   useTaskMutation(
-    async (args: { key: string; editionId: string; stage: number }) =>
+    async (args: {
+      key: string
+      editionId: string
+      stage: number
+      ideaId?: number
+    }) =>
       unwrapResult(
-        await commands.planConference(args.key, args.editionId, args.stage)
+        await commands.planConference(
+          args.key,
+          args.editionId,
+          args.stage,
+          args.ideaId ?? null
+        )
       )
   )

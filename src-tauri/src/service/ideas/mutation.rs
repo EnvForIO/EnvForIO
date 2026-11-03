@@ -61,6 +61,29 @@ pub fn create(conn: &mut Connection, title: &str) -> AppResult<Idea> {
     query::get(conn, id)
 }
 
+/// Links an idea to a project, or unlinks it with `None`. Its todos move
+/// with it: into the project (outside any module), or back to the task pool.
+pub fn set_project(conn: &mut Connection, id: i64, project_id: Option<i64>) -> AppResult<Idea> {
+    if let Some(project) = project_id {
+        crate::service::projects::query::get(conn, project)?;
+    }
+    let tx = conn.transaction()?;
+    let changed = tx.execute(
+        "UPDATE ideas SET project_id = ?2, updated_at = ?3 WHERE id = ?1",
+        params![id, project_id, now_timestamp()],
+    )?;
+    if changed == 0 {
+        return Err(AppError::not_found("idea", id));
+    }
+    tx.execute(
+        "UPDATE tasks SET project_id = ?2, module_id = NULL
+         WHERE idea_id = ?1 AND project_id IS NOT ?2",
+        params![id, project_id],
+    )?;
+    tx.commit()?;
+    query::get(conn, id)
+}
+
 pub fn update(conn: &mut Connection, id: i64, update: &IdeaUpdate) -> AppResult<Idea> {
     let title = clean_name(&update.title)?;
     check_date(&update.deadline)?;

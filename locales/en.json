@@ -504,5 +504,10 @@
   "conferences.area.MX": "Interdisciplinary",
   "conferences.area.NW": "Networks",
   "conferences.area.SC": "Security",
-  "conferences.area.SE": "Software engineering"
+  "conferences.area.SE": "Software engineering",
+  "ideas.noProject": "No project",
+  "ideas.projectHint": "Link a project: this idea's todos become its tasks and count toward its safety line.",
+  "ideas.projectProgress": "{{done}}/{{total}} tasks done",
+  "ideas.projectDue": "due {{date}}",
+  "tasks.fromIdea": "Todo of idea"
 }

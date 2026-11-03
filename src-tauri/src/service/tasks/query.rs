@@ -24,8 +24,12 @@ const ORDER: &str = "ORDER BY t.is_pinned DESC, (t.done_at IS NOT NULL), t.sort_
 
 pub fn list(conn: &Connection, view: TaskView, today: &str) -> AppResult<Vec<Task>> {
     let filter = match view {
-        // Today: added to My Day today, or scheduled for today on the calendar.
-        TaskView::MyDay => "(t.my_day_date = ?1 OR t.scheduled_date = ?1)",
+        // Today: added to My Day today, scheduled for today, due today, or
+        // overdue and still open (user decision 2026-11-20).
+        TaskView::MyDay => {
+            "(t.my_day_date = ?1 OR t.scheduled_date = ?1 OR t.due_date = ?1
+              OR (t.due_date < ?1 AND t.done_at IS NULL))"
+        }
         TaskView::Important => "t.is_important = 1 AND ?1 IS NOT NULL",
         // Planned is ordered by date first: the nearest deadline on top.
         TaskView::Planned => "t.due_date IS NOT NULL AND ?1 IS NOT NULL",

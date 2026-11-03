@@ -4,7 +4,15 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PinIcon, StarIcon, SunIcon, Trash2Icon, XIcon } from 'lucide-react'
+import {
+  LightbulbIcon,
+  PinIcon,
+  StarIcon,
+  SunIcon,
+  Trash2Icon,
+  XIcon,
+} from 'lucide-react'
+import { useIdea } from '@/api/ideas'
 import {
   toUpdate,
   useDeleteTask,
@@ -42,6 +50,25 @@ function NothingSelected() {
     <p className="p-6 text-center text-sm text-muted-foreground">
       {t('tasks.nothingSelected')}
     </p>
+  )
+}
+
+/** A todo of an idea: its title, opening the idea. */
+function FromIdea({ ideaId }: { ideaId: number }) {
+  const { t } = useTranslation()
+  const { data: idea } = useIdea(ideaId)
+  const openIdea = useUIStore(state => state.openIdea)
+  if (!idea) return null
+  return (
+    <button
+      type="button"
+      onClick={() => openIdea(idea.id)}
+      className="flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-start text-sm hover:bg-accent/60"
+    >
+      <LightbulbIcon className="size-4 shrink-0 text-muted-foreground" />
+      <span className="text-muted-foreground">{t('tasks.fromIdea')}</span>
+      <span className="truncate font-medium">{idea.title}</span>
+    </button>
   )
 }
 
@@ -111,6 +138,8 @@ function TaskDetailsForm({ task }: { task: Task }) {
           <XIcon className="size-4" />
         </Button>
       </div>
+
+      {task.ideaId !== null && <FromIdea ideaId={task.ideaId} />}
 
       <TaskSteps taskId={task.id} />
 

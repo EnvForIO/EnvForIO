@@ -13,6 +13,7 @@ use rusqlite::{params, Connection, OptionalExtension};
 use crate::entity::conference::{Conference, ConferenceList, Edition};
 use crate::entity::project::Project;
 use crate::errors::{AppError, AppResult};
+use crate::service::ideas::mutation as ideas;
 use crate::service::projects::mutation::{self as projects, ProjectInput};
 use crate::service::projects::query as project_query;
 
@@ -133,8 +134,27 @@ fn local_day(ms: i64) -> Option<String> {
 }
 
 /// Plans a submission to one round (`stage`) of an edition. Planning the
-/// same edition again opens the project already made.
+/// same edition again opens the project already made. Planned from an
+/// idea, the idea is linked to the project (its todos join it).
 pub fn plan(
+    conn: &mut Connection,
+    key: &str,
+    edition_id: &str,
+    stage: usize,
+    today: &str,
+    idea_id: Option<i64>,
+) -> AppResult<Project> {
+    let project = plan_project(conn, key, edition_id, stage, today)?;
+    match idea_id {
+        Some(idea) => {
+            ideas::set_project(conn, idea, Some(project.id))?;
+            project_query::get(conn, project.id)
+        }
+        None => Ok(project),
+    }
+}
+
+fn plan_project(
     conn: &mut Connection,
     key: &str,
     edition_id: &str,
@@ -261,7 +281,7 @@ mod tests {
     #[test]
     fn planning_makes_a_paper_project_with_an_abstract_task() {
         let mut conn = loaded();
-        let p = plan(&mut conn, "nips", "nips99", 0, "2026-11-20").unwrap();
+        let p = plan(&mut conn, "nips", "nips99", 0, "2026-11-20", None).unwrap();
         let stage = &parse_all(SAMPLE).unwrap()[0].editions[0].stages[0];
         assert_eq!(p.name, "NeurIPS 2099");
         assert_eq!(p.deadline, local_day(stage.deadline_at.unwrap()));
@@ -276,7 +296,7 @@ mod tests {
 
         // Again: the same project, and the edition shows it.
         assert_eq!(
-            plan(&mut conn, "nips", "nips99", 0, "2026-11-20")
+            plan(&mut conn, "nips", "nips99", 0, "2026-11-20", None)
                 .unwrap()
                 .id,
             p.id
@@ -293,10 +313,25 @@ mod tests {
     }
 
     #[test]
+    fn planning_from_an_idea_links_it_and_moves_its_todos() {
+        let mut conn = loaded();
+        let idea = crate::service::ideas::mutation::create(&mut conn, "Sparse attention").unwrap();
+        crate::service::ideas::notes::add_todo(&conn, idea.id, "run baseline", None).unwrap();
+        let p = plan(&mut conn, "nips", "nips99", 0, "2026-11-20", Some(idea.id)).unwrap();
+        assert_eq!(
+            crate::service::ideas::query::get(&conn, idea.id)
+                .unwrap()
+                .project_id,
+            Some(p.id)
+        );
+        assert_eq!(p.task_count, 2); // the abstract task and the idea's todo
+    }
+
+    #[test]
     fn unannounced_or_past_deadlines_cannot_be_planned() {
         let mut conn = loaded();
-        assert!(plan(&mut conn, "miccai", "miccai99", 0, "2026-11-20").is_err());
-        assert!(plan(&mut conn, "nips", "nips99", 0, "2100-01-01").is_err());
-        assert!(plan(&mut conn, "nips", "nips99", 5, "2026-11-20").is_err());
+        assert!(plan(&mut conn, "miccai", "miccai99", 0, "2026-11-20", None).is_err());
+        assert!(plan(&mut conn, "nips", "nips99", 0, "2100-01-01", None).is_err());
+        assert!(plan(&mut conn, "nips", "nips99", 5, "2026-11-20", None).is_err());
     }
 }

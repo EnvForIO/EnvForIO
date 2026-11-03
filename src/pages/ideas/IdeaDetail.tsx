@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea'
 import type { Idea, IdeaStatus, IdeaUpdate } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { formatDate, parseDate } from '@/pages/tasks/dates'
+import { IdeaPlan } from './IdeaPlan'
 import { IdeaSections } from './IdeaSections'
 import { STATUS_COLOR, STATUSES } from './status'
 
@@ -146,6 +147,7 @@ function Form({ idea, onDeleted }: { idea: Idea; onDeleted: () => void }) {
           placeholder={t('ideas.deadline')}
         />
       </div>
+      <IdeaPlan idea={idea} />
       <div className="flex flex-wrap gap-1.5">
         {tags.map(tag => {
           const on = tagIds.includes(tag.id)

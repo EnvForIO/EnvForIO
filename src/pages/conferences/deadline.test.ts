@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import type { Conference, Edition } from '@/lib/tauri-bindings'
 import {
   countdown,
+  findVenue,
   latestEdition,
   nextRound,
   upcoming,
@@ -62,5 +63,13 @@ describe('conference deadlines', () => {
       'close',
       'calm',
     ])
+  })
+
+  it('finds an idea venue by title or key, in any case', () => {
+    const c = { ...conference([]), key: 'MX/miccai', title: 'MICCAI' }
+    expect(findVenue([c], ' miccai ')).toBe(c)
+    expect(findVenue([c], 'MX/MICCAI')).toBe(c)
+    expect(findVenue([c], 'PLOS ONE')).toBeNull()
+    expect(findVenue([c], '')).toBeNull()
   })
 })

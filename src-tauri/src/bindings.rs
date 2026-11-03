@@ -100,6 +100,7 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         ideas::delete_idea_link,
         ideas::get_idea_notes,
         ideas::set_idea_notes,
+        ideas::set_idea_project,
         ideas::list_idea_todos,
         ideas::add_idea_todo,
         ideas::set_idea_todo_done,

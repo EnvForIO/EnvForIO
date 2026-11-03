@@ -43,7 +43,8 @@ pub fn follow_conference(state: State<'_, AppState>, key: String, on: bool) -> A
     conferences::set_followed(&state.db(), &key, on)
 }
 
-/// Plans a submission to one round of an edition (see `conferences::plan`).
+/// Plans a submission to one round of an edition, from an idea or not
+/// (see `conferences::plan`).
 #[tauri::command]
 #[specta::specta]
 pub fn plan_conference(
@@ -51,6 +52,14 @@ pub fn plan_conference(
     key: String,
     edition_id: String,
     stage: u32,
+    idea_id: Option<i64>,
 ) -> AppResult<Project> {
-    conferences::plan(&mut state.db(), &key, &edition_id, stage as usize, &today())
+    conferences::plan(
+        &mut state.db(),
+        &key,
+        &edition_id,
+        stage as usize,
+        &today(),
+        idea_id,
+    )
 }

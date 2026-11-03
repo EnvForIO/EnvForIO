@@ -95,8 +95,14 @@ pub fn update(conn: &Connection, id: i64, input: &ProjectInput) -> AppResult<Pro
 }
 
 /// Delete a project with its modules and tasks (and the tasks' steps).
+/// Todos of an idea linked to it stay with the idea, back in the task pool.
 pub fn delete(conn: &mut Connection, id: i64) -> AppResult<()> {
     let tx = conn.transaction()?;
+    tx.execute(
+        "UPDATE tasks SET project_id = NULL, module_id = NULL
+         WHERE project_id = ?1 AND idea_id IS NOT NULL",
+        params![id],
+    )?;
     tx.execute("DELETE FROM tasks WHERE project_id = ?1", params![id])?;
     if tx.execute("DELETE FROM projects WHERE id = ?1", params![id])? == 0 {
         return Err(AppError::not_found("project", id)); // dropping tx rolls back

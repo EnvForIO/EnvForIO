@@ -648,11 +648,12 @@ async followConference(key: string, on: boolean) : Promise<Result<null, AppError
 }
 },
 /**
- * Plans a submission to one round of an edition (see `conferences::plan`).
+ * Plans a submission to one round of an edition, from an idea or not
+ * (see `conferences::plan`).
  */
-async planConference(key: string, editionId: string, stage: number) : Promise<Result<Project, AppError>> {
+async planConference(key: string, editionId: string, stage: number, ideaId: number | null) : Promise<Result<Project, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("plan_conference", { key, editionId, stage }) };
+    return { status: "ok", data: await TAURI_INVOKE("plan_conference", { key, editionId, stage, ideaId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -797,6 +798,14 @@ async getIdeaNotes(ideaId: number) : Promise<Result<string, AppError>> {
 async setIdeaNotes(ideaId: number, notes: string) : Promise<Result<null, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("set_idea_notes", { ideaId, notes }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setIdeaProject(id: number, projectId: number | null) : Promise<Result<Idea, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_idea_project", { id, projectId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -1142,7 +1151,11 @@ export type GpuSample = { index: number; name: string; usage: number | null; mem
  */
 processes: GpuProcess[] }
 export type Health = "Done" | "OnTrack" | "Tight" | "Behind" | "Overdue"
-export type Idea = { id: number; title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; stepCount: number; stepsDone: number; currentStep: string | null; openTodos: number; openProblems: number; logCount: number; tags: Tag[]; createdAt: string }
+export type Idea = { id: number; title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; stepCount: number; stepsDone: number; currentStep: string | null; openTodos: number; openProblems: number; logCount: number; tags: Tag[]; createdAt: string; 
+/**
+ * The project this idea is worked on in; its todos are that project's tasks.
+ */
+projectId: number | null }
 /**
  * Counts for the filter chips.
  */
@@ -1253,7 +1266,11 @@ error: string | null }
 export type Stage = { abstractAt: number | null; deadlineAt: number | null; comment: string }
 export type Stats = { from: string; to: string; done: number; minutes: number; planned: number; plannedDone: number; activeDays: number; days: number; trend: Bucket[]; projects: ProjectTime[]; weekdays: Bucket[] }
 export type Tag = { id: number; name: string; color: string }
-export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string }
+export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string; 
+/**
+ * The idea this task is a todo of, if any.
+ */
+ideaId: number | null }
 export type TaskStep = { id: number; taskId: number; title: string; isDone: boolean; sortOrder: number }
 /**
  * Everything the details pane can edit, sent whole on every save.

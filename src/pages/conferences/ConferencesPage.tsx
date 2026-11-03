@@ -4,7 +4,7 @@
  * search over all of them by name, area and CCF rank to star more. The
  * list is downloaded only when the user presses refresh.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Loader2Icon, RefreshCwIcon, SearchIcon } from 'lucide-react'
 import { toast } from 'sonner'
@@ -23,22 +23,13 @@ import type { Conference } from '@/lib/tauri-bindings'
 import { DeadlineCard } from './DeadlineCard'
 import { ConferenceRow } from './ConferenceRow'
 import { AREAS, nextRound } from './deadline'
+import { useNow } from './useNow'
 
 /** How many search results to draw at once. */
 const SHOWN = 100
 const RANKS = ['A', 'B', 'C'] as const
 /** The area picker's "every area" value (Radix Select has no empty value). */
 const ALL = 'all'
-
-/** The time, again each minute, for the countdowns. */
-function useNow(): number {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 60_000)
-    return () => clearInterval(id)
-  }, [])
-  return now
-}
 
 /** Soonest open deadline first; conferences with none after, by title. */
 function bySoonest(now: number) {

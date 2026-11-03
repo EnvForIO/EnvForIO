@@ -1,5 +1,9 @@
 //! An idea's working material: notes (Markdown with LaTeX), todos with due
 //! dates, problems with their solutions, and a dated progress log.
+//!
+//! Todos are ordinary tasks with `idea_id` set (since 2026-11-20), so they
+//! show in Planned, My Day, the calendar and the heatmap; an idea linked to
+//! a project files them in that project.
 
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
@@ -8,6 +12,7 @@ use specta::Type;
 use super::query;
 use crate::domain::day::now_timestamp;
 use crate::errors::{AppError, AppResult};
+use crate::service::tasks::mutation as tasks;
 use crate::service::validate::{check_date, clean_name};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
@@ -68,7 +73,7 @@ pub fn notes(conn: &Connection, idea_id: i64) -> AppResult<String> {
 
 pub fn todos(conn: &Connection, idea_id: i64) -> AppResult<Vec<IdeaTodo>> {
     let mut stmt = conn.prepare(
-        "SELECT id, idea_id, title, due_date, done_at IS NOT NULL FROM idea_todos WHERE idea_id = ?1
+        "SELECT id, idea_id, title, due_date, done_at IS NOT NULL FROM tasks WHERE idea_id = ?1
          ORDER BY done_at IS NOT NULL, due_date IS NULL, due_date, sort_order, id",
     )?;
     let rows = stmt.query_map(params![idea_id], |r| {
@@ -91,27 +96,22 @@ pub fn add_todo(
 ) -> AppResult<()> {
     let title = clean_name(title)?;
     check_date(&due)?;
-    query::get(conn, idea_id)?;
+    let idea = query::get(conn, idea_id)?;
+    let now = now_timestamp();
     conn.execute(
-        "INSERT INTO idea_todos (idea_id, title, due_date, sort_order)
-         VALUES (?1, ?2, ?3, (SELECT coalesce(max(sort_order), 0) + 1 FROM idea_todos WHERE idea_id = ?1))",
-        params![idea_id, title, due],
+        "INSERT INTO tasks (title, due_date, idea_id, project_id, sort_order, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, (SELECT coalesce(max(sort_order), 0) + 1 FROM tasks), ?5, ?5)",
+        params![title, due, idea_id, idea.project_id, now],
     )?;
     Ok(())
 }
 
 pub fn set_todo_done(conn: &Connection, id: i64, done: bool) -> AppResult<()> {
-    let at = done.then(now_timestamp);
-    let changed = conn.execute(
-        "UPDATE idea_todos SET done_at = ?2 WHERE id = ?1",
-        params![id, at],
-    )?;
-    gone("todo", id, changed)
+    tasks::set_done(conn, id, done).map(|_| ())
 }
 
 pub fn delete_todo(conn: &Connection, id: i64) -> AppResult<()> {
-    let changed = conn.execute("DELETE FROM idea_todos WHERE id = ?1", params![id])?;
-    gone("todo", id, changed)
+    tasks::delete(conn, id)
 }
 
 // ---------------------------------------------------------------------------
@@ -231,6 +231,54 @@ mod tests {
         assert_eq!(
             (idea.open_todos, idea.open_problems, idea.log_count),
             (1, 0, 1)
+        );
+    }
+
+    #[test]
+    fn todos_are_tasks_that_follow_the_ideas_project() {
+        use crate::service::ideas::mutation::set_project;
+        use crate::service::projects::mutation::{self as projects, ProjectInput};
+        use crate::service::tasks::query::{list, TaskView};
+
+        let mut conn = open_in_memory();
+        let idea = super::super::mutation::create(&mut conn, "idea").unwrap();
+        add_todo(&conn, idea.id, "due today", Some("2026-11-20".into())).unwrap();
+        add_todo(&conn, idea.id, "overdue", Some("2026-11-18".into())).unwrap();
+        add_todo(&conn, idea.id, "someday", None).unwrap();
+        let titles = |view| -> Vec<String> {
+            list(&conn, view, "2026-11-20")
+                .unwrap()
+                .into_iter()
+                .map(|t| t.title)
+                .collect()
+        };
+        // My Day picks up what is due today or overdue; Planned has both dated ones.
+        let mut my_day = titles(TaskView::MyDay);
+        my_day.sort();
+        assert_eq!(my_day, ["due today", "overdue"]);
+        assert_eq!(titles(TaskView::Planned).len(), 2);
+
+        let input = ProjectInput {
+            name: "p".into(),
+            color: "#3b82f6".into(),
+            start_date: None,
+            deadline: Some("2026-12-20".into()),
+            buffer_days: 0,
+            is_archived: false,
+        };
+        let p = projects::create(&mut conn, &input, "blank").unwrap();
+        set_project(&mut conn, idea.id, Some(p.id)).unwrap();
+        add_todo(&conn, idea.id, "added later", None).unwrap();
+        let in_project = crate::service::projects::query::tasks(&conn, p.id).unwrap();
+        assert_eq!(in_project.len(), 4);
+        assert!(in_project.iter().all(|t| t.idea_id == Some(idea.id)));
+
+        // Deleting the project keeps the idea's todos.
+        projects::delete(&mut conn, p.id).unwrap();
+        assert_eq!(todos(&conn, idea.id).unwrap().len(), 4);
+        assert_eq!(
+            super::super::query::get(&conn, idea.id).unwrap().project_id,
+            None
         );
     }
 }

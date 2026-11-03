@@ -87,6 +87,8 @@ pub struct Idea {
     pub log_count: i64,
     pub tags: Vec<Tag>,
     pub created_at: String,
+    /// The project this idea is worked on in; its todos are that project's tasks.
+    pub project_id: Option<i64>,
 }
 
 /// Columns in the order `Idea::from_row` reads them; tags are filled in afterwards.
@@ -96,10 +98,10 @@ pub const IDEA_COLUMNS: &str = "i.id, i.title, i.description, i.status, i.priori
      (SELECT count(*) FROM idea_steps s WHERE s.idea_id = i.id AND s.done_on IS NOT NULL), \
      (SELECT s.title FROM idea_steps s WHERE s.idea_id = i.id AND s.done_on IS NULL \
         ORDER BY s.sort_order, s.id LIMIT 1), \
-     (SELECT count(*) FROM idea_todos d WHERE d.idea_id = i.id AND d.done_at IS NULL), \
+     (SELECT count(*) FROM tasks d WHERE d.idea_id = i.id AND d.done_at IS NULL), \
      (SELECT count(*) FROM idea_problems p WHERE p.idea_id = i.id AND p.is_solved = 0), \
      (SELECT count(*) FROM idea_logs l WHERE l.idea_id = i.id), \
-     i.created_at";
+     i.created_at, i.project_id";
 
 impl Idea {
     pub fn from_row(row: &Row) -> rusqlite::Result<Self> {
@@ -120,6 +122,7 @@ impl Idea {
             log_count: row.get(13)?,
             tags: Vec::new(),
             created_at: row.get(14)?,
+            project_id: row.get(15)?,
         })
     }
 }

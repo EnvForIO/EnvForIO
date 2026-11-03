@@ -301,7 +301,7 @@ Picked and ordered by the user on 2026-11-19; steps in `docs/m4_custom.md`.
 - [ ] **Desktop calendar widget**: a compact month view marking busy days and deadlines
 - [ ] **Read-only external calendars**: add an ICS link, fetched on a schedule
 - [ ] **RSS**: for low-volume sources such as Quanta Magazine; add and remove feeds, list with cover images, read / unread, open in browser, add to todos in one click, scheduled refresh
-- [ ] **Connect the parts**: tasks from deadlines flow into Today; completion feeds the heatmap
+- [x] **Connect the parts** (2026-11-20, m4_custom.md step 4): tasks from deadlines flow into Today; completion feeds the heatmap
 - [ ] ~~**macOS version**~~ (2026-11-19: not now, by user decision)
 
 ## Safety line algorithm

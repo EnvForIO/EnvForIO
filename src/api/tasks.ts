@@ -132,6 +132,8 @@ export function useTaskMutation<Args, Out>(run: (args: Args) => Promise<Out>) {
     mutationFn: run,
     onSettled: async () => {
       await queryClient.invalidateQueries({ queryKey: taskKeys.all })
+      // An idea's todos are tasks: its list and counts change too.
+      await queryClient.invalidateQueries({ queryKey: ['ideas'] })
       await emit(TASKS_CHANGED)
     },
   })

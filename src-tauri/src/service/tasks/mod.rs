@@ -33,9 +33,10 @@ mod tests {
         let c = mutation::create(&conn, "flagged", TaskView::Important, TODAY).unwrap();
         assert!(c.is_important);
 
+        // Due today puts "submit" in My Day too (since 2026-11-20).
         assert_eq!(
             titles(&query::list(&conn, TaskView::MyDay, TODAY).unwrap()),
-            ["read paper"]
+            ["submit", "read paper"]
         );
         assert_eq!(
             titles(&query::list(&conn, TaskView::Planned, TODAY).unwrap()),
