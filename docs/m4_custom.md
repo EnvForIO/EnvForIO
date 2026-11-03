@@ -77,3 +77,11 @@ Decisions (user, 2026-11-20): idea todos become real tasks; tasks due today (or 
 - `plan_conference` takes an optional idea: the project made (or found) for the edition is linked to that idea.
 - UI: the idea page has a box under venue and deadline: a project picker with progress ("3/8 tasks done · due …") and "Open project"; and, when the venue matches a conference by title or key (`findVenue`), its next paper deadline, countdown and "Plan submission". A task that is an idea's todo shows "Todo of idea …" in its details, opening the idea.
 - Queries: task writes also refresh `['ideas']`; idea writes also refresh `['tasks']` and tell other windows (`tasks-changed`).
+
+## Step 5: project board (2026-11-20)
+
+Decision (user, 2026-11-20): status columns To do / Doing / Done.
+
+- Migration `0014_task_started.sql`: `tasks.started_at`. A task is Doing while it has a start and no `done_at`.
+- `tasks::mutation::set_stage` (command `set_task_stage`, undoable as "Move task"): Doing keeps an earlier start, To do clears it and stops the task's timer, Done completes the task; moving a done task back reopens it. Starting the timer on a task sets its start too.
+- UI: a List / Board switch on the project page (remembered for the session in `ui-store.projectView`). `pages/projects/ProjectBoard.tsx`: three columns, cards with title, module, due date, estimate and steps; drag a card (native drag, as on the calendar) to another column; click to open the details pane; an add box at the bottom of To do. Done shows the latest finished first.

@@ -222,6 +222,17 @@ async setTaskDone(id: number, done: boolean) : Promise<Result<Task, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Moves a task to To do, Doing or Done on a project's board.
+ */
+async setTaskStage(id: number, stage: TaskStage) : Promise<Result<Task, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_task_stage", { id, stage }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async deleteTask(id: number) : Promise<Result<null, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("delete_task", { id }) };
@@ -1270,7 +1281,15 @@ export type Task = { id: number; title: string; note: string; isImportant: boole
 /**
  * The idea this task is a todo of, if any.
  */
-ideaId: number | null }
+ideaId: number | null; 
+/**
+ * RFC 3339 UTC; set while the task is in progress ("Doing" on a board).
+ */
+startedAt: string | null }
+/**
+ * Where a task stands on a project's board.
+ */
+export type TaskStage = "Todo" | "Doing" | "Done"
 export type TaskStep = { id: number; taskId: number; title: string; isDone: boolean; sortOrder: number }
 /**
  * Everything the details pane can edit, sent whole on every save.

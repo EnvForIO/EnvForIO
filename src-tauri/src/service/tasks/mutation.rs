@@ -118,6 +118,37 @@ pub fn set_done(conn: &Connection, id: i64, done: bool) -> AppResult<Task> {
     query::get(conn, id)
 }
 
+/// Where a task stands on a project's board.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
+pub enum TaskStage {
+    Todo,
+    Doing,
+    Done,
+}
+
+/// Moves a task on the board. Doing keeps an earlier start time; To do
+/// forgets it (and stops the timer on the task); Done completes the task.
+pub fn set_stage(conn: &Connection, id: i64, stage: TaskStage) -> AppResult<Task> {
+    if stage == TaskStage::Done {
+        return set_done(conn, id, true);
+    }
+    if stage == TaskStage::Todo && timer::running(conn)?.is_some_and(|t| t.task_id == id) {
+        timer::stop(conn)?;
+    }
+    let now = now_timestamp();
+    let started = (stage == TaskStage::Doing).then_some(now.as_str());
+    let changed = conn.execute(
+        "UPDATE tasks SET done_at = NULL, updated_at = ?3,
+             started_at = CASE WHEN ?2 IS NULL THEN NULL ELSE coalesce(started_at, ?2) END
+         WHERE id = ?1",
+        params![id, started, now],
+    )?;
+    if changed == 0 {
+        return Err(AppError::not_found("task", id));
+    }
+    query::get(conn, id)
+}
+
 pub fn delete(conn: &Connection, id: i64) -> AppResult<()> {
     // Steps go with it (ON DELETE CASCADE).
     if conn.execute("DELETE FROM tasks WHERE id = ?1", params![id])? == 0 {

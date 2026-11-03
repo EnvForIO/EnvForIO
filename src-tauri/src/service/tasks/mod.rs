@@ -189,4 +189,40 @@ mod tests {
             .unwrap()
             .is_empty());
     }
+
+    #[test]
+    fn a_task_moves_through_the_board_stages() {
+        use super::mutation::{set_stage, TaskStage};
+        let conn = open_in_memory();
+        let task = mutation::create(&conn, "write intro", TaskView::Tasks, TODAY).unwrap();
+        assert_eq!(task.started_at, None);
+
+        let doing = set_stage(&conn, task.id, TaskStage::Doing).unwrap();
+        let started = doing.started_at.clone().unwrap();
+        // Doing again keeps the first start; Done completes; back to Doing reopens.
+        assert_eq!(
+            set_stage(&conn, task.id, TaskStage::Doing)
+                .unwrap()
+                .started_at,
+            Some(started.clone())
+        );
+        assert!(set_stage(&conn, task.id, TaskStage::Done)
+            .unwrap()
+            .done_at
+            .is_some());
+        let reopened = set_stage(&conn, task.id, TaskStage::Doing).unwrap();
+        assert_eq!(
+            (reopened.done_at, reopened.started_at),
+            (None, Some(started))
+        );
+        let todo = set_stage(&conn, task.id, TaskStage::Todo).unwrap();
+        assert_eq!((todo.done_at, todo.started_at), (None, None));
+
+        // Starting the timer marks the task as in progress.
+        crate::service::timer::start(&conn, task.id).unwrap();
+        assert!(query::get(&conn, task.id).unwrap().started_at.is_some());
+        // Back to To do stops the timer.
+        set_stage(&conn, task.id, TaskStage::Todo).unwrap();
+        assert!(crate::service::timer::running(&conn).unwrap().is_none());
+    }
 }

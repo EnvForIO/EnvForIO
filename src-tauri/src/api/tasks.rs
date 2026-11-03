@@ -8,7 +8,7 @@ use crate::domain::day::today;
 use crate::entity::task::{Task, TaskStep};
 use crate::errors::AppResult;
 use crate::service::tasks::items::{self, ItemStatus};
-use crate::service::tasks::mutation::{self, TaskUpdate};
+use crate::service::tasks::mutation::{self, TaskStage, TaskUpdate};
 use crate::service::tasks::query::{self, DayCompletion, TaskView};
 
 /// Today as EnvIO counts it (the day starts at 07:00), 'YYYY-MM-DD'.
@@ -39,6 +39,13 @@ pub fn update_task(state: State<'_, AppState>, id: i64, update: TaskUpdate) -> A
     state.changing("Edit task", &[id], |db| {
         mutation::update(db, id, &update, &today())
     })
+}
+
+/// Moves a task to To do, Doing or Done on a project's board.
+#[tauri::command]
+#[specta::specta]
+pub fn set_task_stage(state: State<'_, AppState>, id: i64, stage: TaskStage) -> AppResult<Task> {
+    state.changing("Move task", &[id], |db| mutation::set_stage(db, id, stage))
 }
 
 #[tauri::command]

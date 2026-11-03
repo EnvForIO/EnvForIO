@@ -77,6 +77,7 @@ export type {
   JsonValue,
   RecoveryError,
   Task,
+  TaskStage,
   TaskStep,
   TaskUpdate,
   TaskView,

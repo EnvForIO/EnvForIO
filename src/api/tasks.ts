@@ -18,6 +18,7 @@ import {
   type ItemStatus,
   type Task,
   type TaskUpdate,
+  type TaskStage,
   type TaskView,
 } from '@/lib/tauri-bindings'
 
@@ -152,6 +153,11 @@ export const useCreateDayTask = () =>
 export const useUpdateTask = () =>
   useTaskMutation(async ({ id, update }: { id: number; update: TaskUpdate }) =>
     unwrapResult(await commands.updateTask(id, update))
+  )
+
+export const useSetTaskStage = () =>
+  useTaskMutation(async ({ id, stage }: { id: number; stage: TaskStage }) =>
+    unwrapResult(await commands.setTaskStage(id, stage))
   )
 
 export const useSetTaskDone = () =>

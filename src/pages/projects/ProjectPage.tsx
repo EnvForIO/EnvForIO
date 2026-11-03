@@ -1,10 +1,17 @@
 /**
- * The middle pane for a project: dates and progress at the top, then each
- * module with its tasks, then the ungrouped tasks and an "add module" box.
+ * The middle pane for a project: dates and progress at the top, then
+ * either the list (each module with its tasks, the ungrouped tasks and an
+ * "add module" box) or the board (To do / Doing / Done).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { DownloadIcon, PencilIcon, Trash2Icon } from 'lucide-react'
+import {
+  DownloadIcon,
+  KanbanIcon,
+  ListIcon,
+  PencilIcon,
+  Trash2Icon,
+} from 'lucide-react'
 import {
   useAddModule,
   useDeleteProject,
@@ -30,6 +37,8 @@ import { useTodayLine } from '@/api/plans'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from '@/pages/tasks/dates'
 import { ModuleSection } from './ModuleSection'
+import { ProjectBoard } from './ProjectBoard'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ProjectHealthBadge } from '@/pages/plans/ProjectHealthBadge'
 import { ProjectDialog } from './ProjectDialog'
 import { ExportDialog } from '@/pages/export/ExportDialog'
@@ -47,6 +56,8 @@ function ProjectView({ project }: { project: Project }) {
   const addModule = useAddModule()
   const deleteProject = useDeleteProject()
   const selectView = useUIStore(state => state.selectView)
+  const view = useUIStore(state => state.projectView)
+  const setView = useUIStore(state => state.setProjectView)
   const [editing, setEditing] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -97,6 +108,20 @@ function ProjectView({ project }: { project: Project }) {
           )}
           <ProjectHealthBadge projectId={project.id} />
         </div>
+        <ToggleGroup
+          type="single"
+          size="sm"
+          variant="outline"
+          value={view}
+          onValueChange={v => v && setView(v as 'list' | 'board')}
+        >
+          <ToggleGroupItem value="list" aria-label={t('projects.listView')}>
+            <ListIcon className="size-4" />
+          </ToggleGroupItem>
+          <ToggleGroupItem value="board" aria-label={t('projects.boardView')}>
+            <KanbanIcon className="size-4" />
+          </ToggleGroupItem>
+        </ToggleGroup>
         <Button
           variant="ghost"
           size="icon"
@@ -123,34 +148,38 @@ function ProjectView({ project }: { project: Project }) {
         </Button>
       </header>
 
-      <ScrollArea className="min-h-0 flex-1">
-        <div className="flex flex-col gap-4 pr-3">
-          {modules.map(module => (
+      {view === 'board' ? (
+        <ProjectBoard projectId={project.id} modules={modules} tasks={tasks} />
+      ) : (
+        <ScrollArea className="min-h-0 flex-1">
+          <div className="flex flex-col gap-4 pr-3">
+            {modules.map(module => (
+              <ModuleSection
+                key={module.id}
+                projectId={project.id}
+                module={module}
+                tasks={tasks.filter(task => task.moduleId === module.id)}
+              />
+            ))}
             <ModuleSection
-              key={module.id}
               projectId={project.id}
-              module={module}
-              tasks={tasks.filter(task => task.moduleId === module.id)}
+              module={null}
+              tasks={ungrouped}
             />
-          ))}
-          <ModuleSection
-            projectId={project.id}
-            module={null}
-            tasks={ungrouped}
-          />
-          <input
-            value={moduleName}
-            onChange={e => setModuleName(e.target.value)}
-            onKeyDown={e => {
-              if (e.key !== 'Enter' || moduleName.trim() === '') return
-              addModule.mutate({ projectId: project.id, name: moduleName })
-              setModuleName('')
-            }}
-            placeholder={t('projects.addModule')}
-            className="h-8 rounded-md px-3 text-sm outline-none placeholder:text-muted-foreground hover:bg-accent/40"
-          />
-        </div>
-      </ScrollArea>
+            <input
+              value={moduleName}
+              onChange={e => setModuleName(e.target.value)}
+              onKeyDown={e => {
+                if (e.key !== 'Enter' || moduleName.trim() === '') return
+                addModule.mutate({ projectId: project.id, name: moduleName })
+                setModuleName('')
+              }}
+              placeholder={t('projects.addModule')}
+              className="h-8 rounded-md px-3 text-sm outline-none placeholder:text-muted-foreground hover:bg-accent/40"
+            />
+          </div>
+        </ScrollArea>
+      )}
 
       <ExportDialog
         scope={{ kind: 'Project', id: project.id }}

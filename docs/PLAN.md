@@ -294,7 +294,7 @@ Phase 3 ended with step 1 (2026-11-19): the user keeps the monitor in the main w
 
 Picked and ordered by the user on 2026-11-19; steps in `docs/m4_custom.md`.
 
-- [ ] **Kanban view** as another view of a project
+- [x] **Kanban view** as another view of a project
 - [ ] **Monitor target picker**: defaults to `Local`; can switch to `WSL` or an SSH host (read from `~/.ssh/config`), like picking an environment; the panel shows whichever machine is selected; only the selected target is polled
 - [ ] **nvitop-style GPU panel**: per-GPU utilisation, memory, temperature, power, fan; per-process GPU, memory, user and command. Remote hosts are read by running `nvidia-smi` over SSH; nothing is installed on the server
 - [ ] **Research deadlines** (conference part done 2026-11-20, see m4_custom.md step 3): a conference deadline calendar that creates a project with each stage's dates when a conference is picked; templates for submissions, grants, proposals, defences; AoE time zone conversion

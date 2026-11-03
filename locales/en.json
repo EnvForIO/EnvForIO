@@ -509,5 +509,11 @@
   "ideas.projectHint": "Link a project: this idea's todos become its tasks and count toward its safety line.",
   "ideas.projectProgress": "{{done}}/{{total}} tasks done",
   "ideas.projectDue": "due {{date}}",
-  "tasks.fromIdea": "Todo of idea"
+  "tasks.fromIdea": "Todo of idea",
+  "projects.listView": "List",
+  "projects.boardView": "Board",
+  "projects.stage.Todo": "To do",
+  "projects.stage.Doing": "Doing",
+  "projects.stage.Done": "Done",
+  "projects.addTask": "Add a task"
 }

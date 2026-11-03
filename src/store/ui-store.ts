@@ -18,6 +18,8 @@ interface UIState {
   focusIdeaId: number | null
   /** The task open in the details pane, or null when it is closed. */
   selectedTaskId: number | null
+  /** How a project page shows its tasks: grouped by module, or as a board. */
+  projectView: 'list' | 'board'
 
   toggleLeftSidebar: () => void
   setLeftSidebarVisible: (visible: boolean) => void
@@ -34,6 +36,7 @@ interface UIState {
   selectProject: (id: number) => void
   openPage: (page: MainPage) => void
   openIdea: (id: number) => void
+  setProjectView: (view: 'list' | 'board') => void
 }
 
 /** The full pages the middle pane can show instead of a list or project. */
@@ -60,6 +63,7 @@ export const useUIStore = create<UIState>()(
       page: null,
       focusIdeaId: null,
       selectedTaskId: null,
+      projectView: 'list',
 
       toggleLeftSidebar: () =>
         set(
@@ -162,6 +166,9 @@ export const useUIStore = create<UIState>()(
           undefined,
           'openIdea'
         ),
+
+      setProjectView: view =>
+        set({ projectView: view }, undefined, 'setProjectView'),
 
       selectTask: id =>
         set(

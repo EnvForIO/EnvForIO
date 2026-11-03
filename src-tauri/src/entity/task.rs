@@ -31,6 +31,8 @@ pub struct Task {
     pub created_at: String,
     /// The idea this task is a todo of, if any.
     pub idea_id: Option<i64>,
+    /// RFC 3339 UTC; set while the task is in progress ("Doing" on a board).
+    pub started_at: Option<String>,
 }
 
 /// Columns in the order `Task::from_row` reads them. Step counts come from a subquery.
@@ -40,7 +42,7 @@ pub const TASK_COLUMNS: &str = "t.id, t.title, t.note, t.is_important, t.is_pinn
      t.start_time, t.end_time, \
      (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id), \
      (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id AND s.is_done = 1), \
-     t.created_at, t.idea_id";
+     t.created_at, t.idea_id, t.started_at";
 
 impl Task {
     pub fn from_row(row: &Row) -> rusqlite::Result<Self> {
@@ -65,6 +67,7 @@ impl Task {
             steps_done: row.get(17)?,
             created_at: row.get(18)?,
             idea_id: row.get(19)?,
+            started_at: row.get(20)?,
         })
     }
 }

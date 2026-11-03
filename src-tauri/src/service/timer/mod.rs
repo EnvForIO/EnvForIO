@@ -41,9 +41,15 @@ pub fn start(conn: &Connection, task_id: i64) -> AppResult<RunningTimer> {
         return Err(AppError::invalid("the task is already done"));
     }
     stop(conn)?;
+    let now = now_timestamp();
     conn.execute(
         "INSERT INTO time_entries (task_id, started_at) VALUES (?1, ?2)",
-        params![task_id, now_timestamp()],
+        params![task_id, now],
+    )?;
+    // Timing a task means working on it: "Doing" on its project's board.
+    conn.execute(
+        "UPDATE tasks SET started_at = coalesce(started_at, ?2) WHERE id = ?1",
+        params![task_id, now],
     )?;
     running(conn)?.ok_or_else(|| AppError::invalid("timer did not start"))
 }
