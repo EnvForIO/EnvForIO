@@ -3,12 +3,12 @@
  * usual, the note, events of subscribed calendars, and its tasks. Drop a task to schedule it here;
  * right-click for a new task, the note and the day's available time.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useScheduleTask } from '@/api/calendar'
 import { showContextMenu } from '@/lib/context-menu'
 import { formatMinutes } from '@/lib/duration'
 import type { CalendarEvent, Task } from '@/lib/tauri-bindings'
+import { useDropTarget } from '@/hooks/useDropTarget'
 import { cn } from '@/lib/utils'
 import { EventChip } from './EventChip'
 import { TASK_DRAG_TYPE, TaskChip } from './TaskChip'
@@ -31,7 +31,9 @@ export function DayCell(props: Props) {
   const { colors, onOpen } = props
   const { t } = useTranslation()
   const scheduleTask = useScheduleTask()
-  const [dropping, setDropping] = useState(false)
+  const { dropping, handlers } = useDropTarget(TASK_DRAG_TYPE, id =>
+    scheduleTask.mutate({ id, date })
+  )
 
   const openMenu = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -48,18 +50,7 @@ export function DayCell(props: Props) {
     <div
       onContextMenu={openMenu}
       onDoubleClick={() => onOpen(date)}
-      onDragOver={e => {
-        if (!e.dataTransfer.types.includes(TASK_DRAG_TYPE)) return
-        e.preventDefault()
-        setDropping(true)
-      }}
-      onDragLeave={() => setDropping(false)}
-      onDrop={e => {
-        e.preventDefault()
-        setDropping(false)
-        const id = Number(e.dataTransfer.getData(TASK_DRAG_TYPE))
-        if (id) scheduleTask.mutate({ id, date })
-      }}
+      {...handlers}
       className={cn(
         'flex min-h-0 flex-col gap-0.5 overflow-hidden border-r border-b p-1',
         tall ? 'min-h-64' : 'min-h-20',

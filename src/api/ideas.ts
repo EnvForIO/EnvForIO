@@ -102,11 +102,6 @@ export const useCreateTag = () =>
     unwrapResult(await commands.createTag(name, color))
   )
 
-export const useDeleteTag = () =>
-  useIdeaMutation(async (id: number) =>
-    unwrapResult(await commands.deleteTag(id))
-  )
-
 export const useAddIdeaStep = () =>
   useIdeaMutation(
     async ({ ideaId, title }: { ideaId: number; title: string }) =>

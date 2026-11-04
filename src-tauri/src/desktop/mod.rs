@@ -1,8 +1,8 @@
-//! Desktop features with no business logic: tray, and later the small
-//! satellite windows and their shortcuts.
+//! What EnvIO does as a desktop app, outside its commands: the tray, the
+//! Todo Duo windows (mini mode), the machine monitor's sampling thread, and
+//! the background refresh of subscribed calendars and RSS feeds.
 
-pub mod calendars;
 pub mod duo;
-pub mod feeds;
 pub mod monitor;
+pub mod refresh;
 pub mod tray;

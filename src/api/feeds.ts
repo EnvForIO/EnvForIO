@@ -4,10 +4,10 @@
  * `feeds-changed`; `useFeedSync` listens. "Add to todos" is a task write,
  * so it goes through the task mutation (refreshing every task list).
  */
-import { useEffect } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { listen } from '@tauri-apps/api/event'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useInvalidateOn } from '@/hooks/useInvalidateOn'
 import { commands, unwrapResult } from '@/lib/tauri-bindings'
+import { useInvalidatingMutation } from './mutation'
 import { useTaskMutation } from './tasks'
 
 const KEY = ['feeds'] as const
@@ -25,46 +25,32 @@ export const useFeedItems = (feedId: number | null, unreadOnly: boolean) =>
       unwrapResult(await commands.listFeedItems(feedId, unreadOnly)),
   })
 
-export function useFeedSync() {
-  const queryClient = useQueryClient()
-  useEffect(() => {
-    const unlisten = listen('feeds-changed', () => {
-      void queryClient.invalidateQueries({ queryKey: KEY })
-    })
-    return () => {
-      void unlisten.then(stop => stop())
-    }
-  }, [queryClient])
-}
-
-function useFeedMutation<Args, Out>(run: (args: Args) => Promise<Out>) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: run,
-    onSettled: () => queryClient.invalidateQueries({ queryKey: KEY }),
-  })
-}
+export const useFeedSync = () => useInvalidateOn('feeds-changed', KEY)
 
 export const useAddFeed = () =>
-  useFeedMutation(async (url: string) =>
+  useInvalidatingMutation([KEY], async (url: string) =>
     unwrapResult(await commands.addFeed(url))
   )
 
 export const useRemoveFeed = () =>
-  useFeedMutation(async (id: number) =>
+  useInvalidatingMutation([KEY], async (id: number) =>
     unwrapResult(await commands.removeFeed(id))
   )
 
 export const useRefreshFeeds = () =>
-  useFeedMutation(async () => unwrapResult(await commands.refreshFeeds()))
+  useInvalidatingMutation([KEY], async () =>
+    unwrapResult(await commands.refreshFeeds())
+  )
 
 export const useSetFeedItemRead = () =>
-  useFeedMutation(async ({ id, read }: { id: number; read: boolean }) =>
-    unwrapResult(await commands.setFeedItemRead(id, read))
+  useInvalidatingMutation(
+    [KEY],
+    async ({ id, read }: { id: number; read: boolean }) =>
+      unwrapResult(await commands.setFeedItemRead(id, read))
   )
 
 export const useMarkFeedRead = () =>
-  useFeedMutation(async (feedId: number | null) =>
+  useInvalidatingMutation([KEY], async (feedId: number | null) =>
     unwrapResult(await commands.markFeedRead(feedId))
   )
 

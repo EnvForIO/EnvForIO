@@ -10,6 +10,7 @@ import {
   unwrapResult,
   type ConferenceList,
 } from '@/lib/tauri-bindings'
+import { monthKey } from './month'
 import { useTaskMutation } from './tasks'
 
 const KEY = ['tasks', 'conferences'] as const
@@ -45,7 +46,11 @@ export function useFollowConference() {
             ),
           }
       ),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: KEY }),
+    // The Duo card's Month tab shows followed conferences' deadlines.
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: KEY })
+      await queryClient.invalidateQueries({ queryKey: monthKey })
+    },
   })
 }
 

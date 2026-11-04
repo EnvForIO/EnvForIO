@@ -23,7 +23,7 @@ import type { Conference } from '@/lib/tauri-bindings'
 import { DeadlineCard } from './DeadlineCard'
 import { ConferenceRow } from './ConferenceRow'
 import { AREAS, nextRound } from './deadline'
-import { useNow } from './useNow'
+import { useNow } from '@/hooks/useNow'
 
 /** How many search results to draw at once. */
 const SHOWN = 100

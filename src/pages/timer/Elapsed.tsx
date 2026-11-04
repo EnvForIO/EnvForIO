@@ -2,7 +2,7 @@
  * A running clock since `startedAt` (RFC 3339), ticking once a second.
  * Display only: the minutes that count are worked out in Rust on stop.
  */
-import { useEffect, useState } from 'react'
+import { useNow } from '@/hooks/useNow'
 
 function format(seconds: number): string {
   const h = Math.floor(seconds / 3600)
@@ -13,11 +13,7 @@ function format(seconds: number): string {
 }
 
 export function Elapsed({ startedAt }: { startedAt: string }) {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(id)
-  }, [])
+  const now = useNow(1000)
   const seconds = Math.max(0, Math.floor((now - Date.parse(startedAt)) / 1000))
   return <span className="tabular-nums">{format(seconds)}</span>
 }

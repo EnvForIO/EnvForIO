@@ -11,6 +11,7 @@ import { useAddProjectTask } from '@/api/projects'
 import { useSetTaskStage } from '@/api/tasks'
 import { formatMinutes } from '@/lib/duration'
 import type { Module, Task, TaskStage } from '@/lib/tauri-bindings'
+import { useDropTarget } from '@/hooks/useDropTarget'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from '@/pages/tasks/dates'
@@ -73,7 +74,9 @@ function Column({
   const { t } = useTranslation()
   const setStage = useSetTaskStage()
   const addTask = useAddProjectTask()
-  const [dropping, setDropping] = useState(false)
+  const { dropping, handlers } = useDropTarget(DRAG_TYPE, id =>
+    setStage.mutate({ id, stage })
+  )
   const [title, setTitle] = useState('')
 
   const add = () => {
@@ -84,17 +87,7 @@ function Column({
 
   return (
     <section
-      onDragOver={e => {
-        if (!e.dataTransfer.types.includes(DRAG_TYPE)) return
-        e.preventDefault()
-        setDropping(true)
-      }}
-      onDragLeave={() => setDropping(false)}
-      onDrop={e => {
-        setDropping(false)
-        const id = Number(e.dataTransfer.getData(DRAG_TYPE))
-        if (id) setStage.mutate({ id, stage })
-      }}
+      {...handlers}
       className={cn(
         'flex min-h-0 flex-col gap-2 rounded-lg bg-muted/50 p-2 transition-colors',
         dropping && 'bg-accent ring-2 ring-primary/30'

@@ -8,8 +8,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
-import { commands, unwrapResult, type DayMarks } from '@/lib/tauri-bindings'
+import { useMonthMarks } from '@/api/month'
+import { commands, type DayMarks } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { calendarRange, shiftAnchor } from '@/pages/calendar/calendar-range'
 import { parseDate } from '@/pages/tasks/dates'
@@ -17,14 +17,6 @@ import { BUSY_COLOR, busy, isDeadline } from './busy'
 import { selectDuoDay } from './events'
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
-
-/** Under ['tasks'] so every task change in any window refreshes it. */
-function useMonthMarks(from: string, to: string) {
-  return useQuery({
-    queryKey: ['tasks', 'month', from, to] as const,
-    queryFn: async () => unwrapResult(await commands.monthMarks(from, to)),
-  })
-}
 
 export function CardMonth({ today, day }: { today: string; day: string }) {
   const { t } = useTranslation()

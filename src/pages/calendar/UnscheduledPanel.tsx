@@ -2,9 +2,9 @@
  * "To schedule": open tasks without a day. Drag one onto the calendar;
  * drop a scheduled task here to take it off the calendar.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useScheduleTask, useUnscheduledTasks } from '@/api/calendar'
+import { useDropTarget } from '@/hooks/useDropTarget'
 import { cn } from '@/lib/utils'
 import { TASK_DRAG_TYPE, TaskChip } from './TaskChip'
 
@@ -12,22 +12,13 @@ export function UnscheduledPanel({ colors }: { colors: Map<number, string> }) {
   const { t } = useTranslation()
   const { data: tasks = [] } = useUnscheduledTasks()
   const scheduleTask = useScheduleTask()
-  const [dropping, setDropping] = useState(false)
+  const { dropping, handlers } = useDropTarget(TASK_DRAG_TYPE, id =>
+    scheduleTask.mutate({ id, date: null })
+  )
 
   return (
     <aside
-      onDragOver={e => {
-        if (!e.dataTransfer.types.includes(TASK_DRAG_TYPE)) return
-        e.preventDefault()
-        setDropping(true)
-      }}
-      onDragLeave={() => setDropping(false)}
-      onDrop={e => {
-        e.preventDefault()
-        setDropping(false)
-        const id = Number(e.dataTransfer.getData(TASK_DRAG_TYPE))
-        if (id) scheduleTask.mutate({ id, date: null })
-      }}
+      {...handlers}
       className={cn(
         'flex w-56 shrink-0 flex-col gap-1 overflow-y-auto border-l p-2',
         dropping && 'bg-primary/10'

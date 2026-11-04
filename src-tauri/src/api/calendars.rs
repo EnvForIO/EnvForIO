@@ -1,7 +1,7 @@
 //! External calendar commands; storage is in `service::calendars`, parsing
 //! in `domain::ics`. Downloads never hold the database lock across the
 //! network call. `refresh` is also run on start and hourly by
-//! `desktop::calendars`.
+//! `desktop::refresh`.
 
 use chrono::Utc;
 use tauri::State;

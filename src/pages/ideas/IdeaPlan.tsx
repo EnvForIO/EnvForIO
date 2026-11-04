@@ -29,7 +29,7 @@ import {
   urgency,
   when,
 } from '@/pages/conferences/deadline'
-import { useNow } from '@/pages/conferences/useNow'
+import { useNow } from '@/hooks/useNow'
 import { useUIStore } from '@/store/ui-store'
 
 const NONE = 'none'

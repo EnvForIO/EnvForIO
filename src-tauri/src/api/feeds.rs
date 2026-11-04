@@ -1,7 +1,7 @@
 //! RSS reader commands; storage is in `service::feeds`, parsing in
 //! `domain::feed`. Downloads never hold the database lock across the
 //! network call. `refresh` also runs on start and every three hours
-//! (`desktop::feeds`).
+//! (`desktop::refresh`).
 
 use chrono::Utc;
 use tauri::State;

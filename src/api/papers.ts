@@ -3,7 +3,7 @@
  * commands. Every write refetches everything under ['papers'] and ['ideas'],
  * since ideas show their attached papers.
  */
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { writeText } from '@tauri-apps/plugin-clipboard-manager'
 import {
   commands,
@@ -12,6 +12,7 @@ import {
   type PaperRelation,
   type PaperUpdate,
 } from '@/lib/tauri-bindings'
+import { useInvalidatingMutation } from './mutation'
 
 export const paperKeys = {
   all: ['papers'] as const,
@@ -68,36 +69,27 @@ export async function copyBibtex(id: number) {
 // ---------------------------------------------------------------------------
 // Writes
 
-function usePaperMutation<Args, Out>(run: (args: Args) => Promise<Out>) {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: run,
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: paperKeys.all })
-      await queryClient.invalidateQueries({ queryKey: ['ideas'] })
-    },
-  })
-}
-
 /** A DOI or arXiv id/link (looked up online), or a plain title. */
 export const useAddPaper = () =>
-  usePaperMutation(async (input: string) =>
+  useInvalidatingMutation([paperKeys.all, ['ideas']], async (input: string) =>
     unwrapResult(await commands.addPaper(input))
   )
 
 export const useUpdatePaper = () =>
-  usePaperMutation(
+  useInvalidatingMutation(
+    [paperKeys.all, ['ideas']],
     async ({ id, update }: { id: number; update: PaperUpdate }) =>
       unwrapResult(await commands.updatePaper(id, update))
   )
 
 export const useDeletePaper = () =>
-  usePaperMutation(async (id: number) =>
+  useInvalidatingMutation([paperKeys.all, ['ideas']], async (id: number) =>
     unwrapResult(await commands.deletePaper(id))
   )
 
 export const useLinkPaper = () =>
-  usePaperMutation(
+  useInvalidatingMutation(
+    [paperKeys.all, ['ideas']],
     async (a: {
       ideaId: number
       paperId: number
@@ -110,7 +102,8 @@ export const useLinkPaper = () =>
   )
 
 export const useUnlinkPaper = () =>
-  usePaperMutation(
+  useInvalidatingMutation(
+    [paperKeys.all, ['ideas']],
     async ({ ideaId, paperId }: { ideaId: number; paperId: number }) =>
       unwrapResult(await commands.unlinkPaper(ideaId, paperId))
   )
