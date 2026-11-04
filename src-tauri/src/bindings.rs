@@ -2,7 +2,7 @@ use tauri_specta::{collect_commands, Builder};
 
 pub fn generate_bindings() -> Builder<tauri::Wry> {
     use crate::api::{
-        calendar, calendars, conferences, export, ideas, monitor, papers, plans, projects,
+        calendar, calendars, conferences, export, feeds, ideas, monitor, papers, plans, projects,
         research, stats, tasks, timer, windows,
     };
     use crate::commands::{notifications, preferences, quick_pane, recovery};
@@ -85,6 +85,14 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         calendars::remove_calendar,
         calendars::refresh_calendars,
         calendars::list_calendar_events,
+        feeds::list_feeds,
+        feeds::add_feed,
+        feeds::remove_feed,
+        feeds::refresh_feeds,
+        feeds::list_feed_items,
+        feeds::set_feed_item_read,
+        feeds::mark_feed_read,
+        feeds::add_feed_item_to_todos,
         conferences::list_conferences,
         conferences::refresh_conferences,
         conferences::follow_conference,

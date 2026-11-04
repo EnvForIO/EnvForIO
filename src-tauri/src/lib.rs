@@ -128,6 +128,7 @@ pub fn run() {
             // The overview's machines are read only once a window watches them.
             desktop::monitor::start(app.handle(), machines);
             desktop::calendars::start(app.handle());
+            desktop::feeds::start(app.handle());
 
             // The tray keeps EnvIO reachable after its window is closed.
             #[cfg(desktop)]

@@ -42,6 +42,8 @@ export type {
   Calendar,
   CalendarEvent,
   Conference,
+  Feed,
+  FeedItem,
   DayItem,
   DayItemKind,
   DayMarks,

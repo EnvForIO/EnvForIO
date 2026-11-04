@@ -11,6 +11,7 @@ import {
   ChartColumnIcon,
   LibraryIcon,
   LightbulbIcon,
+  RssIcon,
   ListChecksIcon,
   HouseIcon,
   LayoutDashboardIcon,
@@ -92,6 +93,7 @@ export function SidebarNav() {
       <PageItem page="conferences" icon={CalendarClockIcon} />
       <PageItem page="ideas" icon={LightbulbIcon} />
       <PageItem page="papers" icon={LibraryIcon} />
+      <PageItem page="reader" icon={RssIcon} />
       <PageItem page="monitor" icon={ActivityIcon} />
     </nav>
   )

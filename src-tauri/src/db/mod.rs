@@ -29,6 +29,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../../migrations/0015_calendars.sql"),
     include_str!("../../migrations/0016_month_widget.sql"),
     include_str!("../../migrations/0017_drop_widgets.sql"),
+    include_str!("../../migrations/0018_feeds.sql"),
 ];
 
 /// Open (or create) the database file and migrate it.

@@ -5,6 +5,7 @@ pub mod capacity;
 pub mod conferences;
 pub mod days;
 pub mod export;
+pub mod feeds;
 pub mod ideas;
 pub mod machines;
 pub mod month;

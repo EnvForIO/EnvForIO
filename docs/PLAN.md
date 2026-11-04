@@ -300,7 +300,7 @@ Picked and ordered by the user on 2026-11-19; steps in `docs/m4_custom.md`.
 - [ ] **Research deadlines** (conference part done 2026-11-20, see m4_custom.md step 3): a conference deadline calendar that creates a project with each stage's dates when a conference is picked; templates for submissions, grants, proposals, defences; AoE time zone conversion
 - [x] **Desktop calendar widget** (2026-11-20: the Month tab of the Todo Duo card, m4_custom.md step 7): a compact month view marking busy days and deadlines
 - [x] **Read-only external calendars** (2026-11-20, m4_custom.md step 6): add an ICS link, fetched on a schedule
-- [ ] **RSS**: for low-volume sources such as Quanta Magazine; add and remove feeds, list with cover images, read / unread, open in browser, add to todos in one click, scheduled refresh
+- [x] **RSS** (2026-11-20, m4_custom.md step 8): for low-volume sources such as Quanta Magazine; add and remove feeds, list with cover images, read / unread, open in browser, add to todos in one click, scheduled refresh
 - [x] **Connect the parts** (2026-11-20, m4_custom.md step 4): tasks from deadlines flow into Today; completion feeds the heatmap
 - [ ] ~~**macOS version**~~ (2026-11-19: not now, by user decision)
 

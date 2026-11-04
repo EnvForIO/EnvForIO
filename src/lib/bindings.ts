@@ -686,6 +686,79 @@ async listCalendarEvents(fromMs: number, toMs: number) : Promise<Result<Calendar
     else return { status: "error", error: e  as any };
 }
 },
+async listFeeds() : Promise<Result<Feed[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_feeds") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Subscribes to a feed, or to the feed a web page names.
+ */
+async addFeed(url: string) : Promise<Result<Feed, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_feed", { url }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async removeFeed(id: number) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("remove_feed", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async refreshFeeds() : Promise<Result<Feed[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("refresh_feeds") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Items of one feed (or all, with None), newest first.
+ */
+async listFeedItems(feedId: number | null, unreadOnly: boolean) : Promise<Result<FeedItem[], AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("list_feed_items", { feedId, unreadOnly }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async setFeedItemRead(id: number, read: boolean) : Promise<Result<FeedItem, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_feed_item_read", { id, read }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+async markFeedRead(feedId: number | null) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("mark_feed_read", { feedId }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Makes a todo "Read: <title>" with the link in its note.
+ */
+async addFeedItemToTodos(id: number) : Promise<Result<FeedItem, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("add_feed_item_to_todos", { id }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async listConferences() : Promise<Result<ConferenceList, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("list_conferences") };
@@ -1236,6 +1309,8 @@ projectId?: number | null }
 export type Export = { title: string; rows: ExportRow[] }
 export type ExportRow = { id: number; date: string | null; startTime: string | null; endTime: string | null; title: string; project: string | null; module: string | null; estimateMinutes: number | null; actualMinutes: number | null; dueDate: string | null; done: boolean; note: string }
 export type ExportScope = { kind: "Day"; date: string } | { kind: "Week"; date: string } | { kind: "Month"; date: string } | { kind: "Project"; id: number }
+export type Feed = { id: number; title: string; url: string; site: string; fetchedAt: string | null; error: string | null; unread: number }
+export type FeedItem = { id: number; feedId: number; feedTitle: string; title: string; link: string; author: string; summary: string; image: string | null; dateMs: number; isRead: boolean; taskId: number | null }
 export type ForecastDay = { date: string; minutes: number; capacity: number | null }
 export type GpuInfo = { index: number; name: string; memoryTotal: number | null }
 /**

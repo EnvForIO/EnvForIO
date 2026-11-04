@@ -103,3 +103,12 @@ Decisions (user, 2026-11-20): days show deadlines and how busy they are; a click
 - `service/month::marks(from, to)` (command `month_marks`): per day, the minutes of tasks scheduled on it, the day's available minutes (weekday default or override), and items: project deadlines, open tasks due, followed conferences' abstract and paper deadlines (local day), then scheduled tasks.
 - Double-click: `open_calendar_day` leaves mini mode and sends `open-calendar-day` to the main window, which opens the calendar page at that day (`ui-store.calendarDate`).
 - The separate widget window, its tray item and capability were removed; migration `0017_drop_widgets.sql` drops the `widgets` table that `0016` added for it.
+
+## Step 8: RSS reader (2026-11-20)
+
+Decisions (user, 2026-11-20): magazines and blogs (RSS 2.0, Atom); the feed's summary is read in EnvIO and the full article in the browser; refreshed on start and every three hours, plus a button.
+
+- `domain/feed.rs` (with `feed-rs`): title, link, author, date, cover image (media thumbnail or content, else the first `<img>`, made absolute) and the summary as plain text (`html_to_text`: scripts, styles and captions dropped, paragraphs kept, entities decoded with `html-escape`). Feed HTML is never rendered. `feed_candidates` lists where a pasted site's feed may be: advertised feeds, then /feed/, /rss, /rss.xml, /atom.xml, /feed.xml, /index.xml, and comment feeds last (Quanta's front page advertises only its comments feed). Checked on Quanta's real feed.
+- Migration `0018_feeds.sql`: `feeds` and `feed_items` (unique per feed and guid; read state kept across downloads; newest 200 per feed kept; `task_id` for "Add to todos").
+- `service/feeds`, `api/feeds.rs` (downloads outside the database lock), `desktop/feeds.rs` (start and every three hours, `feeds-changed`). Commands: `list_feeds`, `add_feed` (a feed or a site address; https:// is added when missing), `remove_feed`, `refresh_feeds`, `list_feed_items`, `set_feed_item_read`, `mark_feed_read`, `add_feed_item_to_todos` (a task "Read: <title>" in the pool, with the feed and link in its note; once per item).
+- UI (`pages/reader/`, sidebar "Reader"): feeds with unread counts and an address box (right-click a feed: mark all read, remove); items newest first with cover thumbnails, All / Unread, mark all read; the reading pane with cover, byline, summary paragraphs, Open in browser, Add to todos, Mark as unread. Opening an item marks it read.

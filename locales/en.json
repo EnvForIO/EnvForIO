@@ -537,5 +537,22 @@
   "month.kind.Conference": "conference",
   "month.kind.Scheduled": "planned",
   "duo.tab.todo": "Todo",
-  "duo.tab.month": "Month"
+  "duo.tab.month": "Month",
+  "reader.title": "Reader",
+  "reader.refresh": "Refresh feeds",
+  "reader.addPlaceholder": "Feed or site address",
+  "reader.all": "All feeds",
+  "reader.empty": "Paste the address of a feed or a site (e.g. quantamagazine.org) and press Enter. Feeds refresh on start and every three hours.",
+  "reader.markAllRead": "Mark all read",
+  "reader.remove": "Remove feed",
+  "reader.unread": "Unread",
+  "reader.everything": "All",
+  "reader.noItems": "Nothing here.",
+  "reader.pick": "Pick an article to read its summary.",
+  "reader.openInBrowser": "Open in browser",
+  "reader.addToTodos": "Add to todos",
+  "reader.addedToTodos": "Added to your tasks",
+  "reader.inTodos": "In todos",
+  "reader.markUnread": "Mark as unread",
+  "reader.noSummary": "The feed gives no summary; open it in the browser."
 }

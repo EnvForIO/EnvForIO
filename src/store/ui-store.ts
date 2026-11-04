@@ -52,6 +52,7 @@ export type MainPage =
   | 'ideas'
   | 'papers'
   | 'monitor'
+  | 'reader'
 
 export const useUIStore = create<UIState>()(
   devtools(

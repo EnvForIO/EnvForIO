@@ -2,6 +2,7 @@
 
 pub mod calendar;
 pub mod conference;
+pub mod feed;
 pub mod idea;
 pub mod monitor;
 pub mod paper;

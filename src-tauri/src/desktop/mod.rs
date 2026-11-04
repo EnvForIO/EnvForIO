@@ -3,5 +3,6 @@
 
 pub mod calendars;
 pub mod duo;
+pub mod feeds;
 pub mod monitor;
 pub mod tray;
