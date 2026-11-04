@@ -16,15 +16,13 @@ pub const AUTOSTART_ARG: &str = "--autostart";
 
 const SHOW_ID: &str = "show";
 const MINI_ID: &str = "mini";
-const MONTH_ID: &str = "month-widget";
 const QUIT_ID: &str = "quit";
 
 pub fn create(app: &AppHandle) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, SHOW_ID, "Show EnvIO", true, None::<&str>)?;
     let mini = MenuItem::with_id(app, MINI_ID, "Mini mode", true, None::<&str>)?;
-    let month = MenuItem::with_id(app, MONTH_ID, "Desktop calendar", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, QUIT_ID, "Quit EnvIO", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &mini, &month, &quit])?;
+    let menu = Menu::with_items(app, &[&show, &mini, &quit])?;
 
     let mut tray = TrayIconBuilder::with_id("main")
         .tooltip("EnvIO")
@@ -33,7 +31,6 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
         .on_menu_event(|app, event| match event.id.as_ref() {
             SHOW_ID => leave_mini_mode(app),
             MINI_ID => enter_mini_mode(app),
-            MONTH_ID => super::month_widget::toggle(app),
             QUIT_ID => app.exit(0),
             _ => {}
         })

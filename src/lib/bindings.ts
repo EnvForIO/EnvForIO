@@ -1116,19 +1116,13 @@ async leaveMiniMode() : Promise<void> {
     await TAURI_INVOKE("leave_mini_mode");
 },
 /**
- * Hide the desktop calendar widget (its close button); the tray brings it back.
- */
-async hideMonthWidget() : Promise<void> {
-    await TAURI_INVOKE("hide_month_widget");
-},
-/**
- * Open the main window's calendar at a day (double-click in the widget).
+ * Open the main window's calendar at a day (double-click in the Duo card's month).
  */
 async openCalendarDay(date: string) : Promise<void> {
     await TAURI_INVOKE("open_calendar_day", { date });
 },
 /**
- * Each day's marks for the desktop calendar widget, `from` to `to` inclusive.
+ * Each day's marks for the Todo Duo card's Month tab, `from` to `to` inclusive.
  */
 async monthMarks(from: string, to: string) : Promise<Result<DayMarks[], AppError>> {
     try {

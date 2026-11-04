@@ -1,5 +1,5 @@
 /**
- * How full a day is in the desktop calendar widget: the time of the tasks
+ * How full a day is in the Todo Duo card's Month tab: the time of the tasks
  * scheduled on it against the time available. Shaded like the Monitor's
  * thresholds: calm blue while there is room, yellow when nearly full, red
  * when over.

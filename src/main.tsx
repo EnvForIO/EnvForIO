@@ -20,11 +20,6 @@ async function mount(): Promise<void> {
     renderDuo(root, windowName === 'duo-capsule' ? 'capsule' : 'card')
     return
   }
-  if (windowName === 'month-widget') {
-    const { renderMonth } = await import('./windows/month')
-    renderMonth(root)
-    return
-  }
   if (windowName === 'quick-pane') {
     const { renderQuickPane } = await import('./windows/quick-pane')
     renderQuickPane(root)

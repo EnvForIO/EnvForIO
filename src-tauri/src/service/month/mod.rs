@@ -1,4 +1,4 @@
-//! What the desktop calendar widget shows for each day (phase 4 step 7,
+//! What the Todo Duo card's Month tab shows for each day (phase 4 step 7,
 //! user decisions 2026-11-20): deadlines as dots (projects, open tasks
 //! due, followed conferences' abstract and paper deadlines), how full the
 //! day is (time of the tasks scheduled on it against its available time),
@@ -7,7 +7,7 @@
 use std::collections::BTreeMap;
 
 use chrono::{Datelike, Local, NaiveDate, TimeZone};
-use rusqlite::{params, Connection, OptionalExtension};
+use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
@@ -192,25 +192,6 @@ pub fn marks(conn: &Connection, from: &str, to: &str) -> AppResult<Vec<DayMarks>
     Ok(days.into_values().collect())
 }
 
-/// Whether a desktop widget was showing when EnvIO last ran.
-pub fn widget_visible(conn: &Connection, name: &str) -> AppResult<bool> {
-    Ok(conn
-        .query_row("SELECT visible FROM widgets WHERE name = ?1", [name], |r| {
-            r.get(0)
-        })
-        .optional()?
-        .unwrap_or(false))
-}
-
-pub fn set_widget_visible(conn: &Connection, name: &str, visible: bool) -> AppResult<()> {
-    conn.execute(
-        "INSERT INTO widgets (name, visible) VALUES (?1, ?2)
-         ON CONFLICT (name) DO UPDATE SET visible = excluded.visible",
-        params![name, visible],
-    )?;
-    Ok(())
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -256,13 +237,5 @@ mod tests {
         let kinds: Vec<_> = days[1].items.iter().map(|i| i.kind).collect();
         assert_eq!(kinds, [DayItemKind::ProjectDeadline, DayItemKind::TaskDue]);
         assert!(days[2].items.is_empty());
-    }
-
-    #[test]
-    fn widgets_remember_being_shown() {
-        let conn = open_in_memory();
-        assert!(!widget_visible(&conn, "month").unwrap());
-        set_widget_visible(&conn, "month", true).unwrap();
-        assert!(widget_visible(&conn, "month").unwrap());
     }
 }

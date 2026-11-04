@@ -12,7 +12,7 @@
 
 use tauri::webview::WebviewWindowBuilder;
 use tauri::{
-    AppHandle, Manager, PhysicalPosition, Runtime, WebviewUrl, WebviewWindow, WindowEvent,
+    AppHandle, Emitter, Manager, PhysicalPosition, Runtime, WebviewUrl, WebviewWindow, WindowEvent,
 };
 
 pub const CAPSULE: &str = "duo-capsule";
@@ -23,7 +23,7 @@ const SLACK: i32 = 1; // physical pixels of rounding we ignore
 
 pub fn create<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let capsule = build(app, CAPSULE, 320.0, 56.0)?;
-    let card = build(app, CARD, 320.0, 380.0)?;
+    let card = build(app, CARD, 320.0, 440.0)?; // room for the Month tab
 
     let card_for_capsule = card.clone();
     capsule.on_window_event(move |event| match event {
@@ -169,6 +169,13 @@ pub fn set_pinned<R: Runtime>(app: &AppHandle<R>, pinned: bool) {
 }
 
 /// Hide the sticky and bring the main window back.
+/// Leaves mini mode onto the calendar page at `date` (a double-click in the
+/// card's Month tab); the main window opens the day on `open-calendar-day`.
+pub fn open_calendar_day<R: Runtime>(app: &AppHandle<R>, date: &str) {
+    leave_mini_mode(app);
+    let _ = app.emit_to("main", "open-calendar-day", date);
+}
+
 pub fn leave_mini_mode<R: Runtime>(app: &AppHandle<R>) {
     hide_both(app);
     if let Some(main) = app.get_webview_window("main") {

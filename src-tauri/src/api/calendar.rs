@@ -59,7 +59,7 @@ pub fn set_day_note(state: State<'_, AppState>, date: String, text: String) -> A
     days::set_note(&state.db(), &date, &text)
 }
 
-/// Each day's marks for the desktop calendar widget, `from` to `to` inclusive.
+/// Each day's marks for the Todo Duo card's Month tab, `from` to `to` inclusive.
 #[tauri::command]
 #[specta::specta]
 pub fn month_marks(

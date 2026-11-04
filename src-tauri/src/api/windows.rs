@@ -1,9 +1,8 @@
-//! Window commands: switching between the main window and mini mode, and
-//! the desktop calendar widget.
+//! Window commands: switching between the main window and mini mode.
 
 use tauri::AppHandle;
 
-use crate::desktop::{duo, month_widget};
+use crate::desktop::duo;
 
 /// Keep the Todo Duo sticky on top of other windows, or not.
 #[tauri::command]
@@ -26,16 +25,9 @@ pub fn leave_mini_mode(app: AppHandle) {
     duo::leave_mini_mode(&app);
 }
 
-/// Hide the desktop calendar widget (its close button); the tray brings it back.
-#[tauri::command]
-#[specta::specta]
-pub fn hide_month_widget(app: AppHandle) {
-    month_widget::hide(&app);
-}
-
-/// Open the main window's calendar at a day (double-click in the widget).
+/// Open the main window's calendar at a day (double-click in the Duo card's month).
 #[tauri::command]
 #[specta::specta]
 pub fn open_calendar_day(app: AppHandle, date: String) {
-    month_widget::open_day(&app, &date);
+    duo::open_calendar_day(&app, &date);
 }

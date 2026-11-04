@@ -137,7 +137,6 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         windows::set_mini_pinned,
         windows::enter_mini_mode,
         windows::leave_mini_mode,
-        windows::hide_month_widget,
         windows::open_calendar_day,
         calendar::month_marks,
     ])

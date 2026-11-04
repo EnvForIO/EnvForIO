@@ -134,7 +134,6 @@ pub fn run() {
             {
                 desktop::tray::create(app.handle())?;
                 desktop::duo::create(app.handle())?;
-                desktop::month_widget::create(app.handle())?;
                 // Started by "Launch at login": stay in the tray instead of opening the window.
                 if std::env::args().any(|arg| arg == desktop::tray::AUTOSTART_ARG) {
                     if let Some(window) = app.get_webview_window("main") {
