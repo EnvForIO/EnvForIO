@@ -545,5 +545,7 @@
   "reader.markUnread": "Mark as unread",
   "reader.noSummary": "The feed gives no summary; open it in the browser.",
   "projects.template.proposal": "Proposal",
-  "projects.milestonesHint": "Adds {{count}} dated milestones before the deadline: {{list}}."
+  "projects.milestonesHint": "Milestones before the deadline: {{list}}",
+  "projects.modulesHint": "Starts with the modules {{list}}; add your own tasks.",
+  "projects.blankHint": "Starts empty: add modules and tasks yourself."
 }

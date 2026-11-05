@@ -180,7 +180,11 @@ export function ProjectDialog({ open, onOpenChange, project }: Props) {
   )
 }
 
-/** What a deadline template adds: "−21 d Experiments done, …". */
+/**
+ * What the chosen template sets up: its dated milestones, else its
+ * modules, else nothing. Always two lines tall, so the dialog keeps its
+ * size when another template is picked.
+ */
 function MilestonesHint({
   id,
   templates,
@@ -189,12 +193,24 @@ function MilestonesHint({
   templates: ProjectTemplate[]
 }) {
   const { t } = useTranslation()
-  const milestones = templates.find(tpl => tpl.id === id)?.milestones ?? []
-  if (milestones.length === 0) return null
-  const list = milestones.map(m => `−${m.daysBefore} d ${m.title}`).join(', ')
+  const tpl = templates.find(x => x.id === id)
+  const milestones = tpl?.milestones ?? []
+  const modules = tpl?.modules ?? []
+  const text =
+    milestones.length > 0
+      ? t('projects.milestonesHint', {
+          count: milestones.length,
+          list: milestones.map(m => `−${m.daysBefore} d ${m.title}`).join(', '),
+        })
+      : modules.length > 0
+        ? t('projects.modulesHint', { list: modules.join(', ') })
+        : t('projects.blankHint')
   return (
-    <p className="text-xs text-muted-foreground">
-      {t('projects.milestonesHint', { count: milestones.length, list })}
+    <p
+      className="line-clamp-2 min-h-[2lh] text-xs text-muted-foreground"
+      title={text}
+    >
+      {text}
     </p>
   )
 }
