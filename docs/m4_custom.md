@@ -121,3 +121,11 @@ Decisions (user, 2026-11-20): magazines and blogs (RSS 2.0, Atom); the feed's su
 - Duplication: one `desktop/refresh.rs` (helper `every`) runs the calendar and feed refreshes; `hooks/useInvalidateOn` (Rust "…-changed" events), `api/mutation.ts::useInvalidatingMutation` (calendars, feeds, papers), `hooks/useNow` (conferences, idea plan, timer), `hooks/useDropTarget` (calendar day, To schedule, board columns).
 - The Month tab's query moved to `api/month.ts`; following a conference now refreshes the Month tab's dots.
 - Kept on purpose: the template's exported helpers (isRTL, loadEmergencyData, TitleBarContent), the type re-exports in `tauri-bindings.ts`, GPU fan and clock readings, and jscpd's three Rust "clones" (test module headers).
+
+## Deadline templates (2026-11-20)
+
+Decision (user, 2026-11-20): paper submission and proposal (开题) templates create dated milestone tasks; offsets are built in and the tasks are ordinary tasks to edit afterwards. Grant and thesis-defence milestones were not wanted.
+
+- `projects/templates.rs`: a template has `milestones` (title, days before the deadline, module). Paper: experiments done −21, full draft −14, advisor review −7, final check and submit −1. New "proposal" template (modules Literature review, Proposal, Presentation): literature review done −30, proposal draft −14, advisor sign-off −7, slides −3, rehearsal −1.
+- `projects::mutation::create` adds them in the same transaction as the modules, due on deadline − offset, in their module; a milestone that would fall before the start date is left out, and a project without a deadline gets none. Conference "Plan submission" uses the paper template, so it gets them too (plus the abstract task).
+- The new-project dialog lists what the chosen template adds ("−21 d Experiments done, …").

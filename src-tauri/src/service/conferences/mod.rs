@@ -285,9 +285,12 @@ mod tests {
         let stage = &parse_all(SAMPLE).unwrap()[0].editions[0].stages[0];
         assert_eq!(p.name, "NeurIPS 2099");
         assert_eq!(p.deadline, local_day(stage.deadline_at.unwrap()));
-        assert_eq!(p.task_count, 1);
+        assert_eq!(p.task_count, 5); // 4 paper milestones + the abstract
         let tasks = project_query::tasks(&conn, p.id).unwrap();
-        let abstract_task = &tasks[0];
+        let abstract_task = tasks
+            .iter()
+            .find(|t| t.title == "NeurIPS abstract")
+            .unwrap();
         assert_eq!(abstract_task.title, "NeurIPS abstract");
         assert_eq!(
             abstract_task.due_date,
@@ -324,7 +327,7 @@ mod tests {
                 .project_id,
             Some(p.id)
         );
-        assert_eq!(p.task_count, 2); // the abstract task and the idea's todo
+        assert_eq!(p.task_count, 6); // milestones, the abstract task and the idea's todo
     }
 
     #[test]

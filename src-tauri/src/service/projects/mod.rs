@@ -50,6 +50,57 @@ mod tests {
     }
 
     #[test]
+    fn deadline_templates_date_their_milestones() {
+        let mut conn = open_in_memory();
+        // input(): starts 2026-11-20, deadline 2026-12-20.
+        let p = mutation::create(&mut conn, &input("Proposal"), "proposal").unwrap();
+        let tasks = query::tasks(&conn, p.id).unwrap();
+        let mut dated: Vec<(String, String)> = tasks
+            .iter()
+            .map(|t| (t.title.clone(), t.due_date.clone().unwrap()))
+            .collect();
+        dated.sort_by(|a, b| a.1.cmp(&b.1));
+        assert_eq!(
+            dated,
+            [
+                (
+                    "Literature review done".to_string(),
+                    "2026-11-20".to_string()
+                ),
+                ("Proposal draft".into(), "2026-12-06".into()),
+                ("Advisor sign-off".into(), "2026-12-13".into()),
+                ("Slides".into(), "2026-12-17".into()),
+                ("Rehearsal".into(), "2026-12-19".into()),
+            ]
+        );
+        let modules = query::modules(&conn, p.id).unwrap();
+        let slides = tasks.iter().find(|t| t.title == "Slides").unwrap();
+        assert_eq!(
+            modules
+                .iter()
+                .find(|m| Some(m.id) == slides.module_id)
+                .map(|m| m.name.as_str()),
+            Some("Presentation")
+        );
+
+        // A deadline too close leaves out the milestones before the start.
+        let mut soon = input("Soon");
+        soon.deadline = Some("2026-11-25".into());
+        let p = mutation::create(&mut conn, &soon, "proposal").unwrap();
+        let titles: Vec<String> = query::tasks(&conn, p.id)
+            .unwrap()
+            .into_iter()
+            .map(|t| t.title)
+            .collect();
+        assert_eq!(titles.len(), 2); // slides (22nd) and rehearsal (24th)
+                                     // No deadline, no milestones.
+        let mut open = input("Open");
+        open.deadline = None;
+        let p = mutation::create(&mut conn, &open, "paper").unwrap();
+        assert!(query::tasks(&conn, p.id).unwrap().is_empty());
+    }
+
+    #[test]
     fn input_is_checked() {
         let mut conn = open_in_memory();
         let mut bad = input("x");

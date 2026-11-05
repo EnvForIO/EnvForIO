@@ -1,5 +1,6 @@
 //! Creating, editing and deleting projects, modules, and project tasks.
 
+use chrono::NaiveDate;
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use specta::Type;
@@ -65,6 +66,27 @@ pub fn create(conn: &mut Connection, input: &ProjectInput, template: &str) -> Ap
         tx.execute(
             "INSERT INTO modules (project_id, name, sort_order) VALUES (?1, ?2, ?3)",
             params![id, module, i as f64],
+        )?;
+    }
+    // Milestones are dated back from the deadline; one that would fall
+    // before the project starts is left out (too late for it).
+    let deadline = input
+        .deadline
+        .as_deref()
+        .and_then(|d| NaiveDate::parse_from_str(d, "%Y-%m-%d").ok());
+    let start = input.start_date.clone().unwrap_or_default();
+    for (i, ms) in template.milestones.iter().enumerate() {
+        let Some(due) = deadline.map(|d| d - chrono::Days::new(ms.days_before.into())) else {
+            break;
+        };
+        let due = due.to_string();
+        if due < start {
+            continue;
+        }
+        tx.execute(
+            "INSERT INTO tasks (title, due_date, project_id, module_id, sort_order, created_at, updated_at)
+             VALUES (?1, ?2, ?3, (SELECT id FROM modules WHERE project_id = ?3 AND name = ?4), ?5, ?6, ?6)",
+            params![ms.title, due, id, ms.module, i as f64, now],
         )?;
     }
     tx.commit()?;

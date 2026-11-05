@@ -543,5 +543,7 @@
   "reader.addedToTodos": "Added to your tasks",
   "reader.inTodos": "In todos",
   "reader.markUnread": "Mark as unread",
-  "reader.noSummary": "The feed gives no summary; open it in the browser."
+  "reader.noSummary": "The feed gives no summary; open it in the browser.",
+  "projects.template.proposal": "Proposal",
+  "projects.milestonesHint": "Adds {{count}} dated milestones before the deadline: {{list}}."
 }

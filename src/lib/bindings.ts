@@ -1364,6 +1364,10 @@ export type MachineInfo = { hostName: string; os: string; cpuBrand: string; logi
  */
 export type MachineSample = { target: MonitorTarget; sample: Sample }
 export type MemorySample = { used: number; total: number; swapUsed: number; swapTotal: number }
+/**
+ * A task a template adds, due `days_before` the deadline, in `module`.
+ */
+export type Milestone = { title: string; daysBefore: number; module: string }
 export type Module = { id: number; projectId: number; name: string; sortOrder: number }
 /**
  * Which machine to watch: this PC, a running WSL distribution, or a host
@@ -1397,7 +1401,7 @@ export type ProjectHealth = { projectId: number; ratio: number; samples: number;
  */
 export type ProjectInput = { name: string; color: string; startDate: string | null; deadline: string | null; bufferDays: number; isArchived: boolean }
 export type ProjectLine = { projectId: number; name: string; color: string; minutes: number; doneMinutes: number }
-export type ProjectTemplate = { id: string; modules: string[] }
+export type ProjectTemplate = { id: string; modules: string[]; milestones: Milestone[] }
 export type ProjectTime = { projectId: number | null; name: string | null; color: string | null; minutes: number; done: number }
 export type ReadingStatus = "ToRead" | "Reading" | "Read"
 /**

@@ -20,7 +20,11 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import type { Project, ProjectInput } from '@/lib/tauri-bindings'
+import type {
+  Project,
+  ProjectInput,
+  ProjectTemplate,
+} from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { formatDate, parseDate } from '@/pages/tasks/dates'
@@ -127,6 +131,7 @@ export function ProjectDialog({ open, onOpenChange, project }: Props) {
               ))}
             </div>
           )}
+          {!project && <MilestonesHint id={template} templates={templates} />}
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
               <Label>{t('projects.startDate')}</Label>
@@ -172,5 +177,24 @@ export function ProjectDialog({ open, onOpenChange, project }: Props) {
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+/** What a deadline template adds: "−21 d Experiments done, …". */
+function MilestonesHint({
+  id,
+  templates,
+}: {
+  id: string
+  templates: ProjectTemplate[]
+}) {
+  const { t } = useTranslation()
+  const milestones = templates.find(tpl => tpl.id === id)?.milestones ?? []
+  if (milestones.length === 0) return null
+  const list = milestones.map(m => `−${m.daysBefore} d ${m.title}`).join(', ')
+  return (
+    <p className="text-xs text-muted-foreground">
+      {t('projects.milestonesHint', { count: milestones.length, list })}
+    </p>
   )
 }
