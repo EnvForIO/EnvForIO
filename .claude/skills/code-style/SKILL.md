@@ -12,7 +12,7 @@ Two sources, two jobs:
 | Question                                  | Follow    | Source                                                                                                                                                                |
 | ----------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | How is the code inside one file written?  | nanochat  | [karpathy/nanochat](https://github.com/karpathy/nanochat): "minimal, readable, hackable", "no giant configuration objects, model factories, or if-then-else monsters" |
-| How is code split into files and modules? | LokiSharp | `CatallaX` and `workerd-manager`; the layered structure in `docs/PLAN.md`                                                                                             |
+| How is code split into files and modules? | LokiSharp | `CatallaX` and `workerd-manager`; the layered structure in `docs/developer/envio-design.md`                                                                                             |
 
 Do **not** copy nanochat's long files (its training script is about 800 lines). EnvIO files stay short. Only the style is borrowed from either, no code.
 
@@ -22,7 +22,7 @@ A reader should be able to open one file, read it from top to bottom once, and u
 
 ## Modules (LokiSharp)
 
-- **Split by layer, then by resource**, as set in `docs/PLAN.md`: `api/`, `service/<resources>/`, `entity/`, `domain/`, `providers/`, `pipeline/`, `desktop/` in Rust; `api/`, `pages/`, `windows/`, `layouts/`, `components/` in TypeScript.
+- **Split by layer, then by resource**, as set in `docs/developer/envio-design.md`: `api/`, `service/<resources>/`, `entity/`, `domain/`, `providers/`, `pipeline/`, `desktop/` in Rust; `api/`, `pages/`, `windows/`, `layouts/`, `components/` in TypeScript.
 - **One responsibility per file.** Inside a resource, split by role the way `workerd-manager` does: `query.rs` for reads, `mutation.rs` for writes, `mod.rs` only re-exports.
 - **Keep files short.** Aim for under 200 lines; past about 300 lines, split the file by role or sub-concept into a folder with a `mod.rs` (Rust) or `index.ts` (TypeScript) that re-exports. These limits are a guideline, not a hard rule; tests at the bottom of a Rust file do not count.
 - **Interface plus implementations for external sources**, as `CatallaX` does with its providers: `base.rs` defines the trait and shared types, `factory.rs` picks one, each implementation is its own file.
@@ -77,7 +77,7 @@ A reader should be able to open one file, read it from top to bottom once, and u
 
 ## Dependencies
 
-- Add a dependency only when it saves real work and is mature (see the library table in `docs/PLAN.md`). A few lines of our own code beat a package for a one-liner.
+- Add a dependency only when it saves real work and is mature (see the library table in `docs/developer/envio-design.md`). A few lines of our own code beat a package for a one-liner.
 
 ## Tests
 

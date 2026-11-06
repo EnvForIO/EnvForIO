@@ -2,7 +2,7 @@
 
 A desktop app for researchers: tasks, deadline planning, research ideas and machine monitoring, in one place. Windows first; macOS later.
 
-Status: early development. The product plan is in [PLAN.md](docs/PLAN.md).
+Status: phases 0–4 are built. How to use it is in the [user guide](docs/userguide/userguide.md); the design decisions are in [envio-design.md](docs/developer/envio-design.md).
 
 ## Stack
 

@@ -1,6 +1,6 @@
 # Phase 1: main window and Todo Duo parity
 
-Started 2026-11-19. Checklist and scope are in `docs/PLAN.md`; this note records how the phase is built.
+Started 2026-11-19. Checklist and scope are in the product plan (deleted 2026-11-20 when finished; see git history); this note records how the phase is built.
 
 ## Step 1: adapt the template
 

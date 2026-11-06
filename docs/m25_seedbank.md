@@ -1,6 +1,6 @@
 # Phase 2.5: Seedbank idea parity
 
-Started 2026-11-19. The checklist is in `docs/PLAN.md`. Ideas are separate from DayEcho projects (own tables); connecting them waits for Phase 4.
+Started 2026-11-19. The checklist is in the product plan (deleted 2026-11-20 when finished; see git history). Ideas are separate from DayEcho projects (own tables); connecting them waits for Phase 4.
 
 ## Steps
 

@@ -1,6 +1,6 @@
 # Phase 3: Glance parity
 
-Started 2026-11-19. The checklist is in `docs/PLAN.md`. The reference is [lulu-loopp/glance](https://github.com/lulu-loopp/glance) (MIT, commit `00a0472`, read on 2026-11-19). Only its readings are in scope: not its edge panel, widgets, looks, workbench, music, search, overlay or phone remote.
+Started 2026-11-19. The checklist is in the product plan (deleted 2026-11-20 when finished; see git history). The reference is [lulu-loopp/glance](https://github.com/lulu-loopp/glance) (MIT, commit `00a0472`, read on 2026-11-19). Only its readings are in scope: not its edge panel, widgets, looks, workbench, music, search, overlay or phone remote.
 
 Done after step 1 (2026-11-19). The plan had four steps: readings and a Monitor page, an edge panel, a desktop widget, and three looks. Step 2 (the edge panel, commit `67d2370`) was built and then reverted at the user's request: they check the machine from the main window, so the Monitor page is the whole of the monitor. Steps 3 and 4 depended on the panel and were dropped with it.
 

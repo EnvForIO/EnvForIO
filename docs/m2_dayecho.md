@@ -1,6 +1,6 @@
 # Phase 2: DayEcho parity
 
-Started 2026-11-19. The checklist is in `docs/PLAN.md`; the safety line rules are in its "Safety line algorithm" section. This note records how the phase is built.
+Started 2026-11-19. The checklist is in the product plan (deleted 2026-11-20 when finished; see git history); the safety line rules are in `docs/developer/envio-design.md`. This note records how the phase is built.
 
 ## Steps
 

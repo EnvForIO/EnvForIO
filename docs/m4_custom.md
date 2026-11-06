@@ -1,6 +1,6 @@
 # Phase 4: customize
 
-Started 2026-11-19. The checklist is in `docs/PLAN.md`. The user picked the items and the order below; CPU and board temperatures (kernel driver) and the macOS version are not being done.
+Started 2026-11-19. The checklist is in the product plan (deleted 2026-11-20 when finished; see git history). The user picked the items and the order below; CPU and board temperatures (kernel driver) and the macOS version are not being done.
 
 ## Steps
 

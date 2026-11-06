@@ -1,5 +1,5 @@
 //! The daily safety line: how many minutes each project needs on each day
-//! so that it finishes on time. Rules (docs/PLAN.md, "Safety line algorithm"):
+//! so that it finishes on time. Rules (docs/developer/envio-design.md, "Safety line algorithm"):
 //!
 //! 1. Only work days count: a day with 0 available minutes is a rest day.
 //! 2. Aim for the plan date (deadline minus buffer); once that has passed,
