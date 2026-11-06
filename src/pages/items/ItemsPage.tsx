@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select'
 import type { ItemStatus } from '@/lib/tauri-bindings'
 import { useItems } from '@/api/tasks'
-import { TaskRow } from '@/pages/tasks/TaskRow'
+import { SortableTasks } from '@/pages/tasks/SortableTasks'
 
 const STATUSES: ItemStatus[] = ['Open', 'WithDeadline', 'Done', 'All']
 const ANY = 'any'
@@ -66,9 +66,13 @@ export function ItemsPage() {
               {t('items.empty')}
             </p>
           )}
-          {tasks.map(task => (
-            <TaskRow key={task.id} task={task} view="Tasks" />
-          ))}
+          {/* "With deadline" sorts by date and "Done" by when; only the
+              manual order of Open and All can be dragged. */}
+          <SortableTasks
+            tasks={tasks}
+            view="Tasks"
+            sortable={status === 'Open' || status === 'All'}
+          />
         </div>
       </ScrollArea>
     </div>

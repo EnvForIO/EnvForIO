@@ -25,7 +25,7 @@ Right-clicking empty space does nothing. In text boxes, or on selected text, rig
 - **Important**: flagged tasks.
 - **Planned**: tasks with a due date, soonest first.
 - **Tasks**: every task that is not in a project.
-- **Order**: drag a task up or down to reorder My Day, Important, Tasks or a project module (Planned is sorted by date). Ctrl+Z undoes it.
+- **Order**: drag a task up or down to reorder My Day, Important, Tasks, a project module, or Items under Open or All (Planned, and Items with deadline or done, are sorted by date). Ctrl+Z undoes it.
 - **Quick capture**: start a title with a time and it becomes the task's time slot. Examples: `14:00-15:00 group meeting`, `9:30 call`.
 - **Details pane**: title, steps, timer, My Day, flag, pin, due date, estimate (`45m`, `1h30m`, `1.5h`) and note. A task that came from an idea shows **Todo of idea …**; click it to open the idea.
 - **Timer**: the play button on a task row starts it (starting another stops the first). Stopping adds the time to the task. **Did part of it** finishes the part you did and moves the rest to the next work day.
