@@ -12,7 +12,7 @@ Two sources, two jobs:
 | Question                                  | Follow    | Source                                                                                                                                                                |
 | ----------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | How is the code inside one file written?  | nanochat  | [karpathy/nanochat](https://github.com/karpathy/nanochat): "minimal, readable, hackable", "no giant configuration objects, model factories, or if-then-else monsters" |
-| How is code split into files and modules? | LokiSharp | `CatallaX` and `workerd-manager`; the layered structure in `docs/developer/envio-design.md`                                                                                             |
+| How is code split into files and modules? | LokiSharp | `CatallaX` and `workerd-manager`; the layered structure in `docs/developer/envio-design.md`                                                                           |
 
 Do **not** copy nanochat's long files (its training script is about 800 lines). EnvIO files stay short. Only the style is borrowed from either, no code.
 
