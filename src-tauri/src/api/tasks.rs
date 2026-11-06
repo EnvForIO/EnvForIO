@@ -41,6 +41,13 @@ pub fn update_task(state: State<'_, AppState>, id: i64, update: TaskUpdate) -> A
     })
 }
 
+/// Puts a list's tasks in the order the user dragged them into.
+#[tauri::command]
+#[specta::specta]
+pub fn reorder_tasks(state: State<'_, AppState>, ids: Vec<i64>) -> AppResult<()> {
+    state.changing("Reorder tasks", &ids, |db| mutation::reorder(db, &ids))
+}
+
 /// Moves a task to To do, Doing or Done on a project's board.
 #[tauri::command]
 #[specta::specta]

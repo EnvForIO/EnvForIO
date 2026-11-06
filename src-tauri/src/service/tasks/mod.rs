@@ -225,4 +225,24 @@ mod tests {
         set_stage(&conn, task.id, TaskStage::Todo).unwrap();
         assert!(crate::service::timer::running(&conn).unwrap().is_none());
     }
+
+    #[test]
+    fn a_dragged_order_sticks() {
+        let mut conn = open_in_memory();
+        let a = mutation::create(&conn, "a", TaskView::MyDay, TODAY).unwrap();
+        let b = mutation::create(&conn, "b", TaskView::MyDay, TODAY).unwrap();
+        let c = mutation::create(&conn, "c", TaskView::MyDay, TODAY).unwrap();
+        // New tasks go on top: c, b, a. Drag a to the top.
+        mutation::reorder(&mut conn, &[a.id, c.id, b.id]).unwrap();
+        assert_eq!(
+            titles(&query::list(&conn, TaskView::MyDay, TODAY).unwrap()),
+            ["a", "c", "b"]
+        );
+        assert!(mutation::reorder(&mut conn, &[b.id, 999]).is_err());
+        // A failed reorder changes nothing.
+        assert_eq!(
+            titles(&query::list(&conn, TaskView::MyDay, TODAY).unwrap()),
+            ["a", "c", "b"]
+        );
+    }
 }

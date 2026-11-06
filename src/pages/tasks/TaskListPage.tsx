@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from './dates'
+import { SortableTasks } from './SortableTasks'
 import { TaskRow } from './TaskRow'
 import { SafetyLineCard } from '@/pages/plans/SafetyLineCard'
 import { TodayNote } from './TodayNote'
@@ -73,9 +74,12 @@ export function TaskListPage() {
             </p>
           )}
 
-          {open.map(task => (
-            <TaskRow key={task.id} task={task} view={view} />
-          ))}
+          {/* Planned sorts by date, so a dragged order would not show there. */}
+          <SortableTasks
+            tasks={open}
+            view={view}
+            sortable={view !== 'Planned'}
+          />
 
           {completed.length > 0 && (
             <>

@@ -30,6 +30,7 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         tasks::update_task,
         tasks::set_task_done,
         tasks::set_task_stage,
+        tasks::reorder_tasks,
         tasks::delete_task,
         tasks::list_task_steps,
         tasks::add_task_step,

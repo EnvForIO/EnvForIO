@@ -233,6 +233,17 @@ async setTaskStage(id: number, stage: TaskStage) : Promise<Result<Task, AppError
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * Puts a list's tasks in the order the user dragged them into.
+ */
+async reorderTasks(ids: number[]) : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("reorder_tasks", { ids }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
 async deleteTask(id: number) : Promise<Result<null, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("delete_task", { id }) };

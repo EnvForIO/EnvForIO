@@ -149,6 +149,24 @@ pub fn set_stage(conn: &Connection, id: i64, stage: TaskStage) -> AppResult<Task
     query::get(conn, id)
 }
 
+/// Puts the tasks of a list in the given order (a drag in the list): they
+/// get the order numbers 0, 1, 2… Lists sort by these numbers after pinned
+/// and done, so the dragged order shows in every list the tasks share.
+pub fn reorder(conn: &mut Connection, ids: &[i64]) -> AppResult<()> {
+    let tx = conn.transaction()?;
+    for (i, id) in ids.iter().enumerate() {
+        if tx.execute(
+            "UPDATE tasks SET sort_order = ?2 WHERE id = ?1",
+            params![id, i as f64],
+        )? == 0
+        {
+            return Err(AppError::not_found("task", *id)); // dropping tx rolls back
+        }
+    }
+    tx.commit()?;
+    Ok(())
+}
+
 pub fn delete(conn: &Connection, id: i64) -> AppResult<()> {
     // Steps go with it (ON DELETE CASCADE).
     if conn.execute("DELETE FROM tasks WHERE id = ?1", params![id])? == 0 {

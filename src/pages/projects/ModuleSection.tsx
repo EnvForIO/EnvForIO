@@ -13,7 +13,7 @@ import {
 } from '@/api/projects'
 import { formatMinutes } from '@/lib/duration'
 import type { Module, Task } from '@/lib/tauri-bindings'
-import { TaskRow } from '@/pages/tasks/TaskRow'
+import { SortableTasks } from '@/pages/tasks/SortableTasks'
 
 interface Props {
   projectId: number
@@ -92,9 +92,7 @@ export function ModuleSection({ projectId, module, tasks }: Props) {
         )}
       </div>
 
-      {tasks.map(task => (
-        <TaskRow key={task.id} task={task} view="Tasks" />
-      ))}
+      <SortableTasks tasks={tasks} view="Tasks" />
 
       <div className="flex items-center gap-2 rounded-md border border-dashed px-3">
         <input

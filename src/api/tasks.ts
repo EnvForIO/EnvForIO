@@ -155,6 +155,12 @@ export const useUpdateTask = () =>
     unwrapResult(await commands.updateTask(id, update))
   )
 
+/** A list's tasks in their new, dragged order. */
+export const useReorderTasks = () =>
+  useTaskMutation(async (ids: number[]) =>
+    unwrapResult(await commands.reorderTasks(ids))
+  )
+
 export const useSetTaskStage = () =>
   useTaskMutation(async ({ id, stage }: { id: number; stage: TaskStage }) =>
     unwrapResult(await commands.setTaskStage(id, stage))
