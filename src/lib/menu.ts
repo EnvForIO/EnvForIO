@@ -14,7 +14,7 @@ import i18n from '@/i18n/config'
 import { useUIStore } from '@/store/ui-store'
 import { logger } from '@/lib/logger'
 
-const APP_NAME = 'Tauri Template'
+const APP_NAME = 'EnvIO'
 
 /**
  * Build and set the application menu with translated labels.
@@ -116,9 +116,7 @@ export function setupMenuLanguageListener(): () => void {
 
 function handleAbout(): void {
   logger.info('About menu item clicked')
-  alert(
-    `${APP_NAME}\n\nVersion: ${__APP_VERSION__}\n\nBuilt with Tauri v2 + React + TypeScript`
-  )
+  alert(`${APP_NAME}\n\nVersion: ${__APP_VERSION__}`)
 }
 
 function handleOpenPreferences(): void {

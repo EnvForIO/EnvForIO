@@ -7,7 +7,6 @@ interface UIState {
   rightSidebarVisible: boolean
   commandPaletteOpen: boolean
   preferencesOpen: boolean
-  lastQuickPaneEntry: string | null
   /** Which built-in list the main pane shows. */
   selectedView: TaskView
   /** The project shown in the middle pane instead of a built-in list, if any. */
@@ -31,7 +30,6 @@ interface UIState {
   setCommandPaletteOpen: (open: boolean) => void
   togglePreferences: () => void
   setPreferencesOpen: (open: boolean) => void
-  setLastQuickPaneEntry: (text: string) => void
   setSquareCorners: (enabled: boolean) => void
   selectView: (view: TaskView) => void
   selectTask: (id: number | null) => void
@@ -61,7 +59,6 @@ export const useUIStore = create<UIState>()(
       rightSidebarVisible: false, // the details pane opens when a task is selected
       commandPaletteOpen: false,
       preferencesOpen: false,
-      lastQuickPaneEntry: null,
       selectedView: 'MyDay',
       selectedProjectId: null,
       page: null,
@@ -117,9 +114,6 @@ export const useUIStore = create<UIState>()(
 
       setPreferencesOpen: open =>
         set({ preferencesOpen: open }, undefined, 'setPreferencesOpen'),
-
-      setLastQuickPaneEntry: text =>
-        set({ lastQuickPaneEntry: text }, undefined, 'setLastQuickPaneEntry'),
 
       selectView: view =>
         set(

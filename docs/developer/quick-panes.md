@@ -50,25 +50,17 @@ toggle_quick_pane(app_handle);  // Shows/hides the existing window
 
 ### Cross-Window Communication
 
-Windows communicate via Tauri events (not shared state):
+Windows communicate via Tauri events (not shared state). The quick pane does its own work, then tells the other windows that data changed:
 
 ```typescript
-// Quick pane: emit event on submit
-await emit('quick-pane-submit', { text: text.trim() })
+// Quick pane: create the task in My Day, then announce the change
+const result = await commands.createTask(text.trim(), 'MyDay')
+if (result.status === 'ok') await emit(TASKS_CHANGED)
 
-// Main window: listen for events
-listen('quick-pane-submit', ({ payload }) => {
-  // Handle the submission - update Zustand, call API, etc.
-  setLastQuickPaneEntry(payload.text)
-})
+// Main window: useTaskSync (src/api/tasks) refetches on TASKS_CHANGED
 ```
 
-This pattern is intentionally flexible - the action can be anything:
-
-- Update Zustand store (as demonstrated)
-- Call a TanStack Query mutation
-- Invoke a Tauri command
-- Make an API request
+The main window needs no listener of its own for the quick pane. The Todo Duo windows use the same event.
 
 ### Theme Synchronization
 
@@ -160,12 +152,12 @@ export default function QuickPaneApp() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (text.trim()) {
-      // Emit your custom event
-      await emit('quick-pane-submit', {
-        action: 'create-task',  // Custom action type
-        payload: { text: text.trim() }
-      })
-      setText('')
+      // Quick capture: "14:00-15:00 meeting" keeps its time
+      const result = await commands.createTask(text.trim(), 'MyDay')
+      if (result.status === 'ok') {
+        await emit(TASKS_CHANGED)
+        setText('')
+      }
     }
     await commands.dismissQuickPane()
   }
@@ -176,35 +168,6 @@ export default function QuickPaneApp() {
     </form>
   )
 }
-```
-
-### Wiring to Different Actions
-
-In the main window, handle the event however you need:
-
-```typescript
-// Zustand (demonstrated)
-listen('quick-pane-submit', ({ payload }) => {
-  useUIStore.getState().setLastQuickPaneEntry(payload.text)
-})
-
-// TanStack Query mutation
-listen('quick-pane-submit', ({ payload }) => {
-  createTaskMutation.mutate({ title: payload.text })
-})
-
-// API call
-listen('quick-pane-submit', async ({ payload }) => {
-  await fetch('/api/tasks', {
-    method: 'POST',
-    body: JSON.stringify({ title: payload.text }),
-  })
-})
-
-// Tauri command
-listen('quick-pane-submit', async ({ payload }) => {
-  await commands.createTask(payload.text)
-})
 ```
 
 ### Changing Window Size
