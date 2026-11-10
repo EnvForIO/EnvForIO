@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { XIcon } from 'lucide-react'
 import { useAddIdeaLog, useDeleteIdeaLog, useIdeaLogs } from '@/api/ideas'
 import { dateLabel } from '@/pages/tasks/dates'
+import { isEnter } from '@/lib/keys'
 
 export function IdeaLog({ ideaId }: { ideaId: number }) {
   const { t } = useTranslation()
@@ -21,7 +22,7 @@ export function IdeaLog({ ideaId }: { ideaId: number }) {
         value={draft}
         onChange={e => setDraft(e.target.value)}
         onKeyDown={e => {
-          if (e.key !== 'Enter' || draft.trim() === '') return
+          if (!isEnter(e) || draft.trim() === '') return
           add.mutate({ ideaId, text: draft })
           setDraft('')
         }}

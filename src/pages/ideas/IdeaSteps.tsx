@@ -14,6 +14,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { cn } from '@/lib/utils'
 import { dateLabel } from '@/pages/tasks/dates'
+import { isEnter } from '@/lib/keys'
 
 export function IdeaSteps({ ideaId }: { ideaId: number }) {
   const { t } = useTranslation()
@@ -82,7 +83,7 @@ export function IdeaSteps({ ideaId }: { ideaId: number }) {
         value={draft}
         onChange={e => setDraft(e.target.value)}
         onKeyDown={e => {
-          if (e.key !== 'Enter' || draft.trim() === '') return
+          if (!isEnter(e) || draft.trim() === '') return
           addStep.mutate({ ideaId, title: draft })
           setDraft('')
         }}

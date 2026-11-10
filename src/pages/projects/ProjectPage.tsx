@@ -42,6 +42,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ProjectHealthBadge } from '@/pages/plans/ProjectHealthBadge'
 import { ProjectDialog } from './ProjectDialog'
 import { ExportDialog } from '@/pages/export/ExportDialog'
+import { isEnter } from '@/lib/keys'
 
 export function ProjectPage({ projectId }: { projectId: number }) {
   const project = useProjects().data?.find(p => p.id === projectId)
@@ -170,7 +171,7 @@ function ProjectView({ project }: { project: Project }) {
               value={moduleName}
               onChange={e => setModuleName(e.target.value)}
               onKeyDown={e => {
-                if (e.key !== 'Enter' || moduleName.trim() === '') return
+                if (!isEnter(e) || moduleName.trim() === '') return
                 addModule.mutate({ projectId: project.id, name: moduleName })
                 setModuleName('')
               }}

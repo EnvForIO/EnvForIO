@@ -13,6 +13,7 @@ import {
 } from '@/api/ideas'
 import { Textarea } from '@/components/ui/textarea'
 import type { IdeaProblem } from '@/lib/tauri-bindings'
+import { isEnter } from '@/lib/keys'
 
 function Problem({ problem }: { problem: IdeaProblem }) {
   const { t } = useTranslation()
@@ -71,7 +72,7 @@ export function IdeaProblems({ ideaId }: { ideaId: number }) {
         value={draft}
         onChange={e => setDraft(e.target.value)}
         onKeyDown={e => {
-          if (e.key !== 'Enter' || draft.trim() === '') return
+          if (!isEnter(e) || draft.trim() === '') return
           add.mutate({ ideaId, problem: draft })
           setDraft('')
         }}

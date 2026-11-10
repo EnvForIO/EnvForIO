@@ -8,6 +8,7 @@ import { useCreateTag, useIdeaCounts, useTags } from '@/api/ideas'
 import type { IdeaFilter } from '@/lib/tauri-bindings'
 import { FilterChip } from '@/components/FilterChip'
 import { NO_FILTER, STATUS_COLOR, STATUSES } from './status'
+import { isEnter } from '@/lib/keys'
 
 export function IdeaFilters({
   filter,
@@ -70,7 +71,7 @@ export function IdeaFilters({
         value={newTag}
         onChange={e => setNewTag(e.target.value)}
         onKeyDown={e => {
-          if (e.key !== 'Enter' || newTag.trim() === '') return
+          if (!isEnter(e) || newTag.trim() === '') return
           createTag.mutate({ name: newTag, color: '#64748b' })
           setNewTag('')
         }}
