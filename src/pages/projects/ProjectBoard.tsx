@@ -15,6 +15,7 @@ import { useDropTarget } from '@/hooks/useDropTarget'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from '@/pages/tasks/dates'
+import { isEnter } from '@/lib/keys'
 
 const STAGES: TaskStage[] = ['Todo', 'Doing', 'Done']
 const STAGE_COLOR: Record<TaskStage, string> = {
@@ -117,7 +118,7 @@ function Column({
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && add()}
+            onKeyDown={e => isEnter(e) && add()}
             placeholder={t('projects.addTask')}
             className="h-8 shrink-0 rounded-md bg-transparent px-2 text-sm outline-none placeholder:text-muted-foreground hover:bg-background/60 focus:bg-background"
           />

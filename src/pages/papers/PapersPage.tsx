@@ -14,6 +14,7 @@ import type { ReadingStatus } from '@/lib/tauri-bindings'
 import { PaperDetail } from './PaperDetail'
 import { PaperRow } from './PaperRow'
 import { READING_COLOR, READING_STATUSES } from './format'
+import { isEnter } from '@/lib/keys'
 
 export function PapersPage() {
   const { t } = useTranslation()
@@ -52,7 +53,7 @@ export function PapersPage() {
         <input
           value={draft}
           onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
+          onKeyDown={e => isEnter(e) && add()}
           placeholder={
             addPaper.isPending ? t('papers.adding') : t('papers.addPlaceholder')
           }

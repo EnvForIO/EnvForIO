@@ -40,7 +40,7 @@ export function StatsPage() {
   const [period, setPeriod] = useState<Period>('Week')
   const [offset, setOffset] = useState(0)
   const [reviewing, setReviewing] = useState(false)
-  const { data: stats } = useStats(period, offset)
+  const { data: stats, isLoading, error } = useStats(period, offset)
 
   const rate =
     stats && stats.planned > 0
@@ -91,6 +91,12 @@ export function StatsPage() {
       </div>
 
       <ScrollArea className="min-h-0 flex-1">
+        {isLoading && (
+          <p className="text-sm text-muted-foreground">{t('stats.loading')}</p>
+        )}
+        {error && (
+          <p className="text-sm text-destructive">{t('stats.loadFailed')}</p>
+        )}
         {stats && (
           <div className="flex flex-col gap-3 pr-3">
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">

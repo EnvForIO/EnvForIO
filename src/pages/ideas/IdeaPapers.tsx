@@ -19,6 +19,7 @@ import {
 import { NativeSelect } from '@/components/ui/native-select'
 import type { IdeaPaper, PaperRelation } from '@/lib/tauri-bindings'
 import { paperByline, RELATION_COLOR, RELATIONS } from '@/pages/papers/format'
+import { isEnter } from '@/lib/keys'
 
 function RelationSelect({
   value,
@@ -126,7 +127,7 @@ export function IdeaPapers({ ideaId }: { ideaId: number }) {
         <input
           value={draft}
           onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && submit()}
+          onKeyDown={e => isEnter(e) && submit()}
           placeholder={t('ideas.addPaper')}
           className="flex-1 bg-transparent px-1 text-sm outline-none placeholder:text-muted-foreground"
         />

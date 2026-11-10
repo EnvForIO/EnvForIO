@@ -3,6 +3,7 @@ import { X } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Badge } from './badge'
+import { isEnter } from '@/lib/keys'
 
 export interface Tag {
   id: string
@@ -70,7 +71,7 @@ const TagInput = React.forwardRef<HTMLDivElement, TagInputProps>(
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (disabled) return
 
-      if (e.key === 'Enter' && inputValue.trim()) {
+      if (isEnter(e) && inputValue.trim()) {
         e.preventDefault()
         addTag(inputValue)
       } else if (e.key === 'Backspace' && !inputValue && tags.length > 0) {

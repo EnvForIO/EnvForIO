@@ -15,6 +15,7 @@ import { TaskRow } from './TaskRow'
 import { SafetyLineCard } from '@/pages/plans/SafetyLineCard'
 import { TodayNote } from './TodayNote'
 import { ToSchedule } from './ToSchedule'
+import { isEnter } from '@/lib/keys'
 
 export function TaskListPage() {
   const { t } = useTranslation()
@@ -52,7 +53,7 @@ export function TaskListPage() {
         <Input
           value={draft}
           onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
+          onKeyDown={e => isEnter(e) && add()}
           placeholder={t('tasks.addPlaceholder')}
           className="border-0 shadow-none focus-visible:ring-0"
         />

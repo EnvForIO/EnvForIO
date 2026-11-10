@@ -12,6 +12,7 @@ import { dateLabel } from '@/pages/tasks/dates'
 import { CardMonth } from './CardMonth'
 import { CardRow } from './CardRow'
 import { selectDuoDay, useSelectedDuoDay } from './events'
+import { isEnter } from '@/lib/keys'
 
 type Tab = 'todo' | 'month'
 const TAB_KEY = 'duo-card-tab'
@@ -106,7 +107,7 @@ export function Card() {
           <input
             value={draft}
             onChange={e => setDraft(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && add()}
+            onKeyDown={e => isEnter(e) && add()}
             placeholder={t('tasks.addPlaceholder')}
             className="mt-2 rounded-lg bg-foreground/8 px-3 py-1.5 outline-none placeholder:text-muted-foreground"
           />

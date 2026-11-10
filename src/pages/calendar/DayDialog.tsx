@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { dateLabel } from '@/pages/tasks/dates'
+import { isEnter } from '@/lib/keys'
 
 interface Props {
   date: string
@@ -64,7 +65,7 @@ export function DayDialog({ date, note, override, onClose }: Props) {
               autoFocus
               value={title}
               onChange={e => setTitle(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && hoursValid && save()}
+              onKeyDown={e => isEnter(e) && hoursValid && save()}
               placeholder={t('tasks.addPlaceholder')}
             />
           </div>

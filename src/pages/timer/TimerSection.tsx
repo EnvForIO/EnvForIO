@@ -17,6 +17,7 @@ import { formatMinutes } from '@/lib/duration'
 import type { Task } from '@/lib/tauri-bindings'
 import { useUIStore } from '@/store/ui-store'
 import { Elapsed } from './Elapsed'
+import { isEnter } from '@/lib/keys'
 
 export function TimerSection({ task }: { task: Task }) {
   const { t } = useTranslation()
@@ -82,7 +83,7 @@ export function TimerSection({ task }: { task: Task }) {
             autoFocus
             value={done}
             onChange={e => setDone(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && split()}
+            onKeyDown={e => isEnter(e) && split()}
             placeholder={t('timer.howMuch')}
             className="h-8"
           />

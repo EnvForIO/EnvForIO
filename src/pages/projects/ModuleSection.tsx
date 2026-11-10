@@ -14,6 +14,7 @@ import {
 import { formatMinutes } from '@/lib/duration'
 import type { Module, Task } from '@/lib/tauri-bindings'
 import { SortableTasks } from '@/pages/tasks/SortableTasks'
+import { isEnter } from '@/lib/keys'
 
 interface Props {
   projectId: number
@@ -64,7 +65,7 @@ export function ModuleSection({ projectId, module, tasks }: Props) {
             value={name}
             onChange={e => setName(e.target.value)}
             onBlur={finishRename}
-            onKeyDown={e => e.key === 'Enter' && finishRename()}
+            onKeyDown={e => isEnter(e) && finishRename()}
             className="rounded bg-accent px-1 text-sm font-semibold outline-none"
           />
         ) : (
@@ -98,14 +99,14 @@ export function ModuleSection({ projectId, module, tasks }: Props) {
         <input
           value={title}
           onChange={e => setTitle(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
+          onKeyDown={e => isEnter(e) && add()}
           placeholder={t('tasks.addPlaceholder')}
           className="h-8 flex-1 bg-transparent text-sm outline-none"
         />
         <input
           value={estimate}
           onChange={e => setEstimate(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
+          onKeyDown={e => isEnter(e) && add()}
           placeholder={t('projects.estimatePlaceholder')}
           className="h-8 w-20 bg-transparent text-right text-sm outline-none"
         />

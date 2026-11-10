@@ -33,6 +33,7 @@ import { useUIStore } from '@/store/ui-store'
 import { dateLabel, formatDate, parseDate } from './dates'
 import { TaskSteps } from './TaskSteps'
 import { TimerSection } from '@/pages/timer/TimerSection'
+import { isEnter } from '@/lib/keys'
 
 export function TaskDetails() {
   const selectedTaskId = useUIStore(state => state.selectedTaskId)
@@ -125,7 +126,7 @@ function TaskDetailsForm({ task }: { task: Task }) {
           value={title}
           onChange={e => setTitle(e.target.value)}
           onBlur={() => title.trim() !== '' && title !== task.title && save({})}
-          onKeyDown={e => e.key === 'Enter' && e.currentTarget.blur()}
+          onKeyDown={e => isEnter(e) && e.currentTarget.blur()}
           className="text-base font-semibold"
           aria-label={t('tasks.title')}
         />
@@ -171,7 +172,7 @@ function TaskDetailsForm({ task }: { task: Task }) {
         onBlur={() =>
           save({ estimate: estimate.trim() === '' ? null : estimate })
         }
-        onKeyDown={e => e.key === 'Enter' && e.currentTarget.blur()}
+        onKeyDown={e => isEnter(e) && e.currentTarget.blur()}
         placeholder={t('tasks.addEstimate')}
         aria-label={t('tasks.estimate')}
       />

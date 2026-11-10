@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDayNotes, useSetDayNote } from '@/api/calendar'
+import { isEnter } from '@/lib/keys'
 
 export function TodayNote({ today }: { today: string }) {
   const { data: notes } = useDayNotes(today, today)
@@ -24,7 +25,7 @@ function NoteInput({ today, saved }: { today: string; saved: string }) {
       value={text}
       onChange={e => setText(e.target.value)}
       onBlur={() => text !== saved && setNote.mutate({ date: today, text })}
-      onKeyDown={e => e.key === 'Enter' && e.currentTarget.blur()}
+      onKeyDown={e => isEnter(e) && e.currentTarget.blur()}
       placeholder={t('tasks.todayNotePlaceholder')}
       className="w-full bg-transparent text-sm text-muted-foreground italic outline-none placeholder:text-muted-foreground/60"
     />

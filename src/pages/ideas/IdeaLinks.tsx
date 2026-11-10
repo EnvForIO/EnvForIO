@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { ExternalLinkIcon, XIcon } from 'lucide-react'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { useAddIdeaLink, useDeleteIdeaLink, useIdeaLinks } from '@/api/ideas'
+import { isEnter } from '@/lib/keys'
 
 export function IdeaLinks({ ideaId }: { ideaId: number }) {
   const { t } = useTranslation()
@@ -57,7 +58,7 @@ export function IdeaLinks({ ideaId }: { ideaId: number }) {
         <input
           value={url}
           onChange={e => setUrl(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
+          onKeyDown={e => isEnter(e) && add()}
           placeholder={t('ideas.linkUrl')}
           className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
         />

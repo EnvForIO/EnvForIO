@@ -15,6 +15,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { DatePicker } from '@/components/ui/date-picker'
 import { cn } from '@/lib/utils'
 import { dateLabel, formatDate, isOverdue } from '@/pages/tasks/dates'
+import { isEnter } from '@/lib/keys'
 
 export function IdeaTodos({ ideaId }: { ideaId: number }) {
   const { t } = useTranslation()
@@ -81,7 +82,7 @@ export function IdeaTodos({ ideaId }: { ideaId: number }) {
         <input
           value={title}
           onChange={e => setTitle(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
+          onKeyDown={e => isEnter(e) && add()}
           placeholder={t('ideas.addTodo')}
           className="flex-1 bg-transparent px-1 text-sm outline-none placeholder:text-muted-foreground"
         />

@@ -16,6 +16,7 @@ import { showContextMenu } from '@/lib/context-menu'
 import type { Task, TaskUpdate } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { dateLabel, formatDate, parseDate } from '@/pages/tasks/dates'
+import { isEnter } from '@/lib/keys'
 
 const tomorrowOf = (today: string) => {
   const d = parseDate(today)
@@ -109,7 +110,7 @@ export function CardRow({ task, day }: { task: Task; day: string }) {
           value={title}
           onChange={e => setTitle(e.target.value)}
           onBlur={finishRename}
-          onKeyDown={e => e.key === 'Enter' && finishRename()}
+          onKeyDown={e => isEnter(e) && finishRename()}
           className="min-w-0 flex-1 rounded bg-foreground/10 px-1 outline-none"
         />
       ) : (

@@ -13,6 +13,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
+import { isEnter } from '@/lib/keys'
 
 export function TaskSteps({ taskId }: { taskId: number }) {
   const { t } = useTranslation()
@@ -63,7 +64,7 @@ export function TaskSteps({ taskId }: { taskId: number }) {
         <Input
           value={draft}
           onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
+          onKeyDown={e => isEnter(e) && add()}
           placeholder={
             steps.length === 0 ? t('tasks.addStep') : t('tasks.nextStep')
           }

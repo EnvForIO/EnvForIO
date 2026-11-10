@@ -8,6 +8,7 @@ import { useSetWeekdayCapacity, useWeekCapacity } from '@/api/plans'
 import { Input } from '@/components/ui/input'
 import { SettingsField, SettingsSection } from '../shared/SettingsComponents'
 import { PlanningOptions } from './PlanningOptions'
+import { isEnter } from '@/lib/keys'
 
 const WEEKDAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as const
 
@@ -39,7 +40,7 @@ function HoursInput({
       value={text}
       onChange={e => setText(e.target.value)}
       onBlur={save}
-      onKeyDown={e => e.key === 'Enter' && e.currentTarget.blur()}
+      onKeyDown={e => isEnter(e) && e.currentTarget.blur()}
       placeholder={t('preferences.planning.noLimit')}
       inputMode="decimal"
       className="w-28"

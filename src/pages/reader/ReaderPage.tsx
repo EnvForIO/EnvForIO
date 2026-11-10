@@ -38,6 +38,7 @@ import type { FeedItem } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { ItemView } from './ItemView'
 import { shortDate } from './dates'
+import { isEnter } from '@/lib/keys'
 
 export function ReaderPage() {
   const { t } = useTranslation()
@@ -106,7 +107,7 @@ export function ReaderPage() {
           <input
             value={address}
             onChange={e => setAddress(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && subscribe()}
+            onKeyDown={e => isEnter(e) && subscribe()}
             placeholder={t('reader.addPlaceholder')}
             className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none"
           />

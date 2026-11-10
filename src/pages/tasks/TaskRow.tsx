@@ -80,7 +80,15 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
       role="button"
       tabIndex={0}
       onClick={() => selectTask(task.id)}
-      onKeyDown={e => e.key === 'Enter' && selectTask(task.id)}
+      onKeyDown={e => {
+        // Keys pressed on the buttons inside bubble up here; only the row
+        // itself opens the task.
+        if (e.target !== e.currentTarget) return
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault() // Space would scroll the list
+          selectTask(task.id)
+        }
+      }}
       className={cn(
         'group flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-left hover:bg-accent/50',
         selectedTaskId === task.id && 'bg-accent'
@@ -122,7 +130,10 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
             if (running) stopTimer.mutate(undefined)
             else startTimer.mutate(task.id)
           }}
-          className={cn(!running && 'opacity-0 group-hover:opacity-100')}
+          className={cn(
+            !running &&
+              'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+          )}
         >
           {running ? (
             <SquareIcon className="size-3.5 fill-red-500 text-red-500" />

@@ -13,6 +13,7 @@ import { IdeaCard } from './IdeaCard'
 import { IdeaDetail } from './IdeaDetail'
 import { IdeaFilters } from './IdeaFilters'
 import { NO_FILTER } from './status'
+import { isEnter } from '@/lib/keys'
 
 export function IdeasPage() {
   const { t } = useTranslation()
@@ -38,7 +39,7 @@ export function IdeasPage() {
         <input
           value={draft}
           onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && add()}
+          onKeyDown={e => isEnter(e) && add()}
           placeholder={t('ideas.jotDown')}
           className="h-9 flex-1 bg-transparent text-sm outline-none"
         />
