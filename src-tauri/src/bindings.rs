@@ -63,7 +63,6 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         calendar::list_calendar_tasks,
         calendar::list_unscheduled_tasks,
         calendar::schedule_task,
-        calendar::create_scheduled_task,
         calendar::list_day_notes,
         calendar::set_day_note,
         stats::get_stats,

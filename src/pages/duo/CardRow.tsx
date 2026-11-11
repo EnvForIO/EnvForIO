@@ -36,7 +36,7 @@ export function CardRow({ task, day }: { task: Task; day: string }) {
   const save = (change: Partial<TaskUpdate>) =>
     updateTask.mutate({
       id: task.id,
-      update: { ...toUpdate(task, today), ...change },
+      update: { ...toUpdate(task), ...change },
     })
 
   const openMenu = (e: React.MouseEvent) => {

@@ -1,12 +1,12 @@
 //! Putting tasks on the calendar.
 //!
-//! A task shows on a calendar day when it is scheduled for that day or due
-//! that day. "To schedule" is every open task with no scheduled day.
+//! Which day a task is on is `query::IN_DAYS`. "To schedule" is every open
+//! task that has no day to do it on: never planned, or planned for a day
+//! that has passed.
 
 use rusqlite::{params, Connection};
 
-use super::mutation::create;
-use super::query::{self, TaskView};
+use super::query::{self, IN_DAYS};
 use crate::domain::day::now_timestamp;
 use crate::entity::task::{Task, TASK_COLUMNS};
 use crate::errors::{AppError, AppResult};
@@ -14,25 +14,26 @@ use crate::service::validate::check_date;
 
 const ORDER: &str = "ORDER BY (t.done_at IS NOT NULL), t.is_pinned DESC, t.sort_order, t.id";
 
+/// The tasks on the days `from..=to`. One planned in the range and due in
+/// it comes back once; the calendar draws it on both days.
 pub fn in_range(conn: &Connection, from: &str, to: &str) -> AppResult<Vec<Task>> {
-    let sql = format!(
-        "SELECT {TASK_COLUMNS} FROM tasks t
-         WHERE t.scheduled_date BETWEEN ?1 AND ?2 OR t.due_date BETWEEN ?1 AND ?2 {ORDER}"
-    );
+    let sql = format!("SELECT {TASK_COLUMNS} FROM tasks t WHERE {IN_DAYS} {ORDER}");
     let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map(params![from, to], Task::from_row)?;
     Ok(rows.collect::<Result<_, _>>()?)
 }
 
-/// Open tasks with no scheduled day: project tasks first (they feed the safety line).
-pub fn unscheduled(conn: &Connection) -> AppResult<Vec<Task>> {
+/// Open tasks to plan: project tasks first (they feed the safety line).
+/// A task planned for a past day and not finished comes back here rather
+/// than moving to today by itself (user decision 2026-11-20).
+pub fn unscheduled(conn: &Connection, today: &str) -> AppResult<Vec<Task>> {
     let sql = format!(
         "SELECT {TASK_COLUMNS} FROM tasks t
-         WHERE t.scheduled_date IS NULL AND t.done_at IS NULL
+         WHERE (t.scheduled_date IS NULL OR t.scheduled_date < ?1) AND t.done_at IS NULL
          ORDER BY (t.project_id IS NULL), t.due_date IS NULL, t.due_date, t.sort_order, t.id"
     );
     let mut stmt = conn.prepare(&sql)?;
-    let rows = stmt.query_map([], Task::from_row)?;
+    let rows = stmt.query_map(params![today], Task::from_row)?;
     Ok(rows.collect::<Result<_, _>>()?)
 }
 
@@ -49,32 +50,33 @@ pub fn schedule(conn: &Connection, id: i64, date: Option<String>) -> AppResult<T
     query::get(conn, id)
 }
 
-/// A new task in the pool, scheduled on `date` (right-click a calendar day).
-pub fn create_on(conn: &Connection, title: &str, date: &str) -> AppResult<Task> {
-    check_date(&Some(date.to_string()))?;
-    let task = create(conn, title, TaskView::Tasks, date)?;
-    schedule(conn, task.id, Some(date.to_string()))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::db::open_in_memory;
-    use crate::service::tasks::mutation::set_done;
+    use crate::service::tasks::mutation::{create, create_on_day, set_done};
+    use crate::service::tasks::query::TaskView;
+
+    const TODAY: &str = "2026-11-20";
 
     #[test]
     fn scheduling_moves_tasks_between_the_pool_and_days() {
         let conn = open_in_memory();
-        let a = create(&conn, "read paper", TaskView::Tasks, "2026-11-20").unwrap();
-        let b = create_on(&conn, "lab meeting", "2026-11-21").unwrap();
+        let a = create(&conn, "read paper", TaskView::Tasks, TODAY).unwrap();
+        let b = create_on_day(&conn, "lab meeting", "2026-11-21").unwrap();
         let due = create(&conn, "submit", TaskView::Planned, "2026-11-25").unwrap();
 
-        let pool: Vec<_> = unscheduled(&conn)
-            .unwrap()
-            .into_iter()
-            .map(|t| t.id)
-            .collect();
-        assert_eq!(pool, [due.id, a.id]); // dated first
+        let pool = |today: &str| -> Vec<i64> {
+            unscheduled(&conn, today)
+                .unwrap()
+                .into_iter()
+                .map(|t| t.id)
+                .collect()
+        };
+        // Dated first. "lab meeting" is planned for tomorrow, so it is not here.
+        assert_eq!(pool(TODAY), [due.id, a.id]);
+        // Once its day has passed unfinished, a planned task is back in the pool.
+        assert_eq!(pool("2026-11-22"), [due.id, b.id, a.id]);
         assert_eq!(b.scheduled_date.as_deref(), Some("2026-11-21"));
 
         schedule(&conn, a.id, Some("2026-11-20".into())).unwrap();
@@ -90,9 +92,9 @@ mod tests {
             .any(|t| t.id == due.id));
 
         set_done(&conn, due.id, true).unwrap();
-        assert!(unscheduled(&conn).unwrap().is_empty());
+        assert!(pool(TODAY).is_empty());
         schedule(&conn, a.id, None).unwrap();
-        assert_eq!(unscheduled(&conn).unwrap()[0].id, a.id);
+        assert_eq!(pool(TODAY), [a.id]);
         assert!(schedule(&conn, a.id, Some("soon".into())).is_err());
     }
 }

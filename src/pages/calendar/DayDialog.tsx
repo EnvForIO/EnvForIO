@@ -4,11 +4,8 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  useCreateScheduledTask,
-  useSetDayNote,
-  useSetDayOverride,
-} from '@/api/calendar'
+import { useSetDayNote, useSetDayOverride } from '@/api/calendar'
+import { useCreateDayTask } from '@/api/tasks'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -32,7 +29,7 @@ interface Props {
 
 export function DayDialog({ date, note, override, onClose }: Props) {
   const { t } = useTranslation()
-  const createTask = useCreateScheduledTask()
+  const createTask = useCreateDayTask()
   const setNote = useSetDayNote()
   const setOverride = useSetDayOverride()
   const [title, setTitle] = useState('')

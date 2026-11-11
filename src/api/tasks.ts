@@ -90,7 +90,7 @@ export function useTaskSteps(taskId: number | null) {
   })
 }
 
-/** Tasks for one day: in My Day that day or due that day (the Todo Duo card). */
+/** Tasks on one day: planned for it or due on it (the Todo Duo card). */
 export function useDayTasks(date: string | undefined) {
   return useQuery({
     queryKey: taskKeys.day(date ?? ''),
@@ -109,13 +109,13 @@ export function useDayCompletion(from: string, to: string) {
 }
 
 /** The editable fields of a task, ready to change and send back to `useUpdateTask`. */
-export function toUpdate(task: Task, today: string | undefined): TaskUpdate {
+export function toUpdate(task: Task): TaskUpdate {
   return {
     title: task.title,
     note: task.note,
     isImportant: task.isImportant,
     isPinned: task.isPinned,
-    inMyDay: task.myDayDate !== null && task.myDayDate === today,
+    scheduledDate: task.scheduledDate,
     dueDate: task.dueDate,
     // Whole minutes are a valid typed estimate, so they round-trip unchanged.
     estimate:
@@ -145,6 +145,7 @@ export const useCreateTask = () =>
     unwrapResult(await commands.createTask(title, view))
   )
 
+/** A new task planned for `date` (the Todo Duo card, the calendar's day dialog). */
 export const useCreateDayTask = () =>
   useTaskMutation(async ({ title, date }: { title: string; date: string }) =>
     unwrapResult(await commands.createDayTask(title, date))

@@ -71,7 +71,9 @@ fn range(scope: &ExportScope) -> AppResult<Option<(NaiveDate, NaiveDate)>> {
     })
 }
 
-const COLUMNS: &str = "t.id, coalesce(t.scheduled_date, t.my_day_date, t.due_date), t.start_time,
+// An exported row has one date: the planned day, or the due day when the
+// task is not planned. (Unlike the day views, a task is listed once.)
+const COLUMNS: &str = "t.id, coalesce(t.scheduled_date, t.due_date), t.start_time,
      t.end_time, t.title, p.name, m.name, t.estimate_minutes, t.actual_minutes, t.due_date,
      t.done_at IS NOT NULL, t.note";
 
@@ -102,7 +104,7 @@ pub fn export(conn: &Connection, scope: &ExportScope) -> AppResult<Export> {
             };
             let sql = format!(
                 "SELECT {COLUMNS} {from}
-                 WHERE coalesce(t.scheduled_date, t.my_day_date, t.due_date) BETWEEN ?1 AND ?2 {order}"
+                 WHERE coalesce(t.scheduled_date, t.due_date) BETWEEN ?1 AND ?2 {order}"
             );
             (title, sql, vec![first.to_string(), last.to_string()])
         }

@@ -36,9 +36,7 @@ pub fn create_task(state: State<'_, AppState>, title: String, view: TaskView) ->
 #[tauri::command]
 #[specta::specta]
 pub fn update_task(state: State<'_, AppState>, id: i64, update: TaskUpdate) -> AppResult<Task> {
-    state.changing("Edit task", &[id], |db| {
-        mutation::update(db, id, &update, &today())
-    })
+    state.changing("Edit task", &[id], |db| mutation::update(db, id, &update))
 }
 
 /// Puts a list's tasks in the order the user dragged them into.
@@ -105,7 +103,7 @@ pub fn delete_task_step(state: State<'_, AppState>, id: i64) -> AppResult<()> {
 }
 
 // ---------------------------------------------------------------------------
-// Days (Todo Duo)
+// Days (Todo Duo and the calendar)
 
 #[tauri::command]
 #[specta::specta]
@@ -113,12 +111,11 @@ pub fn list_day_tasks(state: State<'_, AppState>, date: String) -> AppResult<Vec
     query::list_day(&state.db(), &date)
 }
 
+/// A new task planned for `date` (the Todo Duo card, the calendar's day dialog).
 #[tauri::command]
 #[specta::specta]
 pub fn create_day_task(state: State<'_, AppState>, title: String, date: String) -> AppResult<Task> {
-    state.creating("Add task", |db| {
-        mutation::create_on_day(db, &title, &date, &today())
-    })
+    state.creating("Add task", |db| mutation::create_on_day(db, &title, &date))
 }
 
 #[tauri::command]

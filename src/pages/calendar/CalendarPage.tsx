@@ -67,12 +67,10 @@ function CalendarBody({
   const colors = new Map(projects.map(p => [p.id, p.color]))
   const noteOn = new Map(notes.map(n => [n.date, n.text]))
   const overrideOn = new Map(overrides.map(o => [o.date, o.minutes]))
+  // The same rule as every day view: planned for the day or due on it. A
+  // task planned Monday and due Friday shows on both (Friday with a due marker).
   const tasksOn = (date: string): Task[] =>
-    tasks.filter(
-      task =>
-        task.scheduledDate === date ||
-        (task.scheduledDate === null && task.dueDate === date)
-    )
+    tasks.filter(task => task.scheduledDate === date || task.dueDate === date)
   const month = parseDate(current).getMonth()
   const title = parseDate(current).toLocaleDateString('en', {
     month: 'long',

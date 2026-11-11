@@ -15,17 +15,17 @@ pub struct Task {
     pub note: String,
     pub is_important: bool,
     pub is_pinned: bool,
-    pub my_day_date: Option<String>, // 'YYYY-MM-DD'; in My Day while it equals today
-    pub due_date: Option<String>,    // 'YYYY-MM-DD'
-    pub done_at: Option<String>,     // RFC 3339 UTC; None = open
+    pub due_date: Option<String>, // 'YYYY-MM-DD'
+    pub done_at: Option<String>,  // RFC 3339 UTC; None = open
     pub sort_order: f64,
     pub project_id: Option<i64>,
     pub module_id: Option<i64>,
     pub estimate_minutes: Option<i64>,
     pub actual_minutes: Option<i64>, // time recorded by the timer (or typed in)
-    pub scheduled_date: Option<String>, // 'YYYY-MM-DD': the day it is planned on the calendar
-    pub start_time: Option<String>,  // 'HH:MM', from quick capture
-    pub end_time: Option<String>,    // 'HH:MM'
+    /// 'YYYY-MM-DD': the day the task is planned for. "In My Day" means this is today.
+    pub scheduled_date: Option<String>,
+    pub start_time: Option<String>, // 'HH:MM', from quick capture
+    pub end_time: Option<String>,   // 'HH:MM'
     pub step_count: i64,
     pub steps_done: i64,
     pub created_at: String,
@@ -37,7 +37,7 @@ pub struct Task {
 
 /// Columns in the order `Task::from_row` reads them. Step counts come from a subquery.
 pub const TASK_COLUMNS: &str = "t.id, t.title, t.note, t.is_important, t.is_pinned, \
-     t.my_day_date, t.due_date, t.done_at, t.sort_order, \
+     t.due_date, t.done_at, t.sort_order, \
      t.project_id, t.module_id, t.estimate_minutes, t.actual_minutes, t.scheduled_date, \
      t.start_time, t.end_time, \
      (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id), \
@@ -52,22 +52,21 @@ impl Task {
             note: row.get(2)?,
             is_important: row.get(3)?,
             is_pinned: row.get(4)?,
-            my_day_date: row.get(5)?,
-            due_date: row.get(6)?,
-            done_at: row.get(7)?,
-            sort_order: row.get(8)?,
-            project_id: row.get(9)?,
-            module_id: row.get(10)?,
-            estimate_minutes: row.get(11)?,
-            actual_minutes: row.get(12)?,
-            scheduled_date: row.get(13)?,
-            start_time: row.get(14)?,
-            end_time: row.get(15)?,
-            step_count: row.get(16)?,
-            steps_done: row.get(17)?,
-            created_at: row.get(18)?,
-            idea_id: row.get(19)?,
-            started_at: row.get(20)?,
+            due_date: row.get(5)?,
+            done_at: row.get(6)?,
+            sort_order: row.get(7)?,
+            project_id: row.get(8)?,
+            module_id: row.get(9)?,
+            estimate_minutes: row.get(10)?,
+            actual_minutes: row.get(11)?,
+            scheduled_date: row.get(12)?,
+            start_time: row.get(13)?,
+            end_time: row.get(14)?,
+            step_count: row.get(15)?,
+            steps_done: row.get(16)?,
+            created_at: row.get(17)?,
+            idea_id: row.get(18)?,
+            started_at: row.get(19)?,
         })
     }
 }

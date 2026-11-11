@@ -122,6 +122,19 @@ Decisions (user, 2026-11-20): magazines and blogs (RSS 2.0, Atom); the feed's su
 - The Month tab's query moved to `api/month.ts`; following a conference now refreshes the Month tab's dots.
 - Kept on purpose: the template's exported helpers (isRTL, loadEmergencyData, TitleBarContent), the type re-exports in `tauri-bindings.ts`, GPU fan and clock readings, and jscpd's three Rust "clones" (test module headers).
 
+## One rule for a task's day (2026-11-20)
+
+A review found seven places that each decided "which day is this task on" their own way (My Day, the Todo Duo card, the heatmap, the calendar, the Month tab, stats, export), over three date columns.
+
+Decisions (user, 2026-11-20): keep two dates, **Do on** (`scheduled_date`) and **Due** (`due_date`); "in My Day" means planned for today; a task is on a day when it is planned for it or due on it, and shows on both; a task planned for a past day and not finished goes back to "To schedule" instead of moving to today; adding a task on a day in Todo Duo plans it for that day, as the calendar does. Still true from earlier the same day: My Day also keeps overdue open tasks.
+
+- Migration `0019_merge_my_day.sql` copies `my_day_date` into `scheduled_date` where no day was set. `my_day_date` stays in the table, unread and unwritten; drop it in a later migration.
+- The rule lives in `service/tasks/query.rs` (`ON_DAY`, `IN_DAYS`) and is used by `list` (My Day), `list_day`, `day_completion`, `schedule::in_range` and stats' completion rate. Export keeps one date per row (planned, else due).
+- `schedule::unscheduled` takes today and includes tasks whose planned day has passed. My Day's "To schedule" leaves out what is due today or overdue, since those are already listed above it.
+- `TaskUpdate.in_my_day` became `scheduled_date`; the details pane has a **Do on** date next to **Due**, and "Add to My Day" sets it to today.
+- One command adds a task on a day (`create_day_task`); `create_scheduled_task` and `schedule::create_on` are gone.
+- Not changed: the Month tab's shading still counts planned tasks only (the day's booked time) and its dots are deadlines; the Todo Duo row menu's "Date: today / tomorrow" still sets the due date.
+
 ## Deadline templates (2026-11-20)
 
 Decision (user, 2026-11-20): paper submission and proposal (开题) templates create dated milestone tasks; offsets are built in and the tasks are ordinary tasks to edit afterwards. Grant and thesis-defence milestones were not wanted.

@@ -49,11 +49,6 @@ export const useScheduleTask = () =>
     unwrapResult(await commands.scheduleTask(id, date))
   )
 
-export const useCreateScheduledTask = () =>
-  useTaskMutation(async ({ title, date }: { title: string; date: string }) =>
-    unwrapResult(await commands.createScheduledTask(title, date))
-  )
-
 export const useSetDayNote = () =>
   useTaskMutation(async ({ date, text }: { date: string; text: string }) =>
     unwrapResult(await commands.setDayNote(date, text))

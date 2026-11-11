@@ -292,6 +292,9 @@ async listDayTasks(date: string) : Promise<Result<Task[], AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
+/**
+ * A new task planned for `date` (the Todo Duo card, the calendar's day dialog).
+ */
 async createDayTask(title: string, date: string) : Promise<Result<Task, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("create_day_task", { title, date }) };
@@ -499,14 +502,6 @@ async listUnscheduledTasks() : Promise<Result<Task[], AppError>> {
 async scheduleTask(id: number, date: string | null) : Promise<Result<Task, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("schedule_task", { id, date }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async createScheduledTask(title: string, date: string) : Promise<Result<Task, AppError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("create_scheduled_task", { title, date }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -1456,7 +1451,11 @@ error: string | null }
 export type Stage = { abstractAt: number | null; deadlineAt: number | null; comment: string }
 export type Stats = { from: string; to: string; done: number; minutes: number; planned: number; plannedDone: number; activeDays: number; days: number; trend: Bucket[]; projects: ProjectTime[]; weekdays: Bucket[] }
 export type Tag = { id: number; name: string; color: string }
-export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; myDayDate: string | null; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string; 
+export type Task = { id: number; title: string; note: string; isImportant: boolean; isPinned: boolean; dueDate: string | null; doneAt: string | null; sortOrder: number; projectId: number | null; moduleId: number | null; estimateMinutes: number | null; actualMinutes: number | null; 
+/**
+ * 'YYYY-MM-DD': the day the task is planned for. "In My Day" means this is today.
+ */
+scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string; 
 /**
  * The idea this task is a todo of, if any.
  */
@@ -1473,7 +1472,7 @@ export type TaskStep = { id: number; taskId: number; title: string; isDone: bool
 /**
  * Everything the details pane can edit, sent whole on every save.
  */
-export type TaskUpdate = { title: string; note: string; isImportant: boolean; isPinned: boolean; inMyDay: boolean; dueDate: string | null; estimate: string | null }
+export type TaskUpdate = { title: string; note: string; isImportant: boolean; isPinned: boolean; scheduledDate: string | null; dueDate: string | null; estimate: string | null }
 /**
  * The built-in lists in the sidebar.
  */

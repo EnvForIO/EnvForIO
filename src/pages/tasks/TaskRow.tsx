@@ -31,11 +31,11 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
   const stopTimer = useStopTimer()
 
   const done = task.doneAt !== null
-  const inMyDay = task.myDayDate !== null && task.myDayDate === today
+  const inMyDay = task.scheduledDate !== null && task.scheduledDate === today
   const toggleStar = () =>
     updateTask.mutate({
       id: task.id,
-      update: { ...toUpdate(task, today), isImportant: !task.isImportant },
+      update: { ...toUpdate(task), isImportant: !task.isImportant },
     })
 
   // The meta line only repeats what the current list does not already say.

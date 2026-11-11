@@ -14,7 +14,7 @@ use crate::errors::{AppError, AppResult};
 /// The built-in lists in the sidebar.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
 pub enum TaskView {
-    MyDay,     // added to My Day today
+    MyDay,     // on today (see ON_DAY), plus what is overdue
     Important, // flagged
     Planned,   // has a due date
     Tasks,     // everything not in a project (the task pool)
@@ -22,14 +22,26 @@ pub enum TaskView {
 
 const ORDER: &str = "ORDER BY t.is_pinned DESC, (t.done_at IS NOT NULL), t.sort_order, t.id";
 
+// ---------------------------------------------------------------------------
+// Which day a task is on
+//
+// One rule for every view (user decision 2026-11-20): a task is on a day
+// when it is planned for that day (`scheduled_date`) or due that day
+// (`due_date`). It can be on two days: planned Monday, due Friday. My Day,
+// the Todo Duo card, the heatmap, the calendar and stats all read it here.
+
+/// "On day ?1". Needs the `tasks` table aliased as `t`.
+pub const ON_DAY: &str = "(t.scheduled_date = ?1 OR t.due_date = ?1)";
+
+/// "On a day from ?1 to ?2", both included.
+pub const IN_DAYS: &str = "(t.scheduled_date BETWEEN ?1 AND ?2 OR t.due_date BETWEEN ?1 AND ?2)";
+
 pub fn list(conn: &Connection, view: TaskView, today: &str) -> AppResult<Vec<Task>> {
+    // Today also keeps what is overdue and still open, so a missed deadline
+    // cannot slip out of sight (user decision 2026-11-20).
+    let my_day = format!("({ON_DAY} OR (t.due_date < ?1 AND t.done_at IS NULL))");
     let filter = match view {
-        // Today: added to My Day today, scheduled for today, due today, or
-        // overdue and still open (user decision 2026-11-20).
-        TaskView::MyDay => {
-            "(t.my_day_date = ?1 OR t.scheduled_date = ?1 OR t.due_date = ?1
-              OR (t.due_date < ?1 AND t.done_at IS NULL))"
-        }
+        TaskView::MyDay => my_day.as_str(),
         TaskView::Important => "t.is_important = 1 AND ?1 IS NOT NULL",
         // Planned is ordered by date first: the nearest deadline on top.
         TaskView::Planned => "t.due_date IS NOT NULL AND ?1 IS NOT NULL",
@@ -49,10 +61,6 @@ pub fn list(conn: &Connection, view: TaskView, today: &str) -> AppResult<Vec<Tas
 
 // ---------------------------------------------------------------------------
 // Days (Todo Duo card and heatmap)
-//
-// A task belongs to a day when it was put in My Day that day, is scheduled
-// that day, or is due that day. It can belong to several days (in My Day on
-// Monday, due Friday).
 
 /// How much of one day's tasks are done: one heatmap cell.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
@@ -63,10 +71,7 @@ pub struct DayCompletion {
 }
 
 pub fn list_day(conn: &Connection, date: &str) -> AppResult<Vec<Task>> {
-    let sql = format!(
-        "SELECT {TASK_COLUMNS} FROM tasks t
-         WHERE t.my_day_date = ?1 OR t.scheduled_date = ?1 OR t.due_date = ?1 {ORDER}"
-    );
+    let sql = format!("SELECT {TASK_COLUMNS} FROM tasks t WHERE {ON_DAY} {ORDER}");
     let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map(params![date], Task::from_row)?;
     Ok(rows.collect::<Result<_, _>>()?)
@@ -75,13 +80,11 @@ pub fn list_day(conn: &Connection, date: &str) -> AppResult<Vec<Task>> {
 /// Completion for every day in `from..=to` that has at least one task.
 /// Days without tasks are left out; the UI draws them empty.
 pub fn day_completion(conn: &Connection, from: &str, to: &str) -> AppResult<Vec<DayCompletion>> {
-    // UNION (not UNION ALL) so a task in My Day and due on the same day counts once.
+    // The ON_DAY rule, one row per (task, day). UNION (not UNION ALL) so a
+    // task planned and due on the same day counts once.
     let mut stmt = conn.prepare(
         "SELECT day, count(*), sum(done) FROM (
-             SELECT id, my_day_date AS day, done_at IS NOT NULL AS done
-               FROM tasks WHERE my_day_date BETWEEN ?1 AND ?2
-             UNION
-             SELECT id, scheduled_date, done_at IS NOT NULL
+             SELECT id, scheduled_date AS day, done_at IS NOT NULL AS done
                FROM tasks WHERE scheduled_date BETWEEN ?1 AND ?2
              UNION
              SELECT id, due_date, done_at IS NOT NULL

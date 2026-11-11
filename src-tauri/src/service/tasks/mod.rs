@@ -25,7 +25,7 @@ mod tests {
         let conn = open_in_memory();
         let a = mutation::create(&conn, "  read paper  ", TaskView::MyDay, TODAY).unwrap();
         assert_eq!(a.title, "read paper");
-        assert_eq!(a.my_day_date.as_deref(), Some(TODAY));
+        assert_eq!(a.scheduled_date.as_deref(), Some(TODAY));
 
         let b = mutation::create(&conn, "submit", TaskView::Planned, TODAY).unwrap();
         assert_eq!(b.due_date.as_deref(), Some(TODAY));
@@ -52,10 +52,13 @@ mod tests {
     #[test]
     fn my_day_only_shows_today() {
         let conn = open_in_memory();
-        mutation::create(&conn, "yesterday's", TaskView::MyDay, "2026-11-18").unwrap();
+        let old = mutation::create(&conn, "yesterday's", TaskView::MyDay, "2026-11-18").unwrap();
         assert!(query::list(&conn, TaskView::MyDay, TODAY)
             .unwrap()
             .is_empty());
+        // It does not follow the user into today; it waits to be planned again.
+        let pool = super::schedule::unscheduled(&conn, TODAY).unwrap();
+        assert_eq!(pool[0].id, old.id);
     }
 
     #[test]
@@ -89,32 +92,47 @@ mod tests {
             note: "use the new figure".into(),
             is_important: true,
             is_pinned: true,
-            in_my_day: true,
+            scheduled_date: Some(TODAY.into()),
             due_date: Some("2026-12-01".into()),
             estimate: None,
         };
-        let t = mutation::update(&conn, t.id, &edit, TODAY).unwrap();
+        let t = mutation::update(&conn, t.id, &edit).unwrap();
         assert_eq!(
-            (t.title.as_str(), t.my_day_date.as_deref()),
+            (t.title.as_str(), t.scheduled_date.as_deref()),
             ("draft intro", Some(TODAY))
         );
+        assert_eq!(
+            titles(&query::list(&conn, TaskView::MyDay, TODAY).unwrap()),
+            ["draft intro"]
+        );
 
-        edit.in_my_day = false;
-        assert!(mutation::update(&conn, t.id, &edit, TODAY)
+        edit.scheduled_date = None;
+        mutation::update(&conn, t.id, &edit).unwrap();
+        assert!(query::list(&conn, TaskView::MyDay, TODAY)
             .unwrap()
-            .my_day_date
-            .is_none());
+            .is_empty());
 
+        edit.scheduled_date = Some("tomorrow".into());
+        assert!(matches!(
+            mutation::update(&conn, t.id, &edit),
+            Err(AppError::Invalid { .. })
+        ));
+        edit.scheduled_date = None;
         edit.due_date = Some("next week".into());
         assert!(matches!(
-            mutation::update(&conn, t.id, &edit, TODAY),
+            mutation::update(&conn, t.id, &edit),
             Err(AppError::Invalid { .. })
         ));
         edit.due_date = None;
         edit.title = "   ".into();
         assert!(matches!(
-            mutation::update(&conn, t.id, &edit, TODAY),
+            mutation::update(&conn, t.id, &edit),
             Err(AppError::Invalid { .. })
+        ));
+        edit.title = "draft intro".into();
+        assert!(matches!(
+            mutation::update(&conn, 999, &edit),
+            Err(AppError::NotFound { .. })
         ));
     }
 
@@ -143,41 +161,54 @@ mod tests {
     }
 
     #[test]
-    fn a_day_holds_its_my_day_and_due_tasks() {
+    fn a_day_holds_its_planned_and_due_tasks() {
         let conn = open_in_memory();
-        let today_task = mutation::create_on_day(&conn, "standup", TODAY, TODAY).unwrap();
-        assert_eq!(today_task.my_day_date.as_deref(), Some(TODAY));
-        let later = mutation::create_on_day(&conn, "review", "2026-11-21", TODAY).unwrap();
-        assert_eq!(later.due_date.as_deref(), Some("2026-11-21"));
-        assert!(later.my_day_date.is_none());
+        let today_task = mutation::create_on_day(&conn, "standup", TODAY).unwrap();
+        assert_eq!(today_task.scheduled_date.as_deref(), Some(TODAY));
+        // Another day's task is planned for that day, not due on it.
+        let later = mutation::create_on_day(&conn, "review", "2026-11-21").unwrap();
+        assert_eq!(later.scheduled_date.as_deref(), Some("2026-11-21"));
+        assert!(later.due_date.is_none());
+        // Planned Saturday, due Monday: on both days, and only those.
+        let edit = TaskUpdate {
+            title: "review".into(),
+            note: String::new(),
+            is_important: false,
+            is_pinned: false,
+            scheduled_date: later.scheduled_date.clone(),
+            due_date: Some("2026-11-23".into()),
+            estimate: None,
+        };
+        mutation::update(&conn, later.id, &edit).unwrap();
 
         assert_eq!(titles(&query::list_day(&conn, TODAY).unwrap()), ["standup"]);
-        assert_eq!(
-            titles(&query::list_day(&conn, "2026-11-21").unwrap()),
-            ["review"]
-        );
-        assert!(query::list_day(&conn, "2026-11-20").unwrap().is_empty());
-        assert!(mutation::create_on_day(&conn, "x", "someday", TODAY).is_err());
+        for day in ["2026-11-21", "2026-11-23"] {
+            assert_eq!(titles(&query::list_day(&conn, day).unwrap()), ["review"]);
+        }
+        assert!(query::list_day(&conn, "2026-11-22").unwrap().is_empty());
+        let week = super::schedule::in_range(&conn, "2026-11-16", "2026-11-23").unwrap();
+        assert_eq!(week.len(), 2); // "review" comes back once for its two days
+        assert!(mutation::create_on_day(&conn, "x", "someday").is_err());
     }
 
     #[test]
     fn day_completion_counts_each_task_once_per_day() {
         let conn = open_in_memory();
-        let a = mutation::create_on_day(&conn, "a", TODAY, TODAY).unwrap();
-        mutation::create_on_day(&conn, "b", TODAY, TODAY).unwrap();
-        mutation::create_on_day(&conn, "c", "2026-11-25", TODAY).unwrap();
+        let a = mutation::create_on_day(&conn, "a", TODAY).unwrap();
+        mutation::create_on_day(&conn, "b", TODAY).unwrap();
+        mutation::create_on_day(&conn, "c", "2026-11-25").unwrap();
         mutation::set_done(&conn, a.id, true).unwrap();
-        // In My Day today and also due today: still one task for today.
+        // Planned for today and also due today: still one task for today.
         let edit = TaskUpdate {
             title: "a".into(),
             note: String::new(),
             is_important: false,
             is_pinned: false,
-            in_my_day: true,
+            scheduled_date: Some(TODAY.into()),
             due_date: Some(TODAY.into()),
             estimate: None,
         };
-        mutation::update(&conn, a.id, &edit, TODAY).unwrap();
+        mutation::update(&conn, a.id, &edit).unwrap();
 
         let days = query::day_completion(&conn, "2026-11-01", "2026-11-30").unwrap();
         let summary: Vec<_> = days

@@ -25,6 +25,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import type { Task, TaskUpdate } from '@/lib/tauri-bindings'
 import { formatMinutes } from '@/lib/duration'
@@ -89,17 +90,19 @@ function TaskDetailsForm({ task }: { task: Task }) {
   const save = (change: Partial<TaskUpdate>) =>
     updateTask.mutate({
       id: task.id,
-      update: { ...toUpdate(task, today), title, note, ...change },
+      update: { ...toUpdate(task), title, note, ...change },
     })
 
-  const inMyDay = task.myDayDate !== null && task.myDayDate === today
+  // In My Day = planned for today, so the toggle and the "Do on" date below
+  // are two ways to set the same field.
+  const inMyDay = task.scheduledDate !== null && task.scheduledDate === today
   const toggles = [
     {
       key: 'myDay',
       on: inMyDay,
       icon: SunIcon,
       label: inMyDay ? t('tasks.removeFromMyDay') : t('tasks.addToMyDay'),
-      change: { inMyDay: !inMyDay },
+      change: { scheduledDate: inMyDay ? null : (today ?? null) },
     },
     {
       key: 'important',
@@ -160,11 +163,28 @@ function TaskDetailsForm({ task }: { task: Task }) {
         ))}
       </div>
 
-      <DatePicker
-        value={task.dueDate ? parseDate(task.dueDate) : undefined}
-        onChange={date => save({ dueDate: date ? formatDate(date) : null })}
-        placeholder={t('tasks.addDueDate')}
-      />
+      <div className="grid gap-1">
+        <Label className="text-xs text-muted-foreground">
+          {t('tasks.doOn')}
+        </Label>
+        <DatePicker
+          value={task.scheduledDate ? parseDate(task.scheduledDate) : undefined}
+          onChange={date =>
+            save({ scheduledDate: date ? formatDate(date) : null })
+          }
+          placeholder={t('tasks.addDoOn')}
+        />
+      </div>
+      <div className="grid gap-1">
+        <Label className="text-xs text-muted-foreground">
+          {t('tasks.due')}
+        </Label>
+        <DatePicker
+          value={task.dueDate ? parseDate(task.dueDate) : undefined}
+          onChange={date => save({ dueDate: date ? formatDate(date) : null })}
+          placeholder={t('tasks.addDueDate')}
+        />
+      </div>
 
       <Input
         value={estimate}

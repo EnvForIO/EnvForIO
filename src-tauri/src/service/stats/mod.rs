@@ -16,6 +16,7 @@ use specta::Type;
 
 use crate::domain::day::day_of_timestamp;
 use crate::errors::{AppError, AppResult};
+use crate::service::tasks::query::IN_DAYS;
 use range::{bounds, Period};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Type)]
@@ -118,9 +119,9 @@ pub fn stats(conn: &Connection, period: Period, today: &str, offset: i32) -> App
 
     // Completion rate over tasks that had a day in the period.
     let (planned, planned_done): (i64, i64) = conn.query_row(
-        "SELECT count(*), coalesce(sum(done_at IS NOT NULL), 0) FROM tasks
-         WHERE my_day_date BETWEEN ?1 AND ?2 OR scheduled_date BETWEEN ?1 AND ?2
-            OR due_date BETWEEN ?1 AND ?2",
+        &format!(
+            "SELECT count(*), coalesce(sum(t.done_at IS NOT NULL), 0) FROM tasks t WHERE {IN_DAYS}"
+        ),
         params![from.to_string(), to.to_string()],
         |r| Ok((r.get(0)?, r.get(1)?)),
     )?;

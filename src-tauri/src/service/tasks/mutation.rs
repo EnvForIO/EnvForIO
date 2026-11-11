@@ -21,14 +21,14 @@ pub struct TaskUpdate {
     pub note: String,
     pub is_important: bool,
     pub is_pinned: bool,
-    pub in_my_day: bool,
-    pub due_date: Option<String>, // 'YYYY-MM-DD'
-    pub estimate: Option<String>, // typed, e.g. "1h30m"; None or "" = no estimate
+    pub scheduled_date: Option<String>, // 'YYYY-MM-DD', the day to do it; today = in My Day
+    pub due_date: Option<String>,       // 'YYYY-MM-DD'
+    pub estimate: Option<String>,       // typed, e.g. "1h30m"; None or "" = no estimate
 }
 
 /// Add a task to the top of a list. The list decides the defaults, as in
-/// Microsoft To Do: adding in My Day puts it in My Day, in Important flags it,
-/// in Planned gives it today's date. A leading time ("14:00-15:00 seminar")
+/// Microsoft To Do: adding in My Day plans it for today, in Important flags
+/// it, in Planned makes it due today. A leading time ("14:00-15:00 seminar")
 /// becomes the task's time slot (quick capture).
 pub fn create(conn: &Connection, title: &str, view: TaskView, today: &str) -> AppResult<Task> {
     let captured = capture(title);
@@ -39,16 +39,16 @@ pub fn create(conn: &Connection, title: &str, view: TaskView, today: &str) -> Ap
         [],
         |r| r.get(0),
     )?;
-    let my_day = (view == TaskView::MyDay).then_some(today);
+    let scheduled = (view == TaskView::MyDay).then_some(today);
     let due = (view == TaskView::Planned).then_some(today);
     conn.execute(
-        "INSERT INTO tasks (title, is_important, my_day_date, due_date, start_time, end_time,
+        "INSERT INTO tasks (title, is_important, scheduled_date, due_date, start_time, end_time,
                             sort_order, created_at, updated_at)
          VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?8)",
         params![
             title,
             view == TaskView::Important,
-            my_day,
+            scheduled,
             due,
             captured.start,
             captured.end,
@@ -59,32 +59,23 @@ pub fn create(conn: &Connection, title: &str, view: TaskView, today: &str) -> Ap
     query::get(conn, conn.last_insert_rowid())
 }
 
-/// Add a task from the Todo Duo card for `date`. Today's card is My Day;
-/// any other day's task gets that day as its due date (its "date tag").
-pub fn create_on_day(conn: &Connection, title: &str, date: &str, today: &str) -> AppResult<Task> {
+/// Add a task planned for `date`: the Todo Duo card and the calendar's day
+/// dialog (user decision 2026-11-20: both plan the task, neither sets a due
+/// date).
+pub fn create_on_day(conn: &Connection, title: &str, date: &str) -> AppResult<Task> {
     check_date(&Some(date.to_string()))?;
-    let view = if date == today {
-        TaskView::MyDay
-    } else {
-        TaskView::Planned
-    };
-    // `create` dates My Day and Planned tasks with its last argument, so pass the card's date.
-    create(conn, title, view, date)
+    // My Day is "planned for today", so a task for another day is the same
+    // insert with that day in place of today.
+    create(conn, title, TaskView::MyDay, date)
 }
 
-pub fn update(conn: &Connection, id: i64, update: &TaskUpdate, today: &str) -> AppResult<Task> {
+pub fn update(conn: &Connection, id: i64, update: &TaskUpdate) -> AppResult<Task> {
     let title = clean_title(&update.title)?;
+    check_date(&update.scheduled_date)?;
     check_date(&update.due_date)?;
-    let current = query::get(conn, id)?;
-    // Keep the original My Day date if it is already in My Day; leaving My Day clears it.
-    let my_day = match (update.in_my_day, current.my_day_date.as_deref()) {
-        (true, Some(d)) if d == today => Some(d.to_string()),
-        (true, _) => Some(today.to_string()),
-        (false, _) => None,
-    };
-    conn.execute(
+    let changed = conn.execute(
         "UPDATE tasks SET title = ?2, note = ?3, is_important = ?4, is_pinned = ?5,
-             my_day_date = ?6, due_date = ?7, estimate_minutes = ?8, updated_at = ?9
+             scheduled_date = ?6, due_date = ?7, estimate_minutes = ?8, updated_at = ?9
          WHERE id = ?1",
         params![
             id,
@@ -92,12 +83,15 @@ pub fn update(conn: &Connection, id: i64, update: &TaskUpdate, today: &str) -> A
             update.note,
             update.is_important,
             update.is_pinned,
-            my_day,
+            update.scheduled_date,
             update.due_date,
             estimate_minutes(&update.estimate)?,
             now_timestamp()
         ],
     )?;
+    if changed == 0 {
+        return Err(AppError::not_found("task", id));
+    }
     query::get(conn, id)
 }
 

@@ -21,13 +21,14 @@ Right-clicking empty space does nothing. In text boxes, or on selected text, rig
 
 ## Tasks
 
-- **My Day**: what you are doing today. It holds tasks you added to My Day, tasks scheduled for today, tasks due today, and overdue tasks that are still open. At the top are today's safety line and a line of note for the day. At the bottom, **To schedule** lists tasks that have no day.
+- **My Day**: what you are doing today. It holds the tasks planned for today, the tasks due today, and overdue tasks that are still open. At the top are today's safety line and a line of note for the day. At the bottom, **To schedule** lists open tasks with no day to do them on.
+- **Two dates per task**: **Do on** is the day you plan to work on it, **Due** is its deadline. A task shows on both days everywhere: My Day, Todo Duo, the calendar and the heatmap. "Add to My Day" sets **Do on** to today. A task you planned for a day and did not finish goes back to **To schedule** the next day; it does not move to today by itself.
 - **Important**: flagged tasks.
 - **Planned**: tasks with a due date, soonest first.
 - **Tasks**: every task that is not in a project.
 - **Order**: drag a task up or down to reorder My Day, Important, Tasks, a project module, or Items under Open or All (Planned, and Items with deadline or done, are sorted by date). Ctrl+Z undoes it.
 - **Quick capture**: start a title with a time and it becomes the task's time slot. Examples: `14:00-15:00 group meeting`, `9:30 call`.
-- **Details pane**: title, steps, timer, My Day, flag, pin, due date, estimate (`45m`, `1h30m`, `1.5h`) and note. A task that came from an idea shows **Todo of idea …**; click it to open the idea.
+- **Details pane**: title, steps, timer, My Day, flag, pin, the Do on and Due dates, estimate (`45m`, `1h30m`, `1.5h`) and note. A task that came from an idea shows **Todo of idea …**; click it to open the idea.
 - **Timer**: the play button on a task row starts it (starting another stops the first). Stopping adds the time to the task. **Did part of it** finishes the part you did and moves the rest to the next work day.
 - **Undo**: Ctrl+Z, or the Undo button that appears after deleting a task. It keeps the last 50 changes until EnvIO closes.
 
@@ -37,7 +38,7 @@ The float button in the title bar (or **Mini mode** in the tray menu) shrinks En
 
 The card has two tabs:
 
-- **Todo**: the day's tasks, with an add box. Click a day on the capsule's heatmap to see another day.
+- **Todo**: the day's tasks, with an add box that plans the new task for that day. Click a day on the capsule's heatmap to see another day.
 - **Month**: the month calendar.
   - **Shading**: how full each day is, comparing the time of the tasks scheduled on it with the time you have that day. Blue means room left, yellow nearly full, red over (or work planned on a rest day).
   - **Dots**: deadlines that day (projects, tasks due, followed conferences).
@@ -68,7 +69,7 @@ Preferences → Appearance sets the sticky's material, font and text size.
 ## Calendar
 
 - **Views**: month or week, with **To schedule** on the right.
-- **Scheduling**: drag a task onto a day to schedule it, or back onto **To schedule** to remove it from the calendar.
+- **Scheduling**: drag a task onto a day to plan it for that day, or back onto **To schedule** to take its day away. A task also shows on its due day, with a due marker.
 - **Day dialog**: double-click or right-click a day to add a task, write the day's note, or set its available time.
 - **Export**: writes the month or week on screen as CSV (for Excel) or ICS. Project pages export the same way.
 - **Calendars**: subscribes to read-only calendars from ICS links, such as Outlook / Office 365 or a course timetable.

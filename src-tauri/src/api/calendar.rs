@@ -3,6 +3,7 @@
 use tauri::State;
 
 use crate::config::AppState;
+use crate::domain::day::today;
 use crate::entity::task::Task;
 use crate::errors::AppResult;
 use crate::service::days::{self, DayNote};
@@ -22,7 +23,7 @@ pub fn list_calendar_tasks(
 #[tauri::command]
 #[specta::specta]
 pub fn list_unscheduled_tasks(state: State<'_, AppState>) -> AppResult<Vec<Task>> {
-    schedule::unscheduled(&state.db())
+    schedule::unscheduled(&state.db(), &today())
 }
 
 #[tauri::command]
@@ -31,16 +32,6 @@ pub fn schedule_task(state: State<'_, AppState>, id: i64, date: Option<String>) 
     state.changing("Schedule task", &[id], |db| {
         schedule::schedule(db, id, date)
     })
-}
-
-#[tauri::command]
-#[specta::specta]
-pub fn create_scheduled_task(
-    state: State<'_, AppState>,
-    title: String,
-    date: String,
-) -> AppResult<Task> {
-    state.creating("Add task", |db| schedule::create_on(db, &title, &date))
 }
 
 #[tauri::command]

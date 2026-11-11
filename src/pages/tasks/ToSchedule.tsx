@@ -1,6 +1,7 @@
 /**
- * "To schedule" at the bottom of My Day: open tasks with no day yet,
- * folded by default. "Today" schedules one for today so it joins My Day.
+ * "To schedule" at the bottom of My Day: open tasks with no day to do them
+ * on (never planned, or planned for a day that passed), folded by default.
+ * "Today" plans one for today so it joins My Day.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -11,9 +12,13 @@ import { formatMinutes } from '@/lib/duration'
 
 export function ToSchedule({ today }: { today: string }) {
   const { t } = useTranslation()
-  const { data: tasks = [] } = useUnscheduledTasks()
+  const { data: unscheduled = [] } = useUnscheduledTasks()
   const scheduleTask = useScheduleTask()
   const [open, setOpen] = useState(false)
+  // Due today or overdue is already in the list above; do not show it twice.
+  const tasks = unscheduled.filter(
+    task => task.dueDate === null || task.dueDate > today
+  )
   if (tasks.length === 0) return null
 
   return (
