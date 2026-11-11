@@ -3,8 +3,7 @@
 //! this sticky, and the capsule's expand button brings the window back.
 //!
 //! The card always sits just under the capsule. Dragging the capsule moves the
-//! card; dragging the card moves the capsule; when the capsule grows into the
-//! heatmap the card slides down with it. Each window keeps its own size.
+//! card; dragging the card moves the capsule. Each window keeps its own size.
 //!
 //! Positions are physical pixels. Moving one window fires a Moved event on the
 //! other; it is ignored when the other is already where it should be, which is

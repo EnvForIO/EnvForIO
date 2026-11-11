@@ -34,11 +34,11 @@ Right-clicking empty space does nothing. In text boxes, or on selected text, rig
 
 ## Todo Duo (mini mode)
 
-The float button in the title bar (or **Mini mode** in the tray menu) shrinks EnvIO into a small sticky: a capsule with a pin and a heatmap, and a card under it. Drag either one to move both. The capsule's expand button, or a click on the tray icon, brings the window back.
+The float button in the title bar (or **Mini mode** in the tray menu) shrinks EnvIO into a small sticky: a capsule with today's progress and a pin, and a card under it. Drag either one to move both. The capsule's expand button, or a click on the tray icon, brings the window back.
 
 The card has two tabs:
 
-- **Todo**: the day's tasks, with an add box that plans the new task for that day. Click a day on the capsule's heatmap to see another day.
+- **Todo**: the day's tasks, with an add box that plans the new task for that day.
 - **Month**: the month calendar.
   - **Shading**: how full each day is, comparing the time of the tasks scheduled on it with the time you have that day. Blue means room left, yellow nearly full, red over (or work planned on a rest day).
   - **Dots**: deadlines that day (projects, tasks due, followed conferences).

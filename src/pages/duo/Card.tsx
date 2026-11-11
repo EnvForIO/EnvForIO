@@ -1,6 +1,6 @@
 /**
  * The Todo Duo card, with two tabs: Todo (the todos of one day, today
- * until the capsule's heatmap or the month picks another, with an add box)
+ * until the month picks another, with an add box)
  * and Month (the calendar with busy days and deadlines). Drag it by the
  * header. The tab is remembered on this machine.
  */
