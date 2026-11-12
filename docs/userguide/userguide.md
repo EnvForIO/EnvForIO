@@ -49,6 +49,7 @@ Preferences → Appearance sets the sticky's material, font and text size.
 
 ## Projects and the safety line
 
+- **Project menu**: right-click a project in the sidebar to open, edit or delete it. Deleting asks first and removes the project's tasks too.
 - **New project** (the + next to Projects): name, colour, template, start date, deadline and **Finish early** days. The dialog shows what the template sets up.
   - **Blank**: starts empty.
   - **Grant** and **Thesis**: start with their modules.

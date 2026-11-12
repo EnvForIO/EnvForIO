@@ -14,21 +14,10 @@ import {
 } from 'lucide-react'
 import {
   useAddModule,
-  useDeleteProject,
   useModules,
   useProjectTasks,
   useProjects,
 } from '@/api/projects'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatMinutes } from '@/lib/duration'
@@ -40,6 +29,7 @@ import { ModuleSection } from './ModuleSection'
 import { ProjectBoard } from './ProjectBoard'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ProjectHealthBadge } from '@/pages/plans/ProjectHealthBadge'
+import { DeleteProjectDialog } from './DeleteProjectDialog'
 import { ProjectDialog } from './ProjectDialog'
 import { ExportDialog } from '@/pages/export/ExportDialog'
 import { isEnter } from '@/lib/keys'
@@ -55,8 +45,6 @@ function ProjectView({ project }: { project: Project }) {
   const { data: modules = [] } = useModules(project.id)
   const { data: tasks = [] } = useProjectTasks(project.id)
   const addModule = useAddModule()
-  const deleteProject = useDeleteProject()
-  const selectView = useUIStore(state => state.selectView)
   const view = useUIStore(state => state.projectView)
   const setView = useUIStore(state => state.setProjectView)
   const [editing, setEditing] = useState(false)
@@ -192,30 +180,10 @@ function ProjectView({ project }: { project: Project }) {
         onOpenChange={setEditing}
         project={project}
       />
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {t('projects.deleteTitle', { name: project.name })}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('projects.deleteDescription', { count: project.taskCount })}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('projects.cancel')}</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() =>
-                deleteProject.mutate(project.id, {
-                  onSuccess: () => selectView('MyDay'),
-                })
-              }
-            >
-              {t('projects.delete')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteProjectDialog
+        project={confirmDelete ? project : null}
+        onClose={() => setConfirmDelete(false)}
+      />
     </div>
   )
 }

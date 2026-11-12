@@ -148,6 +148,7 @@
   "tasks.saveFailed": "Could not save: check the estimate and dates.",
   "projects.title": "Projects",
   "projects.new": "New project",
+  "projects.open": "Open",
   "projects.edit": "Edit project",
   "projects.name": "Name",
   "projects.template.blank": "Blank",
