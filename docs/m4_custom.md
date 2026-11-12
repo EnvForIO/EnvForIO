@@ -166,4 +166,10 @@ Decisions (user, 2026-11-20): no Conferences page and no following; a conference
 - Planning (`plans/work.rs`): each dated phase is a unit with its own window (from the day after the previous phase's end to its own end; the finish-early days apply only to a phase that ends with the project), the rest of the project is one more unit up to the deadline. Units carry the project's id, so `allocate` adds them up per project unchanged. Budgets: unestimated tasks in a budgeted module share what the estimated ones leave of it; a budgeted module without tasks counts its budget until its end date. Projects with dated phases but no deadline are planned too.
 - Health (`plans/forecast.rs`): judged per unit with `safety_line::window`; the project takes the worst. A phase past its end with work left is Behind, only the project's deadline makes it Overdue. New state `Unestimated`: open tasks but nothing to plan with.
 - The Todo Duo Month tab lost its conference dots (a conference project's deadline and abstract task are already deadlines there). ccfddl's list downloads from the dialog when missing or a week old (`useFreshConferences`).
-- Not done here: the Research overview's deadline list does not yet include ideas' target conferences (step 3); moving a project's deadline does not move its phases.
+- Not done here: moving a project's deadline does not move its phases.
+
+## Fewer sidebar entries, step 3: Research as one entry (2026-11-20)
+
+- The sidebar has one Research entry (lit on any of its tabs); `ResearchLayout` shows the title and the Overview / Ideas / Library tabs above the three pages, which lost their own titles. The tabs are still separate `MainPage`s, so `openIdea` and `openPage('papers')` from elsewhere land on the right tab. Dividers now group the sidebar: lists, Calendar and Stats; Research; Reader and Monitor.
+- The overview's deadlines include each unfinished idea's target conference (`DeadlineKind::Conference`, id = the idea's; matched on title or ccfddl key like `findVenue`): its next open round, left out once that edition has a project. Clicking it opens the idea.
+- The sidebar went from 13 entries to 8 over the three steps.

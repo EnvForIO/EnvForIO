@@ -5,6 +5,7 @@
 import { useTranslation } from 'react-i18next'
 import {
   AlertTriangleIcon,
+  CalendarClockIcon,
   FolderIcon,
   LightbulbIcon,
   ListTodoIcon,
@@ -136,6 +137,7 @@ const KIND_ICON: Record<DeadlineKind, LucideIcon> = {
   Idea: LightbulbIcon,
   Project: FolderIcon,
   Task: SquareCheckIcon,
+  Conference: CalendarClockIcon, // an idea's target conference
 }
 
 function DaysLeft({ days }: { days: number }) {
@@ -169,7 +171,8 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
   const selectTask = useUIStore(state => state.selectTask)
   if (deadlines.length === 0) return <Empty text={t('research.noDeadlines')} />
   const open = (d: Deadline) => {
-    if (d.kind === 'Idea') openIdea(d.id)
+    // A target conference's id is its idea's.
+    if (d.kind === 'Idea' || d.kind === 'Conference') openIdea(d.id)
     else if (d.kind === 'Project') selectProject(d.id)
     else selectTask(d.id)
   }

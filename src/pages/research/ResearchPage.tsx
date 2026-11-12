@@ -1,6 +1,7 @@
 /**
- * The research overview (Seedbank's home): four numbers on top, ideas by
- * status, then ideas being worked on, deadlines, open todos and problems.
+ * The research overview (Seedbank's home, Research's first tab): four
+ * numbers on top, ideas by status, then ideas being worked on, deadlines
+ * (with ideas' target conferences), open todos and problems.
  * Every row jumps to its idea, project or task. Export JSON saves every
  * idea and paper in one file.
  */
@@ -58,16 +59,13 @@ export function ResearchPage() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3 px-5 py-4">
-      <header className="flex items-center gap-2">
-        <h1 className="flex-1 text-xl font-semibold">
-          {t('research.pageTitle')}
-        </h1>
+    <div className="flex h-full flex-col gap-3 px-5 pt-3 pb-4">
+      <div className="flex justify-end">
         <Button size="sm" variant="outline" onClick={exportAll}>
           <FileJsonIcon className="size-3.5" />
           {t('research.exportJson')}
         </Button>
-      </header>
+      </div>
       {o && (
         <ScrollArea className="min-h-0 flex-1">
           <div className="flex flex-col gap-3 pr-3 pb-4">

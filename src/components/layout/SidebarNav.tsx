@@ -7,11 +7,9 @@ import {
   ActivityIcon,
   CalendarRangeIcon,
   ChartColumnIcon,
-  LibraryIcon,
   LightbulbIcon,
   RssIcon,
   HouseIcon,
-  LayoutDashboardIcon,
   StarIcon,
   SunIcon,
   type LucideIcon,
@@ -19,6 +17,7 @@ import {
 import { useTasks } from '@/api/tasks'
 import type { TaskView } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
+import { isResearchTab } from '@/pages/research/tabs'
 import { useUIStore, type MainPage } from '@/store/ui-store'
 
 const VIEWS: { view: TaskView; icon: LucideIcon }[] = [
@@ -59,7 +58,11 @@ function NavItem({ view, icon: Icon }: { view: TaskView; icon: LucideIcon }) {
 
 function PageItem({ page, icon: Icon }: { page: MainPage; icon: LucideIcon }) {
   const { t } = useTranslation()
-  const open = useUIStore(state => state.page === page)
+  // Research stays lit on any of its tabs.
+  const open = useUIStore(
+    state =>
+      state.page === page || (page === 'research' && isResearchTab(state.page))
+  )
   const openPage = useUIStore(state => state.openPage)
   return (
     <button
@@ -84,9 +87,9 @@ export function SidebarNav() {
       ))}
       <PageItem page="calendar" icon={CalendarRangeIcon} />
       <PageItem page="stats" icon={ChartColumnIcon} />
-      <PageItem page="research" icon={LayoutDashboardIcon} />
-      <PageItem page="ideas" icon={LightbulbIcon} />
-      <PageItem page="papers" icon={LibraryIcon} />
+      <div className="my-1 border-t" />
+      <PageItem page="research" icon={LightbulbIcon} />
+      <div className="my-1 border-t" />
       <PageItem page="reader" icon={RssIcon} />
       <PageItem page="monitor" icon={ActivityIcon} />
     </nav>

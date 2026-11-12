@@ -9,17 +9,25 @@ import { StatsPage } from './stats/StatsPage'
 import { IdeasPage } from './ideas/IdeasPage'
 import { PapersPage } from './papers/PapersPage'
 import { MonitorPage } from './monitor/MonitorPage'
+import { ResearchLayout } from './research/ResearchLayout'
 import { ResearchPage } from './research/ResearchPage'
+import { isResearchTab } from './research/tabs'
 import { ReaderPage } from './reader/ReaderPage'
 
 export function MainPane() {
   const projectId = useUIStore(state => state.selectedProjectId)
   const page = useUIStore(state => state.page)
+  if (isResearchTab(page)) {
+    return (
+      <ResearchLayout tab={page}>
+        {page === 'research' && <ResearchPage />}
+        {page === 'ideas' && <IdeasPage />}
+        {page === 'papers' && <PapersPage />}
+      </ResearchLayout>
+    )
+  }
   if (page === 'calendar') return <CalendarPage />
   if (page === 'stats') return <StatsPage />
-  if (page === 'research') return <ResearchPage />
-  if (page === 'ideas') return <IdeasPage />
-  if (page === 'papers') return <PapersPage />
   if (page === 'monitor') return <MonitorPage />
   if (page === 'reader') return <ReaderPage />
   return projectId === null ? (

@@ -88,6 +88,68 @@ mod tests {
     }
 
     #[test]
+    fn an_ideas_target_conference_is_a_deadline_until_it_has_a_project() {
+        use crate::domain::conference::{parse_all, tests::SAMPLE};
+        use crate::entity::conference::RoundRef;
+        use crate::service::conferences;
+        use crate::service::projects::mutation::ProjectInput;
+
+        let mut conn = open_in_memory();
+        conferences::replace_all(&mut conn, &parse_all(SAMPLE).unwrap(), "").unwrap();
+        let idea = ideas::create(&mut conn, "sparse attention").unwrap();
+        let update = |venue: &str| IdeaUpdate {
+            title: "sparse attention".into(),
+            description: String::new(),
+            status: IdeaStatus::Researching,
+            priority: 0,
+            is_pinned: false,
+            venue: venue.into(),
+            deadline: None,
+            tag_ids: vec![],
+        };
+        ideas::update(&mut conn, idea.id, &update("nips")).unwrap();
+
+        let o = overview::overview(&conn, "2026-11-19").unwrap();
+        let d = &o.deadlines[0];
+        assert_eq!(d.kind, overview::DeadlineKind::Conference);
+        assert_eq!((d.id, d.title.as_str()), (idea.id, "NeurIPS 2099"));
+        assert_eq!(d.detail, "sparse attention");
+
+        // A journal, or an unknown name: nothing.
+        ideas::update(&mut conn, idea.id, &update("PLOS ONE")).unwrap();
+        assert!(overview::overview(&conn, "2026-11-19")
+            .unwrap()
+            .deadlines
+            .is_empty());
+
+        // Once the edition has a project, the project's deadline stands for it.
+        ideas::update(&mut conn, idea.id, &update("NeurIPS")).unwrap();
+        let round = RoundRef {
+            key: "nips".into(),
+            edition_id: "nips99".into(),
+            stage: 0,
+        };
+        let input = ProjectInput {
+            name: "NeurIPS 2099".into(),
+            color: "#f97316".into(),
+            start_date: None,
+            deadline: None,
+            buffer_days: 0,
+            is_archived: false,
+        };
+        conferences::create_project(&mut conn, &input, &[], &round, "2026-11-19", Some(idea.id))
+            .unwrap();
+        let kinds: Vec<_> = overview::overview(&conn, "2026-11-19")
+            .unwrap()
+            .deadlines
+            .into_iter()
+            .map(|d| d.kind)
+            .collect();
+        assert!(!kinds.contains(&overview::DeadlineKind::Conference));
+        assert!(kinds.contains(&overview::DeadlineKind::Project));
+    }
+
+    #[test]
     fn the_archive_holds_every_idea_with_its_papers() {
         let mut conn = open_in_memory();
         let idea = ideas::create(&mut conn, "stomata").unwrap();

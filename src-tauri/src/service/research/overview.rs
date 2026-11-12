@@ -1,13 +1,16 @@
 //! The research overview: idea counts, ideas being worked on, upcoming
-//! deadlines from ideas, projects and tasks, and the open todos and problems.
+//! deadlines from ideas, projects, tasks and ideas' target conferences,
+//! and the open todos and problems.
 
-use chrono::{Days, NaiveDate};
+use chrono::{Datelike, Days, Local, NaiveDate, TimeZone, Utc};
 use rusqlite::{params, Connection};
 use serde::Serialize;
 use specta::Type;
 
+use crate::entity::conference::Conference;
 use crate::entity::idea::{Idea, IdeaStatus};
 use crate::errors::{AppError, AppResult};
+use crate::service::conferences;
 use crate::service::ideas::query::{self as ideas, IdeaFilter};
 
 /// Ideas someone is working on right now.
@@ -19,12 +22,14 @@ const ACTIVE: [IdeaStatus; 3] = [
 /// Deadlines further back than this are not shown.
 const OVERDUE_DAYS: u64 = 30;
 const LIST_LIMIT: i64 = 20;
+const LIST_DEADLINES: usize = 40;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Type)]
 pub enum DeadlineKind {
     Idea,
     Project,
     Task,
+    Conference, // an idea's target conference; `id` is the idea's
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Type)]
@@ -157,7 +162,92 @@ fn deadlines(conn: &Connection, today: &str) -> AppResult<Vec<Deadline>> {
             days_left,
         });
     }
+    list.extend(conference_deadlines(
+        conn,
+        today,
+        Utc::now().timestamp_millis(),
+    )?);
+    list.sort_by(|a, b| a.date.cmp(&b.date).then(a.title.cmp(&b.title)));
+    list.truncate(LIST_DEADLINES);
     Ok(list)
+}
+
+/// The conference an idea's venue names: its title or ccfddl key, in any
+/// case ("MICCAI", "miccai", "MX/miccai"). The same rule as the frontend's
+/// `findVenue`.
+fn names(venue: &str, c: &Conference) -> bool {
+    let venue = venue.trim().to_lowercase();
+    let key = c.key.to_lowercase();
+    !venue.is_empty()
+        && (c.title.to_lowercase() == venue
+            || key == venue
+            || key.rsplit('/').next() == Some(venue.as_str()))
+}
+
+/// The next open round of each unfinished idea's target conference (user
+/// decision 2026-11-20: the idea's venue does what following a conference
+/// did). An edition with a project is left out: the project's own deadline
+/// is already in the list.
+fn conference_deadlines(
+    conn: &Connection,
+    today: NaiveDate,
+    now_ms: i64,
+) -> AppResult<Vec<Deadline>> {
+    let conferences = conferences::list(conn, Local::now().year() - 1)?.conferences;
+    if conferences.is_empty() {
+        return Ok(Vec::new());
+    }
+    let mut stmt = conn.prepare(
+        "SELECT id, title, venue FROM ideas
+         WHERE venue <> '' AND status NOT IN ('Submitted', 'Done', 'Dropped')",
+    )?;
+    let ideas = stmt.query_map([], |r| {
+        Ok((
+            r.get::<_, i64>(0)?,
+            r.get::<_, String>(1)?,
+            r.get::<_, String>(2)?,
+        ))
+    })?;
+    let mut out = Vec::new();
+    for idea in ideas {
+        let (id, idea_title, venue) = idea?;
+        let Some(c) = conferences.iter().find(|c| names(&venue, c)) else {
+            continue;
+        };
+        let next = c
+            .editions
+            .iter()
+            .flat_map(|e| e.stages.iter().map(move |s| (e, s)))
+            .filter_map(|(e, s)| s.deadline_at.filter(|at| *at > now_ms).map(|at| (at, e, s)))
+            .min_by_key(|(at, _, _)| *at);
+        let Some((at, edition, stage)) = next else {
+            continue;
+        };
+        if edition.project_id.is_some() {
+            continue;
+        }
+        let Some(day) = Local
+            .timestamp_millis_opt(at)
+            .single()
+            .map(|d| d.date_naive())
+        else {
+            continue;
+        };
+        let comment = if stage.comment.is_empty() {
+            String::new()
+        } else {
+            format!(" ({})", stage.comment)
+        };
+        out.push(Deadline {
+            kind: DeadlineKind::Conference,
+            id,
+            title: format!("{} {}{comment}", c.title, edition.year),
+            detail: idea_title,
+            date: day.to_string(),
+            days_left: (day - today).num_days(),
+        });
+    }
+    Ok(out)
 }
 
 /// Open todos of unfinished ideas, dated ones first.

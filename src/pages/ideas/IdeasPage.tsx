@@ -1,6 +1,6 @@
 /**
- * Ideas (Seedbank): "jot down a new idea" on top, filter chips, then the
- * card list on the left and the selected idea on the right.
+ * Ideas (Seedbank), a tab of Research: "jot down a new idea" on top, filter
+ * chips, then the card list on the left and the selected idea on the right.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -32,8 +32,7 @@ export function IdeasPage() {
   }
 
   return (
-    <div className="flex h-full flex-col gap-3 px-5 py-4">
-      <h1 className="text-xl font-semibold">{t('ideas.pageTitle')}</h1>
+    <div className="flex h-full flex-col gap-3 px-5 pt-3 pb-4">
       <div className="flex items-center gap-2 rounded-md border px-3">
         <LightbulbIcon className="size-4 text-muted-foreground" />
         <input

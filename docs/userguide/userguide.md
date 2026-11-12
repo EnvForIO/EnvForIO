@@ -4,7 +4,7 @@ EnvIO is a desktop app for researchers. It covers tasks, planning back from dead
 
 ## Getting around
 
-The left sidebar has the task lists (My Day, Important, Tasks), then the pages: Calendar, Stats, Research, Ideas, Library, Reader and Monitor. Your projects are listed below them.
+The left sidebar has the task lists (My Day, Important, Tasks), then the pages: Calendar and Stats; Research (with its Overview, Ideas and Library tabs); Reader and Monitor. Your projects are listed below them.
 
 Clicking a task opens its details on the right. Closing the window hides EnvIO to the tray; to quit, use the tray menu's **Quit EnvIO**. Preferences → General → **Launch at login** starts EnvIO hidden in the tray when you sign in.
 
@@ -95,6 +95,16 @@ Preferences → Appearance sets the sticky's material, font and text size.
 
 ## Research
 
+One sidebar entry with three tabs: **Overview**, **Ideas** and **Library**.
+
+- **Overview**: these sections:
+  - counts of unfinished ideas, open todos, open problems and papers to read
+  - ideas by status, and the ideas in progress
+  - upcoming deadlines from ideas, projects, tasks, and ideas' target conferences (the next open round; once that edition has a project, the project's deadline stands for it)
+  - open todos and problems
+
+  **Export JSON** saves all ideas and papers to one file.
+
 - **Ideas**: each idea has a status (Spark → Researching → In progress → Writing → Submitted → Done, or On hold or Dropped), a priority, a pin, tags, a target venue and a deadline.
   - **Filters**: by status, pinned or tag.
   - **Inside an idea**:
@@ -107,13 +117,6 @@ Preferences → Appearance sets the sticky's material, font and text size.
   - **Project link**: link an idea to a project and its todos become that project's tasks, so they count toward its safety line once estimated.
   - **Target conference**: if the idea's venue is a conference on ccfddl's list (for example MICCAI), the idea shows its next deadline. **Plan submission** opens the new-project dialog for that round; the project it makes is linked to the idea. This is also how to keep an eye on a conference you have not committed to yet.
 - **Library**: paste a DOI or an arXiv id or link and the details are looked up online. Anything else becomes a paper with that title. Each paper has a reading status, notes and a BibTeX copy button, and lists the ideas using it. PDFs stay in your reference manager (Zotero).
-- **Research**: an overview with these sections:
-  - counts of unfinished ideas, open todos, open problems and papers to read
-  - ideas by status, and the ideas in progress
-  - upcoming deadlines from ideas, projects and tasks
-  - open todos and problems
-
-  **Export JSON** saves all ideas and papers to one file.
 
 ## Reader
 

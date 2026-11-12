@@ -1,5 +1,5 @@
 /**
- * The paper library (Seedbank): paste a DOI or arXiv link (or type a title)
+ * The paper library (Seedbank), a tab of Research: paste a DOI or arXiv link (or type a title)
  * on top, filter by reading status or search, then the list on the left and
  * the selected paper on the right.
  */
@@ -42,8 +42,7 @@ export function PapersPage() {
   const statusCount = new Map(counts?.byStatus ?? [])
 
   return (
-    <div className="flex h-full flex-col gap-3 px-5 py-4">
-      <h1 className="text-xl font-semibold">{t('papers.pageTitle')}</h1>
+    <div className="flex h-full flex-col gap-3 px-5 pt-3 pb-4">
       <div className="flex items-center gap-2 rounded-md border px-3">
         {addPaper.isPending ? (
           <Loader2Icon className="size-4 animate-spin text-muted-foreground" />
