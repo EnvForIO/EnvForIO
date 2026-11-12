@@ -2,6 +2,9 @@
  * Facts about a conference's deadlines, worked out at a moment `now`
  * (Unix ms): the rounds still open, the next one, how long is left and
  * how urgent that is. Times arrive in Unix ms and are shown in local time.
+ * Used by the new-project dialog's conference picker, a conference
+ * project's page and an idea's target venue (there is no Conferences page
+ * any more).
  */
 import type { Conference, Edition, Stage } from '@/lib/tauri-bindings'
 
@@ -28,13 +31,6 @@ export function upcoming(c: Conference, now: number): Round[] {
 
 export const nextRound = (c: Conference, now: number): Round | null =>
   upcoming(c, now)[0] ?? null
-
-/** The newest edition, for a conference whose next deadline is not out. */
-export const latestEdition = (c: Conference): Edition | null =>
-  c.editions.reduce<Edition | null>(
-    (best, e) => (best === null || e.year > best.year ? e : best),
-    null
-  )
 
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
@@ -96,17 +92,3 @@ export function findVenue(
     ) ?? null
   )
 }
-
-/** ccfddl's area codes. */
-export const AREAS = [
-  'AI',
-  'CG',
-  'CT',
-  'DB',
-  'DS',
-  'HI',
-  'MX',
-  'NW',
-  'SC',
-  'SE',
-] as const

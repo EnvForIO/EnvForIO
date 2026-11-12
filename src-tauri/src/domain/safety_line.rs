@@ -48,7 +48,7 @@ impl Default for Options {
 pub type Allocation = BTreeMap<(NaiveDate, i64), i64>;
 
 /// The days a project may use, in order: work days from max(today, start) to its target.
-fn window(
+pub fn window(
     p: &ProjectWork,
     today: NaiveDate,
     squeeze: f64,

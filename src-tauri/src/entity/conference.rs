@@ -38,8 +38,26 @@ pub struct Conference {
     pub area: String, // ccfddl's area code: AI, CG, CT, DB, DS, HI, MX, NW, SC, SE
     pub ccf: String,  // CCF rank: A, B, C or N; "" if unranked
     pub core: String, // CORE rank: A*, A, B, C; "" if unranked
-    pub followed: bool,
     pub editions: Vec<Edition>,
+}
+
+/// The round a conference project was made for, as ccfddl has it now (it
+/// may have moved the deadline since).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectRound {
+    pub title: String, // the conference, e.g. "NeurIPS"
+    pub edition: Edition,
+    pub stage: u32, // index into `edition.stages`
+}
+
+/// Which round of which conference a new project is for.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct RoundRef {
+    pub key: String,
+    pub edition_id: String,
+    pub stage: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]

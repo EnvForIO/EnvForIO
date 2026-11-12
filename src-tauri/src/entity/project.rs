@@ -54,6 +54,8 @@ impl Project {
     }
 }
 
+/// A group of a project's tasks. With an end date it is a phase: the safety
+/// line plans its tasks between the previous phase's end and its own.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
 #[serde(rename_all = "camelCase")]
 pub struct Module {
@@ -61,9 +63,11 @@ pub struct Module {
     pub project_id: i64,
     pub name: String,
     pub sort_order: f64,
+    pub end_date: Option<String>,    // 'YYYY-MM-DD'
+    pub budget_minutes: Option<i64>, // time planned for the phase, for tasks without estimates
 }
 
-pub const MODULE_COLUMNS: &str = "id, project_id, name, sort_order";
+pub const MODULE_COLUMNS: &str = "id, project_id, name, sort_order, end_date, budget_minutes";
 
 impl Module {
     pub fn from_row(row: &Row) -> rusqlite::Result<Self> {
@@ -72,6 +76,8 @@ impl Module {
             project_id: row.get(1)?,
             name: row.get(2)?,
             sort_order: row.get(3)?,
+            end_date: row.get(4)?,
+            budget_minutes: row.get(5)?,
         })
     }
 }

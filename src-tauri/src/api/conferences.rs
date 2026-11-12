@@ -7,10 +7,11 @@ use tauri::State;
 use crate::config::AppState;
 use crate::domain::conference::parse_all;
 use crate::domain::day::{now_timestamp, today};
-use crate::entity::conference::ConferenceList;
+use crate::entity::conference::{ConferenceList, ProjectRound, RoundRef};
 use crate::entity::project::Project;
 use crate::errors::{AppError, AppResult};
 use crate::service::conferences::{self, fetch};
+use crate::service::projects::mutation::{PhaseInput, ProjectInput};
 
 /// Editions from last year on: this year's may still be open.
 fn since_year() -> i32 {
@@ -37,29 +38,25 @@ pub async fn refresh_conferences(state: State<'_, AppState>) -> AppResult<Confer
     conferences::list(&db, since_year())
 }
 
+/// A conference paper project for one round (see `conferences::create_project`).
 #[tauri::command]
 #[specta::specta]
-pub fn follow_conference(state: State<'_, AppState>, key: String, on: bool) -> AppResult<()> {
-    conferences::set_followed(&state.db(), &key, on)
-}
-
-/// Plans a submission to one round of an edition, from an idea or not
-/// (see `conferences::plan`).
-#[tauri::command]
-#[specta::specta]
-pub fn plan_conference(
+pub fn create_conference_project(
     state: State<'_, AppState>,
-    key: String,
-    edition_id: String,
-    stage: u32,
+    input: ProjectInput,
+    phases: Vec<PhaseInput>,
+    round: RoundRef,
     idea_id: Option<i64>,
 ) -> AppResult<Project> {
-    conferences::plan(
-        &mut state.db(),
-        &key,
-        &edition_id,
-        stage as usize,
-        &today(),
-        idea_id,
-    )
+    conferences::create_project(&mut state.db(), &input, &phases, &round, &today(), idea_id)
+}
+
+/// The conference round a project was made for, if any.
+#[tauri::command]
+#[specta::specta]
+pub fn get_project_round(
+    state: State<'_, AppState>,
+    project_id: i64,
+) -> AppResult<Option<ProjectRound>> {
+    conferences::project_round(&state.db(), project_id)
 }

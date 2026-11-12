@@ -1,7 +1,9 @@
 /**
  * One module of a project (or the ungrouped tasks): its name, its tasks,
  * and an add row that takes a title and an optional estimate ("1h30m").
- * Double-click the name to rename; the menu deletes the module.
+ * Double-click the name to rename; the bin deletes the module. A module's
+ * end date makes it a phase, and its budget ("40h") counts for its tasks
+ * without an estimate.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,11 +12,50 @@ import {
   useAddProjectTask,
   useDeleteModule,
   useRenameModule,
+  useSetModulePhase,
 } from '@/api/projects'
+import { DatePicker } from '@/components/ui/date-picker'
 import { formatMinutes } from '@/lib/duration'
 import type { Module, Task } from '@/lib/tauri-bindings'
+import { formatDate, parseDate } from '@/pages/tasks/dates'
 import { SortableTasks } from '@/pages/tasks/SortableTasks'
 import { isEnter } from '@/lib/keys'
+
+/** A phase's end date and budget, saved as they change. */
+function PhaseControls({ module }: { module: Module }) {
+  const { t } = useTranslation()
+  const setPhase = useSetModulePhase()
+  const saved =
+    module.budgetMinutes === null ? '' : formatMinutes(module.budgetMinutes)
+  const [budget, setBudget] = useState(saved)
+  const save = (endDate: string | null, typed: string) =>
+    setPhase.mutate({ id: module.id, endDate, budget: typed.trim() || null })
+
+  return (
+    <div className="ml-auto flex items-center gap-1.5">
+      <DatePicker
+        value={module.endDate ? parseDate(module.endDate) : undefined}
+        onChange={d => save(d ? formatDate(d) : null, budget)}
+        placeholder={t('projects.phaseNoEnd')}
+        className="h-7 w-36 text-xs"
+      />
+      <input
+        value={budget}
+        onChange={e => setBudget(e.target.value)}
+        onBlur={() => budget !== saved && save(module.endDate, budget)}
+        onKeyDown={e => isEnter(e) && e.currentTarget.blur()}
+        placeholder={t('projects.phaseBudget')}
+        aria-label={t('projects.phaseBudget')}
+        className="h-7 w-20 rounded-md border bg-transparent px-2 text-right text-xs outline-none"
+      />
+      {setPhase.error && (
+        <span className="text-xs text-destructive">
+          {t('projects.badEstimate')}
+        </span>
+      )}
+    </div>
+  )
+}
 
 interface Props {
   projectId: number
@@ -81,10 +122,11 @@ export function ModuleSection({ projectId, module, tasks }: Props) {
             {formatMinutes(total)}
           </span>
         )}
+        {module && <PhaseControls module={module} />}
         {module && (
           <button
             type="button"
-            className="ml-auto opacity-0 group-hover:opacity-100"
+            className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100"
             aria-label={t('projects.deleteModule')}
             onClick={() => deleteModule.mutate(module.id)}
           >

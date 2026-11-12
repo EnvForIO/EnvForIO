@@ -44,12 +44,71 @@ fn check(input: &ProjectInput) -> AppResult<String> {
     Ok(name)
 }
 
-pub fn create(conn: &mut Connection, input: &ProjectInput, template: &str) -> AppResult<Project> {
+/// One module of a new project as the dialog sends it. With an end date it
+/// is a phase; the budget is typed like an estimate ("40h").
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct PhaseInput {
+    pub name: String,
+    pub end_date: Option<String>, // 'YYYY-MM-DD'
+    pub budget: Option<String>,   // e.g. "40h"; None or "" = no budget
+}
+
+/// A template's phases dated back from the deadline. A phase that would end
+/// before the project starts, or a project without a deadline, gets no date.
+pub fn default_phases(
+    template: &templates::ProjectTemplate,
+    input: &ProjectInput,
+) -> Vec<PhaseInput> {
+    let deadline = input
+        .deadline
+        .as_deref()
+        .and_then(|d| NaiveDate::parse_from_str(d, "%Y-%m-%d").ok());
+    let start = input.start_date.clone().unwrap_or_default();
+    template
+        .phases
+        .iter()
+        .map(|phase| PhaseInput {
+            name: phase.name.into(),
+            end_date: deadline
+                .zip(phase.days_before)
+                .map(|(d, days)| (d - chrono::Days::new(days.into())).to_string())
+                .filter(|end| *end >= start),
+            budget: None,
+        })
+        .collect()
+}
+
+/// Creates a project and its modules. `phases` None = the template's, dated
+/// from the deadline; the dialog sends them after the user has edited them.
+pub fn create(
+    conn: &mut Connection,
+    input: &ProjectInput,
+    template: &str,
+    phases: Option<&[PhaseInput]>,
+) -> AppResult<Project> {
     let name = check(input)?;
     let template = templates::find(template)
         .ok_or_else(|| AppError::invalid(format!("no such template: {template}")))?;
+    let defaults;
+    let phases = match phases {
+        Some(given) => given,
+        None => {
+            defaults = default_phases(template, input);
+            &defaults
+        }
+    };
+    let mut modules = Vec::new();
+    for phase in phases {
+        check_date(&phase.end_date)?;
+        modules.push((
+            clean_name(&phase.name)?,
+            &phase.end_date,
+            estimate_minutes(&phase.budget)?,
+        ));
+    }
     let now = now_timestamp();
-    // One transaction: a project never exists without its template's modules.
+    // One transaction: a project never exists without its modules.
     let tx = conn.transaction()?;
     let bottom: f64 = tx.query_row(
         "SELECT coalesce(max(sort_order), 0) + 1 FROM projects",
@@ -62,31 +121,11 @@ pub fn create(conn: &mut Connection, input: &ProjectInput, template: &str) -> Ap
         params![name, input.color, template.id, input.start_date, input.deadline, input.buffer_days, bottom, now],
     )?;
     let id = tx.last_insert_rowid();
-    for (i, module) in template.modules.iter().enumerate() {
+    for (i, (name, end_date, budget)) in modules.iter().enumerate() {
         tx.execute(
-            "INSERT INTO modules (project_id, name, sort_order) VALUES (?1, ?2, ?3)",
-            params![id, module, i as f64],
-        )?;
-    }
-    // Milestones are dated back from the deadline; one that would fall
-    // before the project starts is left out (too late for it).
-    let deadline = input
-        .deadline
-        .as_deref()
-        .and_then(|d| NaiveDate::parse_from_str(d, "%Y-%m-%d").ok());
-    let start = input.start_date.clone().unwrap_or_default();
-    for (i, ms) in template.milestones.iter().enumerate() {
-        let Some(due) = deadline.map(|d| d - chrono::Days::new(ms.days_before.into())) else {
-            break;
-        };
-        let due = due.to_string();
-        if due < start {
-            continue;
-        }
-        tx.execute(
-            "INSERT INTO tasks (title, due_date, project_id, module_id, sort_order, created_at, updated_at)
-             VALUES (?1, ?2, ?3, (SELECT id FROM modules WHERE project_id = ?3 AND name = ?4), ?5, ?6, ?6)",
-            params![ms.title, due, id, ms.module, i as f64, now],
+            "INSERT INTO modules (project_id, name, sort_order, end_date, budget_minutes)
+             VALUES (?1, ?2, ?3, ?4, ?5)",
+            params![id, name, i as f64, end_date, budget],
         )?;
     }
     tx.commit()?;
@@ -156,6 +195,26 @@ pub fn rename_module(conn: &Connection, id: i64, name: &str) -> AppResult<Module
     if conn.execute(
         "UPDATE modules SET name = ?2 WHERE id = ?1",
         params![id, name],
+    )? == 0
+    {
+        return Err(AppError::not_found("module", id));
+    }
+    query::get_module(conn, id)
+}
+
+/// Sets when a module ends (making it a phase, or not with None) and its
+/// time budget, typed like an estimate.
+pub fn set_phase(
+    conn: &Connection,
+    id: i64,
+    end_date: &Option<String>,
+    budget: &Option<String>,
+) -> AppResult<Module> {
+    check_date(end_date)?;
+    let minutes = estimate_minutes(budget)?;
+    if conn.execute(
+        "UPDATE modules SET end_date = ?2, budget_minutes = ?3 WHERE id = ?1",
+        params![id, end_date, minutes],
     )? == 0
     {
         return Err(AppError::not_found("module", id));

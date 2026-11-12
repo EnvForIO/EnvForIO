@@ -118,7 +118,7 @@ mod tests {
             buffer_days: 0,
             is_archived: false,
         };
-        let p = projects::create(&mut conn, &input, "blank").unwrap();
+        let p = projects::create(&mut conn, &input, "blank", None).unwrap();
         let a = projects::add_task(&conn, p.id, None, "a", &Some("2h".into())).unwrap();
         projects::add_task(&conn, p.id, None, "b", &Some("2h".into())).unwrap();
 

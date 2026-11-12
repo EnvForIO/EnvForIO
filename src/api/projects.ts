@@ -4,7 +4,13 @@
  * `tasks-changed` sync) also refreshes project totals.
  */
 import { useQuery } from '@tanstack/react-query'
-import { commands, unwrapResult, type ProjectInput } from '@/lib/tauri-bindings'
+import {
+  commands,
+  unwrapResult,
+  type PhaseInput,
+  type ProjectInput,
+  type RoundRef,
+} from '@/lib/tauri-bindings'
 import { useTaskMutation } from './tasks'
 
 export const projectKeys = {
@@ -13,7 +19,18 @@ export const projectKeys = {
     ['tasks', 'projects', projectId, 'modules'] as const,
   tasks: (projectId: number) =>
     ['tasks', 'projects', projectId, 'tasks'] as const,
+  round: (projectId: number) =>
+    ['tasks', 'projects', projectId, 'round'] as const,
   templates: ['project-templates'] as const,
+}
+
+/** The conference round a project was made for, as ccfddl has it now. */
+export function useProjectRound(projectId: number) {
+  return useQuery({
+    queryKey: projectKeys.round(projectId),
+    queryFn: async () =>
+      unwrapResult(await commands.getProjectRound(projectId)),
+  })
 }
 
 export function useProjects() {
@@ -47,10 +64,41 @@ export function useProjectTasks(projectId: number | null) {
   })
 }
 
+interface NewProject {
+  input: ProjectInput
+  template: string
+  phases: PhaseInput[]
+  /** A conference paper: the round it is for, and the idea it comes from. */
+  round?: RoundRef
+  ideaId?: number
+}
+
 export const useCreateProject = () =>
   useTaskMutation(
-    async ({ input, template }: { input: ProjectInput; template: string }) =>
-      unwrapResult(await commands.createProject(input, template))
+    async ({ input, template, phases, round, ideaId }: NewProject) =>
+      round
+        ? unwrapResult(
+            await commands.createConferenceProject(
+              input,
+              phases,
+              round,
+              ideaId ?? null
+            )
+          )
+        : unwrapResult(await commands.createProject(input, template, phases))
+  )
+
+/** A module's end date (null = not a phase) and budget, typed like "40h". */
+export const useSetModulePhase = () =>
+  useTaskMutation(
+    async (args: {
+      id: number
+      endDate: string | null
+      budget: string | null
+    }) =>
+      unwrapResult(
+        await commands.setModulePhase(args.id, args.endDate, args.budget)
+      )
   )
 
 export const useUpdateProject = () =>

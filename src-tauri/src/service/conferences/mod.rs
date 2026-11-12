@@ -1,31 +1,28 @@
-//! Conference deadlines: ccfddl's list as last downloaded, the conferences
-//! the user follows, and submissions planned from them. Planning makes a
-//! paper project whose deadline is the full-paper deadline's day here, plus
-//! a task due on the abstract deadline (user decision 2026-11-20).
+//! Conference deadlines: ccfddl's list as last downloaded, and the
+//! conference projects made from it. A conference project (user decisions
+//! 2026-11-20) is created from the new-project dialog: its deadline is the
+//! full-paper deadline's day here, its phases are what the dialog sends,
+//! and an abstract deadline becomes a task due that day.
 
 pub mod fetch;
 
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use chrono::{Local, TimeZone};
 use rusqlite::{params, Connection, OptionalExtension};
 
-use crate::entity::conference::{Conference, ConferenceList, Edition};
+use crate::entity::conference::{Conference, ConferenceList, Edition, ProjectRound, RoundRef};
 use crate::entity::project::Project;
 use crate::errors::{AppError, AppResult};
 use crate::service::ideas::mutation as ideas;
-use crate::service::projects::mutation::{self as projects, ProjectInput};
+use crate::service::projects::mutation::{self as projects, PhaseInput, ProjectInput};
 use crate::service::projects::query as project_query;
-
-/// Planned submissions get the colour of a deadline.
-const COLOR: &str = "#f97316";
 
 fn json_error(e: serde_json::Error) -> AppError {
     AppError::invalid(format!("conference data: {e}"))
 }
 
-/// Replaces the saved list with a fresh download. Follows and planned
-/// projects are kept.
+/// Replaces the saved list with a fresh download. Projects made from it are kept.
 pub fn replace_all(conn: &mut Connection, list: &[Conference], now: &str) -> AppResult<()> {
     let tx = conn.transaction()?;
     tx.execute("DELETE FROM conferences", [])?;
@@ -66,10 +63,6 @@ pub fn list(conn: &Connection, since_year: i32) -> AppResult<ConferenceList> {
             |r| r.get(0),
         )
         .optional()?;
-    let followed: HashSet<String> = conn
-        .prepare("SELECT key FROM conference_follows")?
-        .query_map([], |r| r.get(0))?
-        .collect::<Result<_, _>>()?;
     let planned: HashMap<String, i64> = conn
         .prepare("SELECT edition_id, project_id FROM conference_projects")?
         .query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?
@@ -88,7 +81,6 @@ pub fn list(conn: &Connection, since_year: i32) -> AppResult<ConferenceList> {
                 area: r.get(3)?,
                 ccf: r.get(4)?,
                 core: r.get(5)?,
-                followed: false,
                 editions: Vec::new(),
             },
             r.get::<_, String>(6)?,
@@ -106,23 +98,12 @@ pub fn list(conn: &Connection, since_year: i32) -> AppResult<ConferenceList> {
                 e
             })
             .collect();
-        c.followed = followed.contains(&c.key);
         conferences.push(c);
     }
     Ok(ConferenceList {
         fetched_at,
         conferences,
     })
-}
-
-pub fn set_followed(conn: &Connection, key: &str, on: bool) -> AppResult<()> {
-    let sql = if on {
-        "INSERT OR IGNORE INTO conference_follows (key) VALUES (?1)"
-    } else {
-        "DELETE FROM conference_follows WHERE key = ?1"
-    };
-    conn.execute(sql, [key])?;
-    Ok(())
 }
 
 /// The day a moment falls on here, 'YYYY-MM-DD'.
@@ -133,45 +114,8 @@ fn local_day(ms: i64) -> Option<String> {
         .map(|d| d.date_naive().to_string())
 }
 
-/// Plans a submission to one round (`stage`) of an edition. Planning the
-/// same edition again opens the project already made. Planned from an
-/// idea, the idea is linked to the project (its todos join it).
-pub fn plan(
-    conn: &mut Connection,
-    key: &str,
-    edition_id: &str,
-    stage: usize,
-    today: &str,
-    idea_id: Option<i64>,
-) -> AppResult<Project> {
-    let project = plan_project(conn, key, edition_id, stage, today)?;
-    match idea_id {
-        Some(idea) => {
-            ideas::set_project(conn, idea, Some(project.id))?;
-            project_query::get(conn, project.id)
-        }
-        None => Ok(project),
-    }
-}
-
-fn plan_project(
-    conn: &mut Connection,
-    key: &str,
-    edition_id: &str,
-    stage: usize,
-    today: &str,
-) -> AppResult<Project> {
-    let existing: Option<i64> = conn
-        .query_row(
-            "SELECT project_id FROM conference_projects WHERE edition_id = ?1",
-            [edition_id],
-            |r| r.get(0),
-        )
-        .optional()?;
-    if let Some(id) = existing {
-        return project_query::get(conn, id);
-    }
-
+/// A conference's title and one of its editions, as last downloaded.
+fn edition(conn: &Connection, key: &str, edition_id: &str) -> AppResult<(String, Edition)> {
     let (title, editions): (String, String) = conn
         .query_row(
             "SELECT title, editions FROM conferences WHERE key = ?1",
@@ -182,40 +126,75 @@ fn plan_project(
         .ok_or_else(|| AppError::invalid(format!("no conference {key}")))?;
     let editions: Vec<Edition> = serde_json::from_str(&editions).map_err(json_error)?;
     let edition = editions
-        .iter()
+        .into_iter()
         .find(|e| e.id == edition_id)
         .ok_or_else(|| AppError::invalid(format!("no edition {edition_id}")))?;
-    let round = edition
+    Ok((title, edition))
+}
+
+/// Creates the project for one round of a conference, with the dialog's
+/// name, colour and phases; its deadline is the round's paper deadline.
+/// Making a project for an edition that has one opens that one instead.
+/// From an idea, the idea is linked to the project (its todos join it).
+pub fn create_project(
+    conn: &mut Connection,
+    input: &ProjectInput,
+    phases: &[PhaseInput],
+    round: &RoundRef,
+    today: &str,
+    idea_id: Option<i64>,
+) -> AppResult<Project> {
+    let project = create_once(conn, input, phases, round, today)?;
+    if let Some(idea) = idea_id {
+        ideas::set_project(conn, idea, Some(project.id))?;
+    }
+    project_query::get(conn, project.id)
+}
+
+fn create_once(
+    conn: &mut Connection,
+    input: &ProjectInput,
+    phases: &[PhaseInput],
+    round: &RoundRef,
+    today: &str,
+) -> AppResult<Project> {
+    let existing: Option<i64> = conn
+        .query_row(
+            "SELECT project_id FROM conference_projects WHERE edition_id = ?1",
+            [&round.edition_id],
+            |r| r.get(0),
+        )
+        .optional()?;
+    if let Some(id) = existing {
+        return project_query::get(conn, id);
+    }
+
+    let (title, edition) = edition(conn, &round.key, &round.edition_id)?;
+    let stage = edition
         .stages
-        .get(stage)
+        .get(round.stage as usize)
         .ok_or_else(|| AppError::invalid("no such submission round"))?;
-    let deadline = round
+    let deadline = stage
         .deadline_at
         .and_then(local_day)
         .ok_or_else(|| AppError::invalid("this deadline has not been announced"))?;
     if deadline.as_str() < today {
         return Err(AppError::invalid("this deadline has passed"));
     }
-
-    let mut name = format!("{title} {}", edition.year);
-    if edition.stages.len() > 1 && !round.comment.is_empty() {
-        name = format!("{name} ({})", round.comment);
-    }
+    // ccfddl decides the deadline, whatever the dialog showed.
     let input = ProjectInput {
-        name,
-        color: COLOR.into(),
-        start_date: Some(today.into()),
         deadline: Some(deadline),
-        buffer_days: 0,
-        is_archived: false,
+        ..input.clone()
     };
-    let project = projects::create(conn, &input, "paper")?;
+    let project = projects::create(conn, &input, "conference", Some(phases))?;
 
-    if let Some(day) = round.abstract_at.and_then(local_day) {
+    if let Some(day) = stage.abstract_at.and_then(local_day) {
         if day.as_str() >= today {
+            // In the first phase still open on the abstract's day.
             let module = project_query::modules(conn, project.id)?
                 .into_iter()
-                .find(|m| m.name == "Submission")
+                .filter(|m| m.end_date.as_deref().is_some_and(|end| end >= day.as_str()))
+                .min_by(|a, b| a.end_date.cmp(&b.end_date))
                 .map(|m| m.id);
             let task = projects::add_task(
                 conn,
@@ -231,10 +210,38 @@ fn plan_project(
         }
     }
     conn.execute(
-        "INSERT INTO conference_projects (edition_id, project_id) VALUES (?1, ?2)",
-        params![edition_id, project.id],
+        "INSERT INTO conference_projects (edition_id, project_id, conference_key, stage)
+         VALUES (?1, ?2, ?3, ?4)",
+        params![round.edition_id, project.id, round.key, round.stage],
     )?;
     project_query::get(conn, project.id)
+}
+
+/// The round a project was made for, as ccfddl has it now; None for a
+/// project not made from a conference, or one ccfddl's list no longer has.
+pub fn project_round(conn: &Connection, project_id: i64) -> AppResult<Option<ProjectRound>> {
+    let link: Option<(String, Option<String>, u32)> = conn
+        .query_row(
+            "SELECT edition_id, conference_key, stage FROM conference_projects WHERE project_id = ?1",
+            [project_id],
+            |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)),
+        )
+        .optional()?;
+    let Some((edition_id, Some(key), stage)) = link else {
+        return Ok(None);
+    };
+    match edition(conn, &key, &edition_id) {
+        Ok((title, mut edition)) => {
+            edition.project_id = Some(project_id);
+            Ok(Some(ProjectRound {
+                title,
+                edition,
+                stage,
+            }))
+        }
+        Err(AppError::Invalid { .. }) => Ok(None),
+        Err(e) => Err(e),
+    }
 }
 
 #[cfg(test)]
@@ -254,15 +261,40 @@ mod tests {
         conn
     }
 
+    fn input() -> ProjectInput {
+        ProjectInput {
+            name: "NeurIPS 2099".into(),
+            color: "#f97316".into(),
+            start_date: Some("2026-11-20".into()),
+            deadline: None, // set from the round
+            buffer_days: 0,
+            is_archived: false,
+        }
+    }
+
+    fn nips(stage: u32) -> RoundRef {
+        RoundRef {
+            key: "nips".into(),
+            edition_id: "nips99".into(),
+            stage,
+        }
+    }
+
+    fn phases() -> Vec<PhaseInput> {
+        vec![PhaseInput {
+            name: "Experiments".into(),
+            end_date: Some("2026-12-01".into()),
+            budget: None,
+        }]
+    }
+
     #[test]
-    fn a_download_replaces_the_list_and_keeps_follows() {
+    fn a_download_replaces_the_list() {
         let mut conn = loaded();
-        set_followed(&conn, "nips", true).unwrap();
         let first = list(&conn, 2026).unwrap();
         assert_eq!(first.fetched_at.as_deref(), Some("2026-11-20T00:00:00Z"));
         let titles: Vec<_> = first.conferences.iter().map(|c| c.title.as_str()).collect();
         assert_eq!(titles, ["MICCAI", "NeurIPS"]);
-        assert!(first.conferences[1].followed && !first.conferences[0].followed);
 
         replace_all(
             &mut conn,
@@ -270,42 +302,37 @@ mod tests {
             "2026-11-21T00:00:00Z",
         )
         .unwrap();
-        assert!(list(&conn, 2026).unwrap().conferences[1].followed);
         assert!(list(&conn, 3000).unwrap().conferences[1]
             .editions
             .is_empty());
-        set_followed(&conn, "nips", false).unwrap();
-        assert!(!list(&conn, 2026).unwrap().conferences[1].followed);
     }
 
     #[test]
-    fn planning_makes_a_paper_project_with_an_abstract_task() {
+    fn a_conference_project_takes_the_rounds_deadline_and_the_dialogs_phases() {
         let mut conn = loaded();
-        let p = plan(&mut conn, "nips", "nips99", 0, "2026-11-20", None).unwrap();
+        let p =
+            create_project(&mut conn, &input(), &phases(), &nips(0), "2026-11-20", None).unwrap();
         let stage = &parse_all(SAMPLE).unwrap()[0].editions[0].stages[0];
         assert_eq!(p.name, "NeurIPS 2099");
         assert_eq!(p.deadline, local_day(stage.deadline_at.unwrap()));
-        assert_eq!(p.task_count, 5); // 4 paper milestones + the abstract
+        let modules = project_query::modules(&conn, p.id).unwrap();
+        assert_eq!(modules.len(), 1);
+        // The abstract deadline is the only task.
         let tasks = project_query::tasks(&conn, p.id).unwrap();
-        let abstract_task = tasks
-            .iter()
-            .find(|t| t.title == "NeurIPS abstract")
-            .unwrap();
-        assert_eq!(abstract_task.title, "NeurIPS abstract");
-        assert_eq!(
-            abstract_task.due_date,
-            local_day(stage.abstract_at.unwrap())
-        );
+        assert_eq!(tasks.len(), 1);
+        assert_eq!(tasks[0].title, "NeurIPS abstract");
+        assert_eq!(tasks[0].due_date, local_day(stage.abstract_at.unwrap()));
 
-        // Again: the same project, and the edition shows it.
-        assert_eq!(
-            plan(&mut conn, "nips", "nips99", 0, "2026-11-20", None)
-                .unwrap()
-                .id,
-            p.id
-        );
-        let nips = &list(&conn, 2026).unwrap().conferences[1];
-        assert_eq!(nips.editions[0].project_id, Some(p.id));
+        // The project knows its round; the list shows the edition taken.
+        let round = project_round(&conn, p.id).unwrap().unwrap();
+        assert_eq!((round.title.as_str(), round.stage), ("NeurIPS", 0));
+        assert_eq!(round.edition.id, "nips99");
+        let listed = &list(&conn, 2026).unwrap().conferences[1];
+        assert_eq!(listed.editions[0].project_id, Some(p.id));
+
+        // Again: the same project.
+        let again = create_project(&mut conn, &input(), &[], &nips(0), "2026-11-20", None).unwrap();
+        assert_eq!(again.id, p.id);
 
         // Deleting the project frees the edition.
         projects::delete(&mut conn, p.id).unwrap();
@@ -313,28 +340,42 @@ mod tests {
             list(&conn, 2026).unwrap().conferences[1].editions[0].project_id,
             None
         );
+        assert!(project_round(&conn, p.id).unwrap().is_none());
     }
 
     #[test]
-    fn planning_from_an_idea_links_it_and_moves_its_todos() {
+    fn a_conference_project_from_an_idea_links_it_and_moves_its_todos() {
         let mut conn = loaded();
         let idea = crate::service::ideas::mutation::create(&mut conn, "Sparse attention").unwrap();
         crate::service::ideas::notes::add_todo(&conn, idea.id, "run baseline", None).unwrap();
-        let p = plan(&mut conn, "nips", "nips99", 0, "2026-11-20", Some(idea.id)).unwrap();
+        let p = create_project(
+            &mut conn,
+            &input(),
+            &[],
+            &nips(0),
+            "2026-11-20",
+            Some(idea.id),
+        )
+        .unwrap();
         assert_eq!(
             crate::service::ideas::query::get(&conn, idea.id)
                 .unwrap()
                 .project_id,
             Some(p.id)
         );
-        assert_eq!(p.task_count, 6); // milestones, the abstract task and the idea's todo
+        assert_eq!(p.task_count, 2); // the abstract task and the idea's todo
     }
 
     #[test]
     fn unannounced_or_past_deadlines_cannot_be_planned() {
         let mut conn = loaded();
-        assert!(plan(&mut conn, "miccai", "miccai99", 0, "2026-11-20", None).is_err());
-        assert!(plan(&mut conn, "nips", "nips99", 0, "2100-01-01", None).is_err());
-        assert!(plan(&mut conn, "nips", "nips99", 5, "2026-11-20", None).is_err());
+        let miccai = RoundRef {
+            key: "miccai".into(),
+            edition_id: "miccai99".into(),
+            stage: 0,
+        };
+        assert!(create_project(&mut conn, &input(), &[], &miccai, "2026-11-20", None).is_err());
+        assert!(create_project(&mut conn, &input(), &[], &nips(0), "2100-01-01", None).is_err());
+        assert!(create_project(&mut conn, &input(), &[], &nips(5), "2026-11-20", None).is_err());
     }
 }

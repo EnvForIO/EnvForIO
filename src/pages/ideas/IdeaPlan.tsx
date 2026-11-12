@@ -1,14 +1,15 @@
 /**
  * Where an idea meets the planner (phase 4 step 4): the project it is
  * worked on in (its todos are that project's tasks, so they count toward
- * the safety line), and, when its venue is a conference on the
- * Conferences page, that venue's next deadline with "Plan submission",
- * which makes the project and links it here.
+ * the safety line), and, when its venue is a conference on ccfddl's list,
+ * that venue's next deadline with "Plan submission", which opens the
+ * new-project dialog for that round, linked to this idea.
  */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CalendarClockIcon, FolderIcon } from 'lucide-react'
 import { toast } from 'sonner'
-import { useConferences, usePlanConference } from '@/api/conferences'
+import { useConferences } from '@/api/conferences'
 import { useSetIdeaProject } from '@/api/ideas'
 import { errorText } from '@/api/papers'
 import { useProjects } from '@/api/projects'
@@ -30,6 +31,7 @@ import {
   when,
 } from '@/pages/conferences/deadline'
 import { useNow } from '@/hooks/useNow'
+import { ProjectDialog } from '@/pages/projects/ProjectDialog'
 import { useUIStore } from '@/store/ui-store'
 
 const NONE = 'none'
@@ -39,7 +41,7 @@ export function IdeaPlan({ idea }: { idea: Idea }) {
   const { data: projects = [] } = useProjects()
   const { data: conferences } = useConferences()
   const setProject = useSetIdeaProject()
-  const plan = usePlanConference()
+  const [planning, setPlanning] = useState(false)
   const selectProject = useUIStore(state => state.selectProject)
 
   const project = projects.find(p => p.id === idea.projectId) ?? null
@@ -53,23 +55,6 @@ export function IdeaPlan({ idea }: { idea: Idea }) {
       { id: idea.id, projectId: value === NONE ? null : Number(value) },
       { onError: e => toast.error(errorText(e)) }
     )
-
-  const planIt = () => {
-    if (!venue || !round) return
-    plan.mutate(
-      {
-        key: venue.key,
-        editionId: round.edition.id,
-        stage: round.stageIndex,
-        ideaId: idea.id,
-      },
-      {
-        onSuccess: p =>
-          toast.success(t('conferences.planned', { name: p.name })),
-        onError: e => toast.error(errorText(e)),
-      }
-    )
-  }
 
   return (
     <div className="flex flex-col gap-2 rounded-md border p-2.5 text-sm">
@@ -144,13 +129,19 @@ export function IdeaPlan({ idea }: { idea: Idea }) {
             <Button
               size="sm"
               className="ms-auto"
-              disabled={plan.isPending}
-              onClick={planIt}
+              onClick={() => setPlanning(true)}
             >
               {t('conferences.plan')}
             </Button>
           ) : null}
         </div>
+      )}
+      {planning && venue && round && (
+        <ProjectDialog
+          open
+          onOpenChange={open => !open && setPlanning(false)}
+          fromIdea={{ picked: { conference: venue, round }, ideaId: idea.id }}
+        />
       )}
     </div>
   )

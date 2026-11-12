@@ -4,7 +4,7 @@ EnvIO is a desktop app for researchers. It covers tasks, planning back from dead
 
 ## Getting around
 
-The left sidebar has the task lists (My Day, Important, Tasks), then the pages: Calendar, Stats, Research, Conferences, Ideas, Library, Reader and Monitor. Your projects are listed below them.
+The left sidebar has the task lists (My Day, Important, Tasks), then the pages: Calendar, Stats, Research, Ideas, Library, Reader and Monitor. Your projects are listed below them.
 
 Clicking a task opens its details on the right. Closing the window hides EnvIO to the tray; to quit, use the tray menu's **Quit EnvIO**. Preferences → General → **Launch at login** starts EnvIO hidden in the tray when you sign in.
 
@@ -42,7 +42,7 @@ The card has two tabs:
 - **Todo**: the day's tasks, with an add box that plans the new task for that day.
 - **Month**: the month calendar.
   - **Shading**: how full each day is, comparing the time of the tasks scheduled on it with the time you have that day. Blue means room left, yellow nearly full, red over (or work planned on a rest day).
-  - **Dots**: deadlines that day (projects, tasks due, followed conferences).
+  - **Dots**: deadlines that day (projects and tasks due, so a conference project's deadline and abstract too).
   - **Click** a day to list it below and to set the Todo tab to it.
   - **Double-click** a day to open the main calendar there.
 
@@ -51,19 +51,21 @@ Preferences → Appearance sets the sticky's material, font and text size.
 ## Projects and the safety line
 
 - **Project menu**: right-click a project in the sidebar to open, edit or delete it. Deleting asks first and removes the project's tasks too.
-- **New project** (the + next to Projects): name, colour, template, start date, deadline and **Finish early** days. The dialog shows what the template sets up.
+- **New project** (the + next to Projects): template, name, colour, start date, deadline, **Finish early** days, and the project's phases.
+  - **Conference paper**: type the conference's name and pick one of its open rounds. The list comes from ccfddl's open list of computer-science conference deadlines (CCF ranks included); it is downloaded the first time and again when it is a week old. Picking a round sets the name and the deadline (the paper deadline, in your local time), and the abstract deadline becomes a task. A conference that is not on the list: leave it out and set the deadline yourself.
+  - **Journal paper**: the same phases; the deadline is optional.
+  - **Proposal (开题)**: literature review until −30 days, proposal until −7, presentation until the deadline.
+  - **Grant** and **Thesis**: start with their modules, without dates.
   - **Blank**: starts empty.
-  - **Grant** and **Thesis**: start with their modules.
-  - **Paper**: adds dated milestones, counted back from the deadline. Experiments done −21 days, full draft −14, advisor review −7, final check and submit −1.
-  - **Proposal (开题)**: literature review done −30 days, proposal draft −14, advisor sign-off −7, slides −3, rehearsal −1.
-
-  The milestones are ordinary tasks you can edit. A milestone that would fall before the start date is left out.
-
-- **Project page**: dates, progress, today's share of the safety line and a health badge (On track / Tight / Behind). The switch at the top right toggles between two views:
+- **Phases**: a module with an end date is a phase. A paper's phases are experiments until 21 days before the deadline, writing until 7 days before, and revise and submit until the deadline. The dialog shows them with their dates; change, add or remove them before creating. On the project page, each module has its end date and budget next to its name.
+  - The safety line plans a phase's tasks between the end of the phase before it and its own end, so experiments are not spread over the writing weeks.
+  - A **budget** (e.g. `40h`) is the time you expect the phase to take. Its tasks without an estimate share what the estimated ones leave of it, and a phase with no tasks yet counts its whole budget until it ends. So you can plan before every task is estimated.
+- **Project page**: dates, progress, today's share of the safety line and a health badge. A conference project also shows its round: a countdown to the paper deadline, the abstract and paper deadlines in your local time (the conference's own time zone on hover) and the website. If ccfddl later moves the deadline, the page says so; **Use the new deadline** updates the project (it never changes by itself). The switch at the top right toggles between two views:
+  - **Health**: the worst phase decides it. **On track**, **Tight** (needs over 80% of your available time), **Behind** (needs more than your available time, or a phase ended with work left), **Overdue** (past the deadline), **Done**, or **Not estimated** (open tasks, but no estimates or budgets to plan with).
   - **List**: tasks grouped by module, each with an add row that takes a title and an estimate.
   - **Board**: To do / Doing / Done. Drag cards between the columns. Starting a task's timer moves it to Doing. Moving a card to Done completes it, and moving a card back to To do stops its timer.
 - **Available time**: set per weekday in Preferences → Planning (0 = rest day). On the calendar, right-click a day to change it for that date only.
-- **Safety line**: each morning EnvIO works out how much of each project's estimated work to do today, so that it finishes by its plan date (the deadline minus the finish-early days). It spreads the work over your work days.
+- **Safety line**: each morning EnvIO works out how much of each project's estimated work to do today, so that each phase finishes by its end and the rest by the plan date (the deadline minus the finish-early days). It spreads the work over your work days.
   - My Day shows the line, your streak, yesterday's shortfall and a 14-day load forecast.
   - Estimates are adjusted by how long tasks really take once you have timed a few.
   - Preferences → Planning sets the day start (default 07:00), levelling, and "earliest deadline first".
@@ -103,7 +105,7 @@ Preferences → Appearance sets the sticky's material, font and text size.
     - **Log**: dated entries.
     - **Papers**: papers from the library attached to the idea.
   - **Project link**: link an idea to a project and its todos become that project's tasks, so they count toward its safety line once estimated.
-  - **Target conference**: if the idea's venue is a conference on the Conferences page (for example MICCAI), the idea shows its next deadline. **Plan submission** makes the project and links it to the idea.
+  - **Target conference**: if the idea's venue is a conference on ccfddl's list (for example MICCAI), the idea shows its next deadline. **Plan submission** opens the new-project dialog for that round; the project it makes is linked to the idea. This is also how to keep an eye on a conference you have not committed to yet.
 - **Library**: paste a DOI or an arXiv id or link and the details are looked up online. Anything else becomes a paper with that title. Each paper has a reading status, notes and a BibTeX copy button, and lists the ideas using it. PDFs stay in your reference manager (Zotero).
 - **Research**: an overview with these sections:
   - counts of unfinished ideas, open todos, open problems and papers to read
@@ -112,17 +114,6 @@ Preferences → Appearance sets the sticky's material, font and text size.
   - open todos and problems
 
   **Export JSON** saves all ideas and papers to one file.
-
-## Conferences
-
-Deadlines come from ccfddl's open list of computer-science conferences (CCF ranks included). The list is downloaded only when you press **Download list** or **Refresh**.
-
-- **Following**: star a conference to get a card with these parts:
-  - the time left, red under a week and yellow under a month
-  - the abstract and paper deadlines in your local time (AoE and other zones are converted; hover to see the original zone)
-  - place and dates, and a link to the website
-- **Plan submission**: makes a Paper project whose deadline is the paper deadline. It includes the milestones plus a task for the abstract deadline. Once made, the button becomes **Open project**.
-- **Find conferences**: search by name, area and CCF rank.
 
 ## Reader
 

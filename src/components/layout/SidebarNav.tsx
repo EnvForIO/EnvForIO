@@ -5,7 +5,6 @@
 import { useTranslation } from 'react-i18next'
 import {
   ActivityIcon,
-  CalendarClockIcon,
   CalendarRangeIcon,
   ChartColumnIcon,
   LibraryIcon,
@@ -86,7 +85,6 @@ export function SidebarNav() {
       <PageItem page="calendar" icon={CalendarRangeIcon} />
       <PageItem page="stats" icon={ChartColumnIcon} />
       <PageItem page="research" icon={LayoutDashboardIcon} />
-      <PageItem page="conferences" icon={CalendarClockIcon} />
       <PageItem page="ideas" icon={LightbulbIcon} />
       <PageItem page="papers" icon={LibraryIcon} />
       <PageItem page="reader" icon={RssIcon} />

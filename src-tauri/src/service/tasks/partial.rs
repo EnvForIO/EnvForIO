@@ -85,7 +85,7 @@ mod tests {
             buffer_days: 0,
             is_archived: false,
         };
-        let p = projects::create(&mut conn, &input, "paper").unwrap();
+        let p = projects::create(&mut conn, &input, "conference", None).unwrap();
         let t = projects::add_task(&conn, p.id, None, "draft intro", &Some("2h".into())).unwrap();
         set_weekday(&conn, 5, Some(0)).unwrap(); // Saturday is a rest day
 

@@ -1,19 +1,18 @@
 /**
  * Conference deadlines: the only place the frontend calls their commands.
- * The list lives under ['tasks', ...] like projects, so deleting a planned
- * project (a task write) also refreshes which editions have a project.
- * ccfddl's list is downloaded only when the user presses refresh.
+ * The list lives under ['tasks', ...] like projects, so deleting a project
+ * (a task write) also refreshes which editions have one.
+ *
+ * ccfddl's list (about 700 KB) is downloaded when the new-project dialog
+ * needs it: never downloaded, or older than a week (user decision
+ * 2026-11-20). There is no page for it any more.
  */
+import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  commands,
-  unwrapResult,
-  type ConferenceList,
-} from '@/lib/tauri-bindings'
-import { monthKey } from './month'
-import { useTaskMutation } from './tasks'
+import { commands, unwrapResult } from '@/lib/tauri-bindings'
 
 const KEY = ['tasks', 'conferences'] as const
+const STALE_AFTER = 7 * 24 * 3_600_000 // ms
 
 export const useConferences = () =>
   useQuery({
@@ -29,45 +28,22 @@ export function useRefreshConferences() {
   })
 }
 
-export function useFollowConference() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: async ({ key, on }: { key: string; on: boolean }) =>
-      unwrapResult(await commands.followConference(key, on)),
-    // The star turns at once; the list is read again afterwards.
-    onMutate: ({ key, on }) =>
-      queryClient.setQueryData<ConferenceList>(
-        KEY,
-        list =>
-          list && {
-            ...list,
-            conferences: list.conferences.map(c =>
-              c.key === key ? { ...c, followed: on } : c
-            ),
-          }
-      ),
-    // The Duo card's Month tab shows followed conferences' deadlines.
-    onSettled: async () => {
-      await queryClient.invalidateQueries({ queryKey: KEY })
-      await queryClient.invalidateQueries({ queryKey: monthKey })
-    },
-  })
+/**
+ * The list, downloaded first when it is missing or a week old. `enabled`
+ * false (the dialog is on another template) downloads nothing.
+ */
+export function useFreshConferences(enabled: boolean) {
+  const list = useConferences()
+  const refresh = useRefreshConferences()
+  const loaded = list.isSuccess
+  const fetchedAt = list.data?.fetchedAt ?? null
+  const { mutate, isIdle } = refresh
+  useEffect(() => {
+    const stale =
+      fetchedAt === null ||
+      Date.now() - new Date(fetchedAt).getTime() > STALE_AFTER
+    // Once per mount: a failed download is not retried in a loop.
+    if (enabled && loaded && stale && isIdle) mutate()
+  }, [enabled, loaded, fetchedAt, isIdle, mutate])
+  return { list, refresh }
 }
-
-export const usePlanConference = () =>
-  useTaskMutation(
-    async (args: {
-      key: string
-      editionId: string
-      stage: number
-      ideaId?: number
-    }) =>
-      unwrapResult(
-        await commands.planConference(
-          args.key,
-          args.editionId,
-          args.stage,
-          args.ideaId ?? null
-        )
-      )
-  )

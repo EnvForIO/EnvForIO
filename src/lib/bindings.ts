@@ -322,9 +322,9 @@ async listProjects() : Promise<Result<Project[], AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
-async createProject(input: ProjectInput, template: string) : Promise<Result<Project, AppError>> {
+async createProject(input: ProjectInput, template: string, phases: PhaseInput[]) : Promise<Result<Project, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("create_project", { input, template }) };
+    return { status: "ok", data: await TAURI_INVOKE("create_project", { input, template, phases }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -365,6 +365,17 @@ async addModule(projectId: number, name: string) : Promise<Result<Module, AppErr
 async renameModule(id: number, name: string) : Promise<Result<Module, AppError>> {
     try {
     return { status: "ok", data: await TAURI_INVOKE("rename_module", { id, name }) };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * When a module ends (None = not a phase) and its budget ("40h").
+ */
+async setModulePhase(id: number, endDate: string | null, budget: string | null) : Promise<Result<Module, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("set_module_phase", { id, endDate, budget }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -784,21 +795,23 @@ async refreshConferences() : Promise<Result<ConferenceList, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
-async followConference(key: string, on: boolean) : Promise<Result<null, AppError>> {
+/**
+ * A conference paper project for one round (see `conferences::create_project`).
+ */
+async createConferenceProject(input: ProjectInput, phases: PhaseInput[], round: RoundRef, ideaId: number | null) : Promise<Result<Project, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("follow_conference", { key, on }) };
+    return { status: "ok", data: await TAURI_INVOKE("create_conference_project", { input, phases, round, ideaId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
 /**
- * Plans a submission to one round of an edition, from an idea or not
- * (see `conferences::plan`).
+ * The conference round a project was made for, if any.
  */
-async planConference(key: string, editionId: string, stage: number, ideaId: number | null) : Promise<Result<Project, AppError>> {
+async getProjectRound(projectId: number) : Promise<Result<ProjectRound | null, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("plan_conference", { key, editionId, stage, ideaId }) };
+    return { status: "ok", data: await TAURI_INVOKE("get_project_round", { projectId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -1267,7 +1280,7 @@ export type CheckIns = {
  * Days in a row (up to today) that met their line; days without a line don't break it.
  */
 streak: number; yesterday: DayResult | null; shortfall: number; days: DayResult[] }
-export type Conference = { key: string; title: string; description: string; area: string; ccf: string; core: string; followed: boolean; editions: Edition[] }
+export type Conference = { key: string; title: string; description: string; area: string; ccf: string; core: string; editions: Edition[] }
 export type ConferenceList = { 
 /**
  * When the list was last downloaded (RFC 3339); None = never.
@@ -1279,7 +1292,7 @@ export type CpuSample = { usage: number; cores: number[]; frequencyMhz: number }
  */
 export type DayCompletion = { date: string; total: number; done: number }
 export type DayItem = { kind: DayItemKind; title: string; color: string; done: boolean }
-export type DayItemKind = "ProjectDeadline" | "TaskDue" | "Conference" | "Scheduled"
+export type DayItemKind = "ProjectDeadline" | "TaskDue" | "Scheduled"
 export type DayMarks = { date: string; 
 /**
  * Estimated minutes of the tasks scheduled on this day.
@@ -1331,7 +1344,10 @@ export type GpuSample = { index: number; name: string; usage: number | null; mem
  * are not what a researcher looks for here.
  */
 processes: GpuProcess[] }
-export type Health = "Done" | "OnTrack" | "Tight" | "Behind" | "Overdue"
+/**
+ * Ordered from best to worst, so the worst phase is the max.
+ */
+export type Health = "Done" | "Unestimated" | "OnTrack" | "Tight" | "Behind" | "Overdue"
 export type Idea = { id: number; title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; stepCount: number; stepsDone: number; currentStep: string | null; openTodos: number; openProblems: number; logCount: number; tags: Tag[]; createdAt: string; 
 /**
  * The project this idea is worked on in; its todos are that project's tasks.
@@ -1371,10 +1387,10 @@ export type MachineInfo = { hostName: string; os: string; cpuBrand: string; logi
 export type MachineSample = { target: MonitorTarget; sample: Sample }
 export type MemorySample = { used: number; total: number; swapUsed: number; swapTotal: number }
 /**
- * A task a template adds, due `days_before` the deadline, in `module`.
+ * A group of a project's tasks. With an end date it is a phase: the safety
+ * line plans its tasks between the previous phase's end and its own.
  */
-export type Milestone = { title: string; daysBefore: number; module: string }
-export type Module = { id: number; projectId: number; name: string; sortOrder: number }
+export type Module = { id: number; projectId: number; name: string; sortOrder: number; endDate: string | null; budgetMinutes: number | null }
 /**
  * Which machine to watch: this PC, a running WSL distribution, or a host
  * named in the user's SSH config.
@@ -1399,6 +1415,11 @@ export type PaperRelation = "Inspiration" | "Baseline" | "Competing" | "Referenc
  */
 export type PaperUpdate = { title: string; authors: string[]; year: number | null; venue: string; status: ReadingStatus; notes: string }
 export type Period = "Week" | "Month" | "Year"
+/**
+ * One module of a new project as the dialog sends it. With an end date it
+ * is a phase; the budget is typed like an estimate ("40h").
+ */
+export type PhaseInput = { name: string; endDate: string | null; budget: string | null }
 export type PlanningSettings = { dayStart: string; level: boolean; earliestFirst: boolean }
 export type Project = { id: number; name: string; color: string; template: string; startDate: string | null; deadline: string | null; bufferDays: number; planDate: string | null; isArchived: boolean; sortOrder: number; taskCount: number; doneCount: number; estimateMinutes: number; doneEstimateMinutes: number }
 export type ProjectHealth = { projectId: number; ratio: number; samples: number; remaining: number; predictedRemaining: number; neededPerDay: number | null; health: Health }
@@ -1407,7 +1428,12 @@ export type ProjectHealth = { projectId: number; ratio: number; samples: number;
  */
 export type ProjectInput = { name: string; color: string; startDate: string | null; deadline: string | null; bufferDays: number; isArchived: boolean }
 export type ProjectLine = { projectId: number; name: string; color: string; minutes: number; doneMinutes: number }
-export type ProjectTemplate = { id: string; modules: string[]; milestones: Milestone[] }
+/**
+ * The round a conference project was made for, as ccfddl has it now (it
+ * may have moved the deadline since).
+ */
+export type ProjectRound = { title: string; edition: Edition; stage: number }
+export type ProjectTemplate = { id: string; phases: TemplatePhase[] }
 export type ProjectTime = { projectId: number | null; name: string | null; color: string | null; minutes: number; done: number }
 export type ReadingStatus = "ToRead" | "Reading" | "Read"
 /**
@@ -1435,6 +1461,10 @@ export type RecoveryError =
  */
 { type: "ParseError"; message: string }
 export type ResearchOverview = { byStatus: ([IdeaStatus, number])[]; unfinished: number; openTodos: number; openProblems: number; toRead: number; active: Idea[]; deadlines: Deadline[]; todos: OpenTodo[]; problems: OpenProblem[] }
+/**
+ * Which round of which conference a new project is for.
+ */
+export type RoundRef = { key: string; editionId: string; stage: number }
 export type RunningTimer = { taskId: number; title: string; startedAt: string }
 /**
  * One second's readings. Network traffic and the machine's whole process
@@ -1477,6 +1507,7 @@ export type TaskUpdate = { title: string; note: string; isImportant: boolean; is
  * The built-in lists in the sidebar.
  */
 export type TaskView = "MyDay" | "Important" | "Tasks"
+export type TemplatePhase = { name: string; daysBefore: number | null }
 export type TodayLine = { date: string; minutes: number; doneMinutes: number; capacity: number | null; projects: ProjectLine[] }
 /**
  * Minutes per weekday, Monday first; None = no limit.

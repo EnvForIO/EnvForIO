@@ -1,7 +1,8 @@
 /**
- * The middle pane for a project: dates and progress at the top, then
- * either the list (each module with its tasks, the ungrouped tasks and an
- * "add module" box) or the board (To do / Doing / Done).
+ * The middle pane for a project: dates and progress at the top, a
+ * conference project's round, then either the list (each module or phase
+ * with its tasks, the ungrouped tasks and an "add module" box) or the
+ * board (To do / Doing / Done).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -31,6 +32,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 import { ProjectHealthBadge } from '@/pages/plans/ProjectHealthBadge'
 import { DeleteProjectDialog } from './DeleteProjectDialog'
 import { ProjectDialog } from './ProjectDialog'
+import { RoundBanner } from './RoundBanner'
 import { ExportDialog } from '@/pages/export/ExportDialog'
 import { isEnter } from '@/lib/keys'
 
@@ -136,6 +138,8 @@ function ProjectView({ project }: { project: Project }) {
           <Trash2Icon className="size-4" />
         </Button>
       </header>
+
+      <RoundBanner project={project} />
 
       {view === 'board' ? (
         <ProjectBoard projectId={project.id} modules={modules} tasks={tasks} />

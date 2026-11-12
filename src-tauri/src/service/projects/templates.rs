@@ -1,85 +1,86 @@
-//! Built-in project templates: the modules a new project starts with and,
-//! for deadline templates (paper submission, proposal; user decision
-//! 2026-11-20), milestone tasks dated back from the project's deadline.
-//! The offsets are built in; the tasks made are ordinary tasks to edit.
-//! Module and milestone names are English constants; the template names
-//! are translated in the UI.
+//! Built-in project templates: the modules a new project starts with. A
+//! module with `days_before` is a phase that ends that many days before the
+//! project's deadline (user decision 2026-11-20: a project's time is split
+//! into phases instead of milestone tasks). The new-project dialog shows
+//! the phases with their dates and lets the user change them first.
+//! Module names are English constants; template names are translated in the UI.
 
 use serde::Serialize;
 use specta::Type;
 
-/// A task a template adds, due `days_before` the deadline, in `module`.
 #[derive(Debug, Clone, Serialize, Type)]
 #[serde(rename_all = "camelCase")]
-pub struct Milestone {
-    pub title: &'static str,
-    pub days_before: u32,
-    pub module: &'static str,
+pub struct TemplatePhase {
+    pub name: &'static str,
+    pub days_before: Option<u32>, // None = a module without an end date
 }
 
 #[derive(Debug, Clone, Serialize, Type)]
 pub struct ProjectTemplate {
     pub id: &'static str,
-    pub modules: &'static [&'static str],
-    pub milestones: &'static [Milestone],
+    pub phases: &'static [TemplatePhase],
 }
 
-const fn m(title: &'static str, days_before: u32, module: &'static str) -> Milestone {
-    Milestone {
-        title,
-        days_before,
-        module,
+const fn ends(name: &'static str, days_before: u32) -> TemplatePhase {
+    TemplatePhase {
+        name,
+        days_before: Some(days_before),
     }
 }
+
+const fn open(name: &'static str) -> TemplatePhase {
+    TemplatePhase {
+        name,
+        days_before: None,
+    }
+}
+
+/// A paper's phases, the same for a conference or a journal.
+const PAPER: &[TemplatePhase] = &[
+    ends("Experiments", 21),
+    ends("Writing", 7),
+    ends("Revise and submit", 0),
+];
 
 pub const TEMPLATES: &[ProjectTemplate] = &[
     ProjectTemplate {
         id: "blank",
-        modules: &[],
-        milestones: &[],
+        phases: &[],
     },
     ProjectTemplate {
-        id: "paper",
-        modules: &[
-            "Literature review",
-            "Method",
-            "Experiments",
-            "Writing",
-            "Submission",
-        ],
-        milestones: &[
-            m("Experiments done", 21, "Experiments"),
-            m("Full draft", 14, "Writing"),
-            m("Advisor review", 7, "Writing"),
-            m("Final check and submit", 1, "Submission"),
-        ],
+        id: "conference",
+        phases: PAPER,
+    },
+    ProjectTemplate {
+        id: "journal",
+        phases: PAPER,
     },
     ProjectTemplate {
         id: "proposal",
-        modules: &["Literature review", "Proposal", "Presentation"],
-        milestones: &[
-            m("Literature review done", 30, "Literature review"),
-            m("Proposal draft", 14, "Proposal"),
-            m("Advisor sign-off", 7, "Proposal"),
-            m("Slides", 3, "Presentation"),
-            m("Rehearsal", 1, "Presentation"),
+        phases: &[
+            ends("Literature review", 30),
+            ends("Proposal", 7),
+            ends("Presentation", 0),
         ],
     },
     ProjectTemplate {
         id: "grant",
-        modules: &[
-            "Background",
-            "Aims",
-            "Budget",
-            "Writing",
-            "Review and submit",
+        phases: &[
+            open("Background"),
+            open("Aims"),
+            open("Budget"),
+            open("Writing"),
+            open("Review and submit"),
         ],
-        milestones: &[],
     },
     ProjectTemplate {
         id: "thesis",
-        modules: &["Outline", "Draft", "Revisions", "Defense preparation"],
-        milestones: &[],
+        phases: &[
+            open("Outline"),
+            open("Draft"),
+            open("Revisions"),
+            open("Defense preparation"),
+        ],
     },
 ];
 

@@ -1,13 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Conference, Edition } from '@/lib/tauri-bindings'
-import {
-  countdown,
-  findVenue,
-  latestEdition,
-  nextRound,
-  upcoming,
-  urgency,
-} from './deadline'
+import { countdown, findVenue, nextRound, upcoming, urgency } from './deadline'
 
 const DAY = 86_400_000
 
@@ -33,7 +26,6 @@ const conference = (editions: Edition[]): Conference => ({
   area: 'AI',
   ccf: 'A',
   core: '',
-  followed: true,
   editions,
 })
 
@@ -50,7 +42,6 @@ describe('conference deadlines', () => {
     ])
     expect(nextRound(c, now)?.at).toBe(120 * DAY)
     expect(nextRound(c, 200 * DAY)).toBeNull()
-    expect(latestEdition(c)?.year).toBe(2027)
   })
 
   it('counts down in two units and grades urgency', () => {

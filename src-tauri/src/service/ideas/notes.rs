@@ -270,7 +270,7 @@ mod tests {
             buffer_days: 0,
             is_archived: false,
         };
-        let p = projects::create(&mut conn, &input, "blank").unwrap();
+        let p = projects::create(&mut conn, &input, "blank", None).unwrap();
         set_project(&mut conn, idea.id, Some(p.id)).unwrap();
         add_todo(&conn, idea.id, "added later", None).unwrap();
         let in_project = crate::service::projects::query::tasks(&conn, p.id).unwrap();

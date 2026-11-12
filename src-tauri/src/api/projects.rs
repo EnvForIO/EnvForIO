@@ -6,7 +6,7 @@ use crate::config::AppState;
 use crate::entity::project::{Module, Project};
 use crate::entity::task::Task;
 use crate::errors::AppResult;
-use crate::service::projects::mutation::{self, ProjectInput};
+use crate::service::projects::mutation::{self, PhaseInput, ProjectInput};
 use crate::service::projects::query;
 use crate::service::projects::templates::{ProjectTemplate, TEMPLATES};
 
@@ -28,8 +28,9 @@ pub fn create_project(
     state: State<'_, AppState>,
     input: ProjectInput,
     template: String,
+    phases: Vec<PhaseInput>,
 ) -> AppResult<Project> {
-    mutation::create(&mut state.db(), &input, &template)
+    mutation::create(&mut state.db(), &input, &template, Some(&phases))
 }
 
 #[tauri::command]
@@ -64,6 +65,18 @@ pub fn add_module(state: State<'_, AppState>, project_id: i64, name: String) -> 
 #[specta::specta]
 pub fn rename_module(state: State<'_, AppState>, id: i64, name: String) -> AppResult<Module> {
     mutation::rename_module(&state.db(), id, &name)
+}
+
+/// When a module ends (None = not a phase) and its budget ("40h").
+#[tauri::command]
+#[specta::specta]
+pub fn set_module_phase(
+    state: State<'_, AppState>,
+    id: i64,
+    end_date: Option<String>,
+    budget: Option<String>,
+) -> AppResult<Module> {
+    mutation::set_phase(&state.db(), id, &end_date, &budget)
 }
 
 #[tauri::command]

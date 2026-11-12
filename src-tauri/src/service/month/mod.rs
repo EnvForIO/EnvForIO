@@ -1,22 +1,20 @@
 //! What the Todo Duo card's Month tab shows for each day (phase 4 step 7,
-//! user decisions 2026-11-20): deadlines as dots (projects, open tasks
-//! due, followed conferences' abstract and paper deadlines), how full the
-//! day is (time of the tasks scheduled on it against its available time),
-//! and the list for the day: those deadlines and the scheduled tasks.
+//! user decisions 2026-11-20): deadlines as dots (projects and open tasks
+//! due; a conference project's deadline and abstract task are among them),
+//! how full the day is (time of the tasks scheduled on it against its
+//! available time), and the list for the day: those deadlines and the
+//! scheduled tasks.
 
 use std::collections::BTreeMap;
 
-use chrono::{Datelike, Local, NaiveDate, TimeZone};
+use chrono::NaiveDate;
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
 use crate::errors::AppResult;
 use crate::service::capacity::CapacityTable;
-use crate::service::conferences;
 
-/// Conference deadlines in the widget use the planned-submission colour.
-const CONFERENCE_COLOR: &str = "#f97316";
 /// Tasks outside a project.
 const TASK_COLOR: &str = "#8e8e93";
 
@@ -24,7 +22,6 @@ const TASK_COLOR: &str = "#8e8e93";
 pub enum DayItemKind {
     ProjectDeadline,
     TaskDue,
-    Conference,
     Scheduled,
 }
 
@@ -127,41 +124,6 @@ pub fn marks(conn: &Connection, from: &str, to: &str) -> AppResult<Vec<DayMarks>
         );
     }
 
-    let local_day = |ms: i64| {
-        Local
-            .timestamp_millis_opt(ms)
-            .single()
-            .map(|d| d.date_naive().to_string())
-    };
-    let since = Local::now().year() - 1;
-    for c in conferences::list(conn, since)?
-        .conferences
-        .into_iter()
-        .filter(|c| c.followed)
-    {
-        for e in &c.editions {
-            for stage in &e.stages {
-                let rounds = [
-                    (stage.abstract_at, "abstract"),
-                    (stage.deadline_at, "paper"),
-                ];
-                for (at, what) in rounds {
-                    if let Some(day) = at.and_then(local_day) {
-                        push(
-                            &day,
-                            DayItem {
-                                kind: DayItemKind::Conference,
-                                title: format!("{} {} {what}", c.title, e.year),
-                                color: CONFERENCE_COLOR.into(),
-                                done: false,
-                            },
-                        );
-                    }
-                }
-            }
-        }
-    }
-
     let mut stmt = conn.prepare(
         "SELECT t.title, p.color, t.scheduled_date, t.estimate_minutes, t.done_at IS NOT NULL
          FROM tasks t LEFT JOIN projects p ON p.id = t.project_id
@@ -212,7 +174,7 @@ mod tests {
             buffer_days: 0,
             is_archived: false,
         };
-        let p = projects::create(&mut conn, &input, "blank").unwrap();
+        let p = projects::create(&mut conn, &input, "blank", None).unwrap();
         let task = projects::add_task(&conn, p.id, None, "chapter 2", &Some("3h".into())).unwrap();
         conn.execute(
             "UPDATE tasks SET scheduled_date = '2026-11-23' WHERE id = ?1",

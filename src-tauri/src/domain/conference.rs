@@ -101,7 +101,6 @@ fn conference(v: &Value) -> Option<Conference> {
         area: text(v, "sub"),
         ccf: text(&rank, "ccf"),
         core: text(&rank, "core"),
-        followed: false,
         editions: v
             .get("confs")
             .and_then(Value::as_sequence)
