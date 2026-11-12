@@ -16,7 +16,6 @@ use crate::errors::{AppError, AppResult};
 pub enum TaskView {
     MyDay,     // on today (see ON_DAY), plus what is overdue
     Important, // flagged
-    Planned,   // has a due date
     Tasks,     // everything not in a project (the task pool)
 }
 
@@ -43,17 +42,10 @@ pub fn list(conn: &Connection, view: TaskView, today: &str) -> AppResult<Vec<Tas
     let filter = match view {
         TaskView::MyDay => my_day.as_str(),
         TaskView::Important => "t.is_important = 1 AND ?1 IS NOT NULL",
-        // Planned is ordered by date first: the nearest deadline on top.
-        TaskView::Planned => "t.due_date IS NOT NULL AND ?1 IS NOT NULL",
         TaskView::Tasks => "t.project_id IS NULL AND ?1 IS NOT NULL",
     };
-    let order = if view == TaskView::Planned {
-        "ORDER BY t.is_pinned DESC, (t.done_at IS NOT NULL), t.due_date, t.sort_order, t.id"
-    } else {
-        ORDER
-    };
     // `?1 IS NOT NULL` keeps one parameter in every query so they share one code path.
-    let sql = format!("SELECT {TASK_COLUMNS} FROM tasks t WHERE {filter} {order}");
+    let sql = format!("SELECT {TASK_COLUMNS} FROM tasks t WHERE {filter} {ORDER}");
     let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map(params![today], Task::from_row)?;
     Ok(rows.collect::<Result<_, _>>()?)

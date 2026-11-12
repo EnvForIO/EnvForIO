@@ -1,4 +1,5 @@
-//! The item list: every task, filtered by status and optionally by project.
+//! The Tasks page's filters: tasks by status, and optionally by project.
+//! (The page took over the old Items page and the Planned list, 2026-11-20.)
 
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
@@ -9,22 +10,24 @@ use crate::errors::AppResult;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Type)]
 pub enum ItemStatus {
-    Open,         // not done
-    WithDeadline, // not done and has a due date, nearest first
+    All,          // open first in the user's order, then done (the page folds these)
+    WithDeadline, // not done and has a due date, nearest first (the old Planned list)
     Done,         // done, most recent first
-    All,
 }
 
 /// `project`: None = any task; Some(0) = tasks outside projects; Some(id) = that project.
 pub fn list(conn: &Connection, status: ItemStatus, project: Option<i64>) -> AppResult<Vec<Task>> {
     let (filter, order) = match status {
-        ItemStatus::Open => ("t.done_at IS NULL", "t.is_pinned DESC, t.sort_order, t.id"),
+        // The same order as the built-in lists (`query::ORDER`).
+        ItemStatus::All => (
+            "1",
+            "t.is_pinned DESC, (t.done_at IS NOT NULL), t.sort_order, t.id",
+        ),
         ItemStatus::WithDeadline => (
             "t.done_at IS NULL AND t.due_date IS NOT NULL",
             "t.due_date, t.sort_order, t.id",
         ),
         ItemStatus::Done => ("t.done_at IS NOT NULL", "t.done_at DESC, t.id DESC"),
-        ItemStatus::All => ("1", "(t.done_at IS NOT NULL), t.sort_order, t.id"),
     };
     let project_filter = match project {
         None => "?1 IS NULL OR 1",
@@ -43,8 +46,8 @@ pub fn list(conn: &Connection, status: ItemStatus, project: Option<i64>) -> AppR
 mod tests {
     use super::*;
     use crate::db::open_in_memory;
-    use crate::service::tasks::mutation::{create, set_done};
-    use crate::service::tasks::query::TaskView;
+    use crate::service::tasks::mutation::{create, create_due, set_done};
+    use crate::service::tasks::query::{self, TaskView};
 
     fn titles(tasks: Vec<Task>) -> Vec<String> {
         tasks.into_iter().map(|t| t.title).collect()
@@ -54,11 +57,10 @@ mod tests {
     fn filters_by_status_and_project() {
         let conn = open_in_memory();
         let a = create(&conn, "a", TaskView::Tasks, "2026-11-20").unwrap();
-        create(&conn, "due later", TaskView::Planned, "2026-11-30").unwrap();
-        create(&conn, "due soon", TaskView::Planned, "2026-11-21").unwrap();
+        create_due(&conn, "due later", "2026-11-30").unwrap();
+        create_due(&conn, "due soon", "2026-11-21").unwrap();
         set_done(&conn, a.id, true).unwrap();
 
-        assert_eq!(list(&conn, ItemStatus::Open, None).unwrap().len(), 2);
         assert_eq!(
             titles(list(&conn, ItemStatus::WithDeadline, None).unwrap()),
             ["due soon", "due later"]
@@ -67,6 +69,11 @@ mod tests {
         assert_eq!(list(&conn, ItemStatus::All, None).unwrap().len(), 3);
         assert_eq!(list(&conn, ItemStatus::All, Some(0)).unwrap().len(), 3); // none are in projects
         assert!(list(&conn, ItemStatus::All, Some(42)).unwrap().is_empty());
+        // The page's default (All, outside projects) is the old Tasks list, in its order.
+        assert_eq!(
+            list(&conn, ItemStatus::All, Some(0)).unwrap(),
+            query::list(&conn, TaskView::Tasks, "2026-11-20").unwrap()
+        );
     }
 
     #[test]

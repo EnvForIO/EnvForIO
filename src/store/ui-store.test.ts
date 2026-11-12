@@ -60,9 +60,9 @@ describe('UIStore', () => {
     })
 
     // Switching lists closes the details pane, like Microsoft To Do.
-    selectView('Planned')
+    selectView('Important')
     expect(useUIStore.getState()).toMatchObject({
-      selectedView: 'Planned',
+      selectedView: 'Important',
       selectedTaskId: null,
       rightSidebarVisible: false,
     })

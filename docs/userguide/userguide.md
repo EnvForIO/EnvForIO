@@ -4,7 +4,7 @@ EnvIO is a desktop app for researchers. It covers tasks, planning back from dead
 
 ## Getting around
 
-The left sidebar has the task lists (My Day, Important, Planned, Tasks), then the pages: Calendar, Items, Stats, Research, Conferences, Ideas, Library, Reader and Monitor. Your projects are listed below them.
+The left sidebar has the task lists (My Day, Important, Tasks), then the pages: Calendar, Stats, Research, Conferences, Ideas, Library, Reader and Monitor. Your projects are listed below them.
 
 Clicking a task opens its details on the right. Closing the window hides EnvIO to the tray; to quit, use the tray menu's **Quit EnvIO**. Preferences → General → **Launch at login** starts EnvIO hidden in the tray when you sign in.
 
@@ -24,9 +24,10 @@ Right-clicking empty space does nothing. In text boxes, or on selected text, rig
 - **My Day**: what you are doing today. It holds the tasks planned for today, the tasks due today, and overdue tasks that are still open. At the top are today's safety line and a line of note for the day. At the bottom, **To schedule** lists open tasks with no day to do them on.
 - **Two dates per task**: **Do on** is the day you plan to work on it, **Due** is its deadline. A task shows on both days everywhere: My Day, Todo Duo, the calendar and the heatmap. "Add to My Day" sets **Do on** to today. A task you planned for a day and did not finish goes back to **To schedule** the next day; it does not move to today by itself.
 - **Important**: flagged tasks.
-- **Planned**: tasks with a due date, soonest first.
-- **Tasks**: every task that is not in a project.
-- **Order**: drag a task up or down to reorder My Day, Important, Tasks, a project module, or Items under Open or All (Planned, and Items with deadline or done, are sorted by date). Ctrl+Z undoes it.
+- **Tasks**: every task that is not in a project. Filters at the top narrow it down:
+  - **All** (the default), **With deadline** (open tasks with a due date, soonest first) or **Done** (most recent first).
+  - The project picker: **Not in a project** (the default), **All projects**, or one project.
+- **Order**: drag a task up or down to reorder My Day, Important, Tasks (under **All**) or a project module. **With deadline** and **Done** are sorted by date. Ctrl+Z undoes it.
 - **Quick capture**: start a title with a time and it becomes the task's time slot. Examples: `14:00-15:00 group meeting`, `9:30 call`.
 - **Details pane**: title, steps, timer, My Day, flag, pin, the Do on and Due dates, estimate (`45m`, `1h30m`, `1.5h`) and note. A task that came from an idea shows **Todo of idea …**; click it to open the idea.
 - **Timer**: the play button on a task row starts it (starting another stops the first). Stopping adds the time to the task. **Did part of it** finishes the part you did and moves the rest to the next work day.
@@ -79,9 +80,8 @@ Preferences → Appearance sets the sticky's material, font and text size.
   - Calendars are downloaded when EnvIO starts and every hour. Each one can be hidden, removed, or refreshed now.
   - The links stay on your computer.
 
-## Items and Stats
+## Stats
 
-- **Items**: every task, filtered by open, with deadline, done or all, and by project.
 - **Stats**: week, month or year, covering:
   - tasks done, time tracked, completion rate and active days
   - a trend chart
@@ -97,7 +97,7 @@ Preferences → Appearance sets the sticky's material, font and text size.
   - **Filters**: by status, pinned or tag.
   - **Inside an idea**:
     - **Progress**: an 8-step checklist and links.
-    - **Todos**: tasks with optional due dates. They are real tasks, so they show in Planned, My Day, the calendar and the heatmap.
+    - **Todos**: tasks with optional due dates. They are real tasks, so they show in My Day, Tasks (with deadline, all projects), the calendar and the heatmap.
     - **Notes**: Markdown with LaTeX.
     - **Problems**: each with its solution.
     - **Log**: dated entries.

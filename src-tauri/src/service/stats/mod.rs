@@ -186,7 +186,7 @@ fn project_names(conn: &Connection) -> AppResult<HashMap<i64, (String, String)>>
 mod tests {
     use super::*;
     use crate::db::open_in_memory;
-    use crate::service::tasks::mutation::create;
+    use crate::service::tasks::mutation::{create, create_due};
     use crate::service::tasks::query::TaskView;
 
     #[test]
@@ -194,7 +194,7 @@ mod tests {
         let conn = open_in_memory();
         let a = create(&conn, "a", TaskView::MyDay, "2026-11-18").unwrap();
         create(&conn, "b", TaskView::MyDay, "2026-11-18").unwrap();
-        create(&conn, "outside", TaskView::Planned, "2026-12-05").unwrap();
+        create_due(&conn, "outside", "2026-12-05").unwrap();
         // Finished Wednesday afternoon local time (noon UTC is the same day in most zones).
         conn.execute(
             "UPDATE tasks SET done_at = '2026-11-18T12:00:00Z' WHERE id = ?1",

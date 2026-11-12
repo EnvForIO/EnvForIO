@@ -1,5 +1,5 @@
 /**
- * A rounded filter chip with an optional colour dot and a count.
+ * A rounded filter chip with an optional colour dot and an optional count.
  */
 import { cn } from '@/lib/utils'
 
@@ -8,7 +8,7 @@ export function FilterChip(props: {
   onClick: () => void
   color?: string
   label: string
-  count: number
+  count?: number
 }) {
   return (
     <button
@@ -28,7 +28,9 @@ export function FilterChip(props: {
         />
       )}
       {props.label}
-      <span className="opacity-60">{props.count}</span>
+      {props.count !== undefined && (
+        <span className="opacity-60">{props.count}</span>
+      )}
     </button>
   )
 }

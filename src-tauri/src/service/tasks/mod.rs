@@ -27,20 +27,18 @@ mod tests {
         assert_eq!(a.title, "read paper");
         assert_eq!(a.scheduled_date.as_deref(), Some(TODAY));
 
-        let b = mutation::create(&conn, "submit", TaskView::Planned, TODAY).unwrap();
+        let b = mutation::create_due(&conn, "submit", TODAY).unwrap();
         assert_eq!(b.due_date.as_deref(), Some(TODAY));
 
         let c = mutation::create(&conn, "flagged", TaskView::Important, TODAY).unwrap();
         assert!(c.is_important);
+        // Only My Day gives a new task a date.
+        assert_eq!((c.scheduled_date, c.due_date), (None, None));
 
         // Due today puts "submit" in My Day too (since 2026-11-20).
         assert_eq!(
             titles(&query::list(&conn, TaskView::MyDay, TODAY).unwrap()),
             ["submit", "read paper"]
-        );
-        assert_eq!(
-            titles(&query::list(&conn, TaskView::Planned, TODAY).unwrap()),
-            ["submit"]
         );
         assert_eq!(
             titles(&query::list(&conn, TaskView::Important, TODAY).unwrap()),

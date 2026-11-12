@@ -238,6 +238,7 @@ mod tests {
     fn todos_are_tasks_that_follow_the_ideas_project() {
         use crate::service::ideas::mutation::set_project;
         use crate::service::projects::mutation::{self as projects, ProjectInput};
+        use crate::service::tasks::items::{list as items, ItemStatus};
         use crate::service::tasks::query::{list, TaskView};
 
         let mut conn = open_in_memory();
@@ -252,11 +253,14 @@ mod tests {
                 .map(|t| t.title)
                 .collect()
         };
-        // My Day picks up what is due today or overdue; Planned has both dated ones.
+        // My Day picks up what is due today or overdue; "with deadline" has both dated ones.
         let mut my_day = titles(TaskView::MyDay);
         my_day.sort();
         assert_eq!(my_day, ["due today", "overdue"]);
-        assert_eq!(titles(TaskView::Planned).len(), 2);
+        assert_eq!(
+            items(&conn, ItemStatus::WithDeadline, None).unwrap().len(),
+            2
+        );
 
         let input = ProjectInput {
             name: "p".into(),

@@ -2,7 +2,7 @@
  * Task rows that can be dragged into a new order (user request
  * 2026-11-20), like Microsoft To Do: a line shows where the task will
  * land, and the new order shows at once while it is saved. Used by the
- * built-in lists (not Planned, which sorts by date) and project modules.
+ * built-in lists (not the date-sorted Tasks filters) and project modules.
  */
 import { useState } from 'react'
 import { useReorderTasks } from '@/api/tasks'

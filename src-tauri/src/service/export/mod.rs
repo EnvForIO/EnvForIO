@@ -137,14 +137,14 @@ pub fn export(conn: &Connection, scope: &ExportScope) -> AppResult<Export> {
 mod tests {
     use super::*;
     use crate::db::open_in_memory;
-    use crate::service::tasks::mutation::create;
+    use crate::service::tasks::mutation::{create, create_due};
     use crate::service::tasks::query::TaskView;
 
     #[test]
     fn scopes_pick_the_right_tasks() {
         let conn = open_in_memory();
         create(&conn, "14:00-15:00 seminar", TaskView::MyDay, "2026-11-18").unwrap();
-        create(&conn, "submit", TaskView::Planned, "2026-11-30").unwrap();
+        create_due(&conn, "submit", "2026-11-30").unwrap();
         create(&conn, "undated", TaskView::Tasks, "2026-11-18").unwrap();
 
         let day = export(

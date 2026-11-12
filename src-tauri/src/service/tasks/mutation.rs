@@ -28,8 +28,8 @@ pub struct TaskUpdate {
 
 /// Add a task to the top of a list. The list decides the defaults, as in
 /// Microsoft To Do: adding in My Day plans it for today, in Important flags
-/// it, in Planned makes it due today. A leading time ("14:00-15:00 seminar")
-/// becomes the task's time slot (quick capture).
+/// it. A leading time ("14:00-15:00 seminar") becomes the task's time slot
+/// (quick capture).
 pub fn create(conn: &Connection, title: &str, view: TaskView, today: &str) -> AppResult<Task> {
     let captured = capture(title);
     let title = clean_title(&captured.title)?;
@@ -40,16 +40,14 @@ pub fn create(conn: &Connection, title: &str, view: TaskView, today: &str) -> Ap
         |r| r.get(0),
     )?;
     let scheduled = (view == TaskView::MyDay).then_some(today);
-    let due = (view == TaskView::Planned).then_some(today);
     conn.execute(
-        "INSERT INTO tasks (title, is_important, scheduled_date, due_date, start_time, end_time,
+        "INSERT INTO tasks (title, is_important, scheduled_date, start_time, end_time,
                             sort_order, created_at, updated_at)
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?8)",
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?7)",
         params![
             title,
             view == TaskView::Important,
             scheduled,
-            due,
             captured.start,
             captured.end,
             top,
@@ -67,6 +65,18 @@ pub fn create_on_day(conn: &Connection, title: &str, date: &str) -> AppResult<Ta
     // My Day is "planned for today", so a task for another day is the same
     // insert with that day in place of today.
     create(conn, title, TaskView::MyDay, date)
+}
+
+/// A task in the pool due on `date`. Tests use it for dated tasks, since no
+/// list creates them any more.
+#[cfg(test)]
+pub fn create_due(conn: &Connection, title: &str, date: &str) -> AppResult<Task> {
+    let task = create(conn, title, TaskView::Tasks, date)?;
+    conn.execute(
+        "UPDATE tasks SET due_date = ?2 WHERE id = ?1",
+        params![task.id, date],
+    )?;
+    query::get(conn, task.id)
 }
 
 pub fn update(conn: &Connection, id: i64, update: &TaskUpdate) -> AppResult<Task> {

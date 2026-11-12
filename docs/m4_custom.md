@@ -142,3 +142,14 @@ Decision (user, 2026-11-20): paper submission and proposal (开题) templates cr
 - `projects/templates.rs`: a template has `milestones` (title, days before the deadline, module). Paper: experiments done −21, full draft −14, advisor review −7, final check and submit −1. New "proposal" template (modules Literature review, Proposal, Presentation): literature review done −30, proposal draft −14, advisor sign-off −7, slides −3, rehearsal −1.
 - `projects::mutation::create` adds them in the same transaction as the modules, due on deadline − offset, in their module; a milestone that would fall before the start date is left out, and a project without a deadline gets none. Conference "Plan submission" uses the paper template, so it gets them too (plus the abstract task).
 - The new-project dialog lists what the chosen template adds ("−21 d Experiments done, …").
+
+## Fewer sidebar entries, step 1: Planned and Items into Tasks (2026-11-20)
+
+A review of the sidebar found two lists that were the same queries as a third: Planned was "open or done tasks with a due date", Items was every task with a status and a project filter, and Tasks was Items' "outside projects".
+
+Decision (user, 2026-11-20), the first of three steps (then conferences into paper projects with phases, then Research as one entry with tabs): remove Planned and the Items page; the Tasks list gets Items' filters.
+
+- Tasks shows a filter row: **All** (default), **With deadline** (open, soonest first: the old Planned, without its done tasks) and **Done** (most recent first), and a project picker (**Not in a project** by default, **All projects**, or one project). The defaults are the old Tasks list, in the same order.
+- The add box shows only where a new pool task appears (All, outside projects or all projects). Dragging works under All only.
+- `TaskView::Planned` is gone, and with it "adding in Planned makes the task due today". `ItemStatus` lost `Open` (All folds done tasks, which covers it); `All` now orders pinned first like the built-in lists. Tests that need a dated task use `mutation::create_due`.
+- `FilterChip`'s count is optional, so the task filters reuse it.

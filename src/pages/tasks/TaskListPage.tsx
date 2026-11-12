@@ -1,33 +1,57 @@
 /**
  * The middle pane: the selected list's title, an "Add a task" box, open
  * tasks, and a folded "Completed" section, laid out like Microsoft To Do.
+ * The Tasks list also has filters (status and project), which took over
+ * the Items page and the Planned list.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDownIcon, ChevronRightIcon, PlusIcon } from 'lucide-react'
-import { useCreateTask, useTasks, useToday } from '@/api/tasks'
+import {
+  useCreateTask,
+  useFilteredTasks,
+  useTasks,
+  useToday,
+} from '@/api/tasks'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { isEnter } from '@/lib/keys'
+import { SafetyLineCard } from '@/pages/plans/SafetyLineCard'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from './dates'
 import { SortableTasks } from './SortableTasks'
+import { POOL, type TaskFilter } from './filter'
+import { TaskFilters } from './TaskFilters'
 import { TaskRow } from './TaskRow'
-import { SafetyLineCard } from '@/pages/plans/SafetyLineCard'
 import { TodayNote } from './TodayNote'
 import { ToSchedule } from './ToSchedule'
-import { isEnter } from '@/lib/keys'
 
 export function TaskListPage() {
   const { t } = useTranslation()
   const view = useUIStore(state => state.selectedView)
   const today = useToday()
-  const { data: tasks = [], isLoading, error } = useTasks(view)
+  const [filter, setFilter] = useState<TaskFilter>(POOL)
+  const filtering = view === 'Tasks'
+  const list = useTasks(view, !filtering)
+  const filtered = useFilteredTasks(filter.status, filter.project, filtering)
+  const { data: tasks = [], isLoading, error } = filtering ? filtered : list
   const createTask = useCreateTask()
   const [draft, setDraft] = useState('')
   const [showCompleted, setShowCompleted] = useState(false)
 
-  const open = tasks.filter(task => task.doneAt === null)
-  const completed = tasks.filter(task => task.doneAt !== null)
+  // "Done" lists only finished tasks, so it shows them instead of folding them.
+  const onlyDone = filtering && filter.status === 'Done'
+  const open = onlyDone ? [] : tasks.filter(task => task.doneAt === null)
+  const completed = onlyDone ? [] : tasks.filter(task => task.doneAt !== null)
+  // "With deadline" and "Done" are sorted by date, so a dragged order would not show.
+  const sortable = !filtering || filter.status === 'All'
+  // A new task goes into the pool (no project, no date): only offer it where it will show.
+  const canAdd =
+    !filtering ||
+    (filter.status === 'All' &&
+      (filter.project === null || filter.project === 0))
+  const unfiltered =
+    !filtering || (filter.status === POOL.status && filter.project === 0)
 
   const add = () => {
     const title = draft.trim()
@@ -47,17 +71,20 @@ export function TaskListPage() {
       </header>
 
       {view === 'MyDay' && <SafetyLineCard />}
+      {filtering && <TaskFilters filter={filter} onChange={setFilter} />}
 
-      <div className="flex items-center gap-2 rounded-md border px-3">
-        <PlusIcon className="size-4 text-muted-foreground" />
-        <Input
-          value={draft}
-          onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => isEnter(e) && add()}
-          placeholder={t('tasks.addPlaceholder')}
-          className="border-0 shadow-none focus-visible:ring-0"
-        />
-      </div>
+      {canAdd && (
+        <div className="flex items-center gap-2 rounded-md border px-3">
+          <PlusIcon className="size-4 text-muted-foreground" />
+          <Input
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            onKeyDown={e => isEnter(e) && add()}
+            placeholder={t('tasks.addPlaceholder')}
+            className="border-0 shadow-none focus-visible:ring-0"
+          />
+        </div>
+      )}
 
       <ScrollArea className="min-h-0 flex-1">
         <div className="flex flex-col gap-1 pr-3">
@@ -71,16 +98,15 @@ export function TaskListPage() {
           )}
           {!isLoading && tasks.length === 0 && (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              {t(`tasks.empty.${view}`)}
+              {unfiltered ? t(`tasks.empty.${view}`) : t('tasks.filter.empty')}
             </p>
           )}
 
-          {/* Planned sorts by date, so a dragged order would not show there. */}
-          <SortableTasks
-            tasks={open}
-            view={view}
-            sortable={view !== 'Planned'}
-          />
+          {onlyDone ? (
+            tasks.map(task => <TaskRow key={task.id} task={task} view={view} />)
+          ) : (
+            <SortableTasks tasks={open} view={view} sortable={sortable} />
+          )}
 
           {completed.length > 0 && (
             <>

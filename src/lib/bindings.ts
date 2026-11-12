@@ -1362,7 +1362,7 @@ export type IdeaTodo = { id: number; ideaId: number; title: string; dueDate: str
  * Everything the idea detail can edit, sent whole on every save.
  */
 export type IdeaUpdate = { title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; tagIds: number[] }
-export type ItemStatus = "Open" | "WithDeadline" | "Done" | "All"
+export type ItemStatus = "All" | "WithDeadline" | "Done"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
 export type MachineInfo = { hostName: string; os: string; cpuBrand: string; logicalCores: number; physicalCores: number | null; memoryTotal: number; gpus: GpuInfo[] }
 /**
@@ -1476,7 +1476,7 @@ export type TaskUpdate = { title: string; note: string; isImportant: boolean; is
 /**
  * The built-in lists in the sidebar.
  */
-export type TaskView = "MyDay" | "Important" | "Planned" | "Tasks"
+export type TaskView = "MyDay" | "Important" | "Tasks"
 export type TodayLine = { date: string; minutes: number; doneMinutes: number; capacity: number | null; projects: ProjectLine[] }
 /**
  * Minutes per weekday, Monday first; None = no limit.

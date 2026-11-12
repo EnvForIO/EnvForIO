@@ -43,7 +43,6 @@ interface UIState {
 /** The full pages the middle pane can show instead of a list or project. */
 export type MainPage =
   | 'calendar'
-  | 'items'
   | 'stats'
   | 'research'
   | 'conferences'

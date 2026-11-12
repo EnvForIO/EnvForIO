@@ -56,19 +56,25 @@ export function useToday(): string | undefined {
   }).data
 }
 
-export function useTasks(view: TaskView) {
+export function useTasks(view: TaskView, enabled = true) {
   return useQuery({
     queryKey: taskKeys.list(view),
     queryFn: async () => unwrapResult(await commands.listTasks(view)),
+    enabled,
   })
 }
 
-/** The item list: status filter, and project (null = any, 0 = outside projects). */
-export function useItems(status: ItemStatus, project: number | null) {
+/** The Tasks page's filters: status, and project (null = any, 0 = outside projects). */
+export function useFilteredTasks(
+  status: ItemStatus,
+  project: number | null,
+  enabled = true
+) {
   return useQuery({
-    queryKey: ['tasks', 'items', status, project] as const,
+    queryKey: ['tasks', 'filtered', status, project] as const,
     queryFn: async () =>
       unwrapResult(await commands.listItems(status, project)),
+    enabled,
   })
 }
 

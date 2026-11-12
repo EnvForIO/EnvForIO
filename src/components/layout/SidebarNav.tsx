@@ -1,18 +1,16 @@
 /**
- * The left sidebar's built-in lists, each with its count of open tasks.
- * Projects, Calendar, Stats and the rest join here in later phases.
+ * The left sidebar's built-in lists, each with its count of open tasks,
+ * then the full pages. Projects follow in `SidebarProjects`.
  */
 import { useTranslation } from 'react-i18next'
 import {
   ActivityIcon,
   CalendarClockIcon,
-  CalendarDaysIcon,
   CalendarRangeIcon,
   ChartColumnIcon,
   LibraryIcon,
   LightbulbIcon,
   RssIcon,
-  ListChecksIcon,
   HouseIcon,
   LayoutDashboardIcon,
   StarIcon,
@@ -27,7 +25,6 @@ import { useUIStore, type MainPage } from '@/store/ui-store'
 const VIEWS: { view: TaskView; icon: LucideIcon }[] = [
   { view: 'MyDay', icon: SunIcon },
   { view: 'Important', icon: StarIcon },
-  { view: 'Planned', icon: CalendarDaysIcon },
   { view: 'Tasks', icon: HouseIcon },
 ]
 
@@ -87,7 +84,6 @@ export function SidebarNav() {
         <NavItem key={item.view} {...item} />
       ))}
       <PageItem page="calendar" icon={CalendarRangeIcon} />
-      <PageItem page="items" icon={ListChecksIcon} />
       <PageItem page="stats" icon={ChartColumnIcon} />
       <PageItem page="research" icon={LayoutDashboardIcon} />
       <PageItem page="conferences" icon={CalendarClockIcon} />

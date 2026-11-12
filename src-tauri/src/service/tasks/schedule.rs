@@ -54,7 +54,7 @@ pub fn schedule(conn: &Connection, id: i64, date: Option<String>) -> AppResult<T
 mod tests {
     use super::*;
     use crate::db::open_in_memory;
-    use crate::service::tasks::mutation::{create, create_on_day, set_done};
+    use crate::service::tasks::mutation::{create, create_due, create_on_day, set_done};
     use crate::service::tasks::query::TaskView;
 
     const TODAY: &str = "2026-11-20";
@@ -64,7 +64,7 @@ mod tests {
         let conn = open_in_memory();
         let a = create(&conn, "read paper", TaskView::Tasks, TODAY).unwrap();
         let b = create_on_day(&conn, "lab meeting", "2026-11-21").unwrap();
-        let due = create(&conn, "submit", TaskView::Planned, "2026-11-25").unwrap();
+        let due = create_due(&conn, "submit", "2026-11-25").unwrap();
 
         let pool = |today: &str| -> Vec<i64> {
             unscheduled(&conn, today)
