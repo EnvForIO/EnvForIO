@@ -7,12 +7,17 @@
 //! project's time is split instead of spread evenly to the deadline. Work
 //! outside dated phases is planned up to the project's deadline.
 //!
+//! A task's own dates (user report 2026-11-21): a task planned for a day
+//! ("Do on", today or later) is asked for on that day; a task due before
+//! its phase or project ends is planned up to its due date. Either way its
+//! minutes are no longer spread thin up to the deadline.
+//!
 //! Budgets: a phase can carry a time budget. Its tasks without an estimate
 //! share what the estimated ones leave of it, so a phase can be planned
 //! before every task is estimated. A budgeted phase with no tasks yet
 //! counts its whole budget until its end date.
 
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 
 use chrono::{Duration, NaiveDate};
 use rusqlite::Connection;
@@ -102,14 +107,21 @@ pub fn projects(conn: &Connection) -> AppResult<Vec<ProjectRow>> {
     Ok(out)
 }
 
-/// Estimated minutes per project and unit: still open, and done on each day.
+/// A task's own dates, which can pull its work out of its unit's window.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+struct Due {
+    on: Option<NaiveDate>,  // planned for this day ("Do on")
+    due: Option<NaiveDate>, // due by this day
+}
+
+/// Estimated minutes per project, unit and due date: still open, and done on each day.
 pub struct Estimates {
-    open: HashMap<(i64, Unit), i64>,
-    done_on: HashMap<(NaiveDate, i64, Unit), i64>,
+    open: HashMap<(i64, Unit, Due), i64>,
+    done_on: HashMap<(NaiveDate, i64, Unit, Due), i64>,
     /// A budgeted phase with no tasks yet: (project, module) -> (budget, end).
     untasked: HashMap<(i64, i64), (i64, Option<NaiveDate>)>,
-    /// Open tasks per project, estimated or not.
-    open_tasks: HashMap<i64, i64>,
+    /// Per project, estimated or not: (tasks, open tasks).
+    task_counts: HashMap<i64, (i64, i64)>,
 }
 
 struct TaskRow {
@@ -117,16 +129,19 @@ struct TaskRow {
     module: Option<i64>,
     estimate: Option<i64>,
     done_at: Option<String>,
+    due: Due,
     phase: bool, // its module has an end date
 }
 
 impl Estimates {
     pub fn load(conn: &Connection) -> AppResult<Self> {
         let mut stmt = conn.prepare(
-            "SELECT t.project_id, t.module_id, t.estimate_minutes, t.done_at, m.end_date IS NOT NULL
+            "SELECT t.project_id, t.module_id, t.estimate_minutes, t.done_at, m.end_date IS NOT NULL,
+                    t.due_date, t.scheduled_date
              FROM tasks t LEFT JOIN modules m ON m.id = t.module_id
              WHERE t.project_id IS NOT NULL",
         )?;
+        let date = |s: Option<String>| s.as_deref().and_then(parse_date);
         let tasks: Vec<TaskRow> = stmt
             .query_map([], |r| {
                 Ok(TaskRow {
@@ -135,6 +150,10 @@ impl Estimates {
                     estimate: r.get(2)?,
                     done_at: r.get(3)?,
                     phase: r.get::<_, Option<bool>>(4)?.unwrap_or(false),
+                    due: Due {
+                        due: date(r.get(5)?),
+                        on: date(r.get(6)?),
+                    },
                 })
             })?
             .collect::<Result<_, _>>()?;
@@ -172,13 +191,13 @@ impl Estimates {
             }
         }
 
-        let mut open: HashMap<(i64, Unit), i64> = HashMap::new();
-        let mut done_on: HashMap<(NaiveDate, i64, Unit), i64> = HashMap::new();
-        let mut open_tasks: HashMap<i64, i64> = HashMap::new();
+        let mut open: HashMap<(i64, Unit, Due), i64> = HashMap::new();
+        let mut done_on: HashMap<(NaiveDate, i64, Unit, Due), i64> = HashMap::new();
+        let mut task_counts: HashMap<i64, (i64, i64)> = HashMap::new();
         for t in &tasks {
-            if t.done_at.is_none() {
-                *open_tasks.entry(t.project).or_default() += 1;
-            }
+            let counts = task_counts.entry(t.project).or_default();
+            counts.0 += 1;
+            counts.1 += i64::from(t.done_at.is_none());
             let minutes = t
                 .estimate
                 .or_else(|| t.module.and_then(|m| share.get(&m).copied()));
@@ -187,8 +206,10 @@ impl Estimates {
             };
             let unit = t.module.filter(|_| t.phase);
             match t.done_at.as_deref().map(day_of_timestamp) {
-                None => *open.entry((t.project, unit)).or_default() += minutes,
-                Some(Some(day)) => *done_on.entry((day, t.project, unit)).or_default() += minutes,
+                None => *open.entry((t.project, unit, t.due)).or_default() += minutes,
+                Some(Some(day)) => {
+                    *done_on.entry((day, t.project, unit, t.due)).or_default() += minutes
+                }
                 Some(None) => {} // unreadable timestamp: ignore
             }
         }
@@ -196,42 +217,58 @@ impl Estimates {
             open,
             done_on,
             untasked,
-            open_tasks,
+            task_counts,
         })
     }
 
-    /// Work left in one unit at the start of `day`: open tasks plus tasks
-    /// finished on or after it, plus an untasked phase's budget until its end.
-    pub fn remaining_in(&self, day: NaiveDate, project: i64, unit: Unit) -> i64 {
+    /// Work left in one unit's tasks due on `due` (None = undated) at the
+    /// start of `day`: open tasks plus tasks finished later, plus tasks
+    /// finished on `day` itself when `with_today` (today's line counts them,
+    /// so finishing work does not lower it; health does not).
+    fn remaining(
+        &self,
+        day: NaiveDate,
+        project: i64,
+        unit: Unit,
+        due: Due,
+        with_today: bool,
+    ) -> i64 {
         let later: i64 = self
             .done_on
             .iter()
-            .filter(|((d, p, u), _)| *p == project && *u == unit && *d >= day)
+            .filter(|((d, p, u, du), _)| {
+                *p == project && *u == unit && *du == due && (*d > day || (with_today && *d == day))
+            })
             .map(|(_, m)| m)
             .sum();
-        let budget: i64 = self
-            .untasked
+        self.open.get(&(project, unit, due)).copied().unwrap_or(0) + later
+    }
+
+    /// An untasked budgeted phase's budget in `unit` on `day` (until its end).
+    fn budget(&self, day: NaiveDate, project: i64, unit: Unit) -> i64 {
+        self.untasked
             .iter()
             .filter(|((p, module), (_, end))| {
                 *p == project && end.is_none_or(|end| day <= end) && unit == end.map(|_| *module)
             })
             .map(|(_, (minutes, _))| minutes)
-            .sum();
-        self.open.get(&(project, unit)).copied().unwrap_or(0) + later + budget
+            .sum()
     }
 
-    /// Minutes of one unit's tasks finished on `day`.
-    pub fn done_in(&self, day: NaiveDate, project: i64, unit: Unit) -> i64 {
-        self.done_on
-            .get(&(day, project, unit))
-            .copied()
-            .unwrap_or(0)
+    /// The due dates a unit's tasks have (None for undated ones).
+    fn dues(&self, project: i64, unit: Unit) -> BTreeSet<Due> {
+        let open = self.open.keys().map(|(p, u, due)| (*p, *u, *due));
+        let done = self.done_on.keys().map(|(_, p, u, due)| (*p, *u, *due));
+        open.chain(done)
+            .filter(|(p, u, _)| *p == project && *u == unit)
+            .map(|(_, _, due)| due)
+            .collect()
     }
 
     pub fn done_on(&self, day: NaiveDate, project: i64) -> i64 {
         self.done_on
             .iter()
-            .filter(|((d, p, _), _)| *d == day && *p == project)
+            .filter(|((d, p, _, _), _)| *d == day && *p == project)
             .map(|(_, m)| m)
             .sum()
     }
@@ -239,21 +276,75 @@ impl Estimates {
     pub fn done_on_day(&self, day: NaiveDate) -> i64 {
         self.done_on
             .iter()
-            .filter(|((d, _, _), _)| *d == day)
+            .filter(|((d, _, _, _), _)| *d == day)
             .map(|(_, m)| m)
             .sum()
     }
 
-    pub fn open_tasks(&self, project: i64) -> i64 {
-        self.open_tasks.get(&project).copied().unwrap_or(0)
+    /// Every task is finished, and there is at least one: a project with no
+    /// tasks yet is not done, only not planned.
+    pub fn all_done(&self, project: i64) -> bool {
+        self.task_counts
+            .get(&project)
+            .is_some_and(|(tasks, open)| *tasks > 0 && *open == 0)
     }
 }
 
-/// One project's units for the safety line on `day`: each dated phase in
-/// its own window, then the rest of the project up to its deadline. They
-/// all carry the project's id, so the allocation adds them up per project.
-pub fn units_at(p: &ProjectRow, estimates: &Estimates, day: NaiveDate) -> Vec<(Unit, ProjectWork)> {
+/// One unit's work, split by the tasks' own dates (user report 2026-11-21):
+/// a task planned for a day still to come ("Do on") is asked for on that
+/// day; a task due before the unit's target gets a window ending on its due
+/// date (200 minutes due tomorrow are done by tomorrow, not spread to the
+/// deadline); the rest share the unit's window. A planned day that has
+/// passed unfinished no longer counts, as in "To schedule".
+fn split_by_due(
+    estimates: &Estimates,
+    p: &ProjectRow,
+    unit: Unit,
+    window: ProjectWork,
+    day: NaiveDate,
+    with_today: bool,
+) -> Vec<ProjectWork> {
+    let target = window.deadline - Duration::days(window.buffer_days);
     let mut out = Vec::new();
+    let mut rest = estimates.budget(day, p.id, unit);
+    for dates in estimates.dues(p.id, unit) {
+        let minutes = estimates.remaining(day, p.id, unit, dates, with_today);
+        match (dates.on, dates.due) {
+            (Some(on), _) if on >= day => out.push(ProjectWork {
+                start: Some(on),
+                deadline: on,
+                buffer_days: 0,
+                remaining: minutes,
+                ..window.clone()
+            }),
+            (_, Some(due)) if due < target => out.push(ProjectWork {
+                deadline: due,
+                buffer_days: 0,
+                remaining: minutes,
+                ..window.clone()
+            }),
+            _ => rest += minutes,
+        }
+    }
+    out.push(ProjectWork {
+        remaining: rest,
+        ..window
+    });
+    out
+}
+
+/// One project's units for the safety line on `day`: each dated phase in
+/// its own window, then the rest of the project up to its deadline, and
+/// within each, tasks due earlier in windows of their own. They all carry
+/// the project's id, so the allocation adds them up per project.
+/// `with_today`: count work finished today as still left (today's line).
+pub fn units_at(
+    p: &ProjectRow,
+    estimates: &Estimates,
+    day: NaiveDate,
+    with_today: bool,
+) -> Vec<ProjectWork> {
+    let mut windows = Vec::new();
     let mut from = p.start;
     for phase in &p.phases {
         // The buffer moves only a phase that ends with the project.
@@ -261,37 +352,39 @@ pub fn units_at(p: &ProjectRow, estimates: &Estimates, day: NaiveDate) -> Vec<(U
             Some(deadline) if phase.end >= deadline => p.buffer_days,
             _ => 0,
         };
-        out.push((
+        windows.push((
             Some(phase.module),
             ProjectWork {
                 id: p.id,
                 start: from,
                 deadline: phase.end,
                 buffer_days: buffer,
-                remaining: estimates.remaining_in(day, p.id, Some(phase.module)),
+                remaining: 0,
             },
         ));
         from = Some(phase.end + Duration::days(1));
     }
     if let Some(deadline) = p.deadline {
-        out.push((
+        windows.push((
             None,
             ProjectWork {
                 id: p.id,
                 start: p.start,
                 deadline,
                 buffer_days: p.buffer_days,
-                remaining: estimates.remaining_in(day, p.id, None),
+                remaining: 0,
             },
         ));
     }
-    out
+    windows
+        .into_iter()
+        .flat_map(|(unit, window)| split_by_due(estimates, p, unit, window, day, with_today))
+        .collect()
 }
 
 /// The safety line's input for `day`: every project's units.
 pub fn work_at(rows: &[ProjectRow], estimates: &Estimates, day: NaiveDate) -> Vec<ProjectWork> {
     rows.iter()
-        .flat_map(|p| units_at(p, estimates, day))
-        .map(|(_, work)| work)
+        .flat_map(|p| units_at(p, estimates, day, true))
         .collect()
 }

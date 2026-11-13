@@ -66,6 +66,7 @@ Preferences → Appearance sets the sticky's material, font and text size.
   - **Board**: To do / Doing / Done. Drag cards between the columns. Starting a task's timer moves it to Doing. Moving a card to Done completes it, and moving a card back to To do stops its timer.
 - **Available time**: set per weekday in Preferences → Planning (0 = rest day). On the calendar, right-click a day to change it for that date only.
 - **Safety line**: each morning EnvIO works out how much of each project's estimated work to do today, so that each phase finishes by its end and the rest by the plan date (the deadline minus the finish-early days). It spreads the work over your work days.
+  - A task's own dates come first: a task with **Do on** today or later is asked for on that day, and a task **Due** before its phase or project ends is planned up to its due date. A **Do on** day that passed with the task unfinished no longer counts.
   - My Day shows the line, your streak, yesterday's shortfall and a 14-day load forecast.
   - Estimates are adjusted by how long tasks really take once you have timed a few.
   - Preferences → Planning sets the day start (default 07:00), levelling, and "earliest deadline first".

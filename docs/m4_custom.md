@@ -167,6 +167,7 @@ Decisions (user, 2026-11-20): no Conferences page and no following; a conference
 - Health (`plans/forecast.rs`): judged per unit with `safety_line::window`; the project takes the worst. A phase past its end with work left is Behind, only the project's deadline makes it Overdue. New state `Unestimated`: open tasks but nothing to plan with.
 - The Todo Duo Month tab lost its conference dots (a conference project's deadline and abstract task are already deadlines there). ccfddl's list downloads from the dialog when missing or a week old (`useFreshConferences`).
 - Not done here: moving a project's deadline does not move its phases.
+- Fix after trying it (user report 2026-11-21): a 200-minute task in a project due in two months got nothing on today's line, because the line ignored task dates. Within each unit, a task with Do on today or later now has a one-day window on that day, and a task due before the unit's target has a window ending on its due date (`work.rs::split_by_due`). Also, a project with no tasks at all is Not estimated, not Done.
 
 ## Fewer sidebar entries, step 3: Research as one entry (2026-11-20)
 

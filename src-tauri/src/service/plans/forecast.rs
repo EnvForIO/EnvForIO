@@ -58,8 +58,8 @@ pub fn load_forecast(conn: &Connection, today: &str, days: i64) -> AppResult<Vec
 /// Ordered from best to worst, so the worst phase is the max.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Type)]
 pub enum Health {
-    Done,        // no open tasks
-    Unestimated, // open tasks, but no estimates or budgets to plan with
+    Done,        // every task finished (and there is at least one)
+    Unestimated, // no tasks yet, or open ones without estimates or budgets
     OnTrack,     // needs well under the available time
     Tight,       // needs more than 80% of the available time
     Behind,      // needs more than the available time, or a phase ended with work left
@@ -144,13 +144,7 @@ pub fn project_health(conn: &Connection, today: &str) -> AppResult<Vec<ProjectHe
                 _ => overall.map_or((1.0, 0), |r| (r, all_count)),
             };
             // Work done today is not left, unlike in today's line.
-            let units: Vec<ProjectWork> = units_at(p, &estimates, today)
-                .into_iter()
-                .map(|(unit, mut work)| {
-                    work.remaining -= estimates.done_in(today, p.id, unit);
-                    work
-                })
-                .collect();
+            let units: Vec<ProjectWork> = units_at(p, &estimates, today, false);
             let remaining: i64 = units.iter().map(|u| u.remaining).sum();
             let worst = units
                 .iter()
@@ -164,8 +158,8 @@ pub fn project_health(conn: &Connection, today: &str) -> AppResult<Vec<ProjectHe
                 .max();
             let (needed_per_day, health) = match worst {
                 Some((health, _, needed)) => (Some(needed), health),
-                None if estimates.open_tasks(p.id) > 0 => (None, Health::Unestimated),
-                None => (None, Health::Done),
+                None if estimates.all_done(p.id) => (None, Health::Done),
+                None => (None, Health::Unestimated),
             };
             ProjectHealth {
                 project_id: p.id,
@@ -292,6 +286,9 @@ mod tests {
     fn a_budget_plans_a_phase_before_its_tasks_are_estimated() {
         let mut conn = open_in_memory();
         let (p, m) = paper(&mut conn);
+        // A new project with no tasks is not done, only not planned yet.
+        let h = &project_health(&conn, "2026-11-20").unwrap()[0];
+        assert_eq!(h.health, Health::Unestimated);
         // No estimates anywhere: open tasks, but nothing to plan with.
         let a = projects::add_task(&conn, p, Some(m[0]), "baseline", &None).unwrap();
         projects::add_task(&conn, p, Some(m[0]), "ablation", &None).unwrap();
@@ -319,6 +316,52 @@ mod tests {
         assert_eq!(
             project_health(&conn, "2026-12-14").unwrap()[0].remaining,
             600
+        );
+    }
+
+    #[test]
+    fn a_task_due_before_its_project_is_planned_up_to_its_due_date() {
+        // The user's case (2026-11-21): 200 minutes due tomorrow in a
+        // project due in two months were spread so thin today got nothing.
+        let mut conn = open_in_memory();
+        let p = project(&mut conn, "2027-01-23");
+        let t = projects::add_task(&conn, p, None, "rebuttal", &Some("200m".into())).unwrap();
+        conn.execute(
+            "UPDATE tasks SET due_date = '2026-11-21' WHERE id = ?1",
+            params![t.id],
+        )
+        .unwrap();
+        projects::add_task(&conn, p, None, "camera ready", &Some("10h".into())).unwrap();
+
+        let days = load_forecast(&conn, "2026-11-20", 14).unwrap();
+        // The due task fills today and tomorrow (in 15-minute chunks);
+        // the 10h without a date is spread to January.
+        let first_two = days[0].minutes + days[1].minutes;
+        assert!(first_two >= 200, "{first_two}");
+        assert!(days[0].minutes >= 90, "{}", days[0].minutes);
+        assert!(days[5].minutes < 30, "{}", days[5].minutes);
+
+        let h = &project_health(&conn, "2026-11-20").unwrap()[0];
+        assert_eq!(h.needed_per_day, Some(100)); // the due task decides it
+
+        // Planned for a day ("Do on", as My Day sets it): all of it that day.
+        let planned = projects::add_task(&conn, p, None, "slides", &Some("2h".into())).unwrap();
+        conn.execute(
+            "UPDATE tasks SET scheduled_date = '2026-11-24' WHERE id = ?1",
+            params![planned.id],
+        )
+        .unwrap();
+        let days = load_forecast(&conn, "2026-11-20", 14).unwrap();
+        assert!(days[4].minutes >= 120, "{}", days[4].minutes);
+        // Once that day has passed unfinished, it is spread again like the
+        // rest; only the overdue 200 minutes (due Nov 21) fall on that day.
+        let later = load_forecast(&conn, "2026-11-25", 3).unwrap();
+        assert!(later[0].minutes < 200 + 60, "{}", later[0].minutes);
+        // Once the due date passes with the task open, it is Behind (the
+        // project itself is not late).
+        assert_eq!(
+            project_health(&conn, "2026-11-22").unwrap()[0].health,
+            Health::Behind
         );
     }
 }
