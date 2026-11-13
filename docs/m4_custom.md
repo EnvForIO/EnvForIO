@@ -179,6 +179,18 @@ Decisions (user, 2026-11-21): with no daily time set, show a neutral state that 
 - My Day's line turns red when today asks more than the day's time (or 24 hours), with the biggest projects and their limits listed; "Set daily time" opens Preferences on Planning (`openPreferencesAt`, the pane now lives in the UI store). The 14-day bars carry their hours.
 - Phases ending on the same day share a window; before, the second one got no days and everything landed on today.
 
+## Subtasks (2026-11-21)
+
+Decisions (user, 2026-11-21): steps become subtasks (one concept, not both); subtasks show nested in lists, and alone with the parent's name where the parent is not listed; the parent's estimate is a budget like a phase's; one level deep.
+
+- `tasks.parent_id` (migration 0021, `ON DELETE CASCADE`). Steps were moved into subtasks and `task_steps` dropped; a ticked step takes the parent's done time or last change. A subtask copies its parent's project and module on creation, so project queries and the safety line read it like any task. Nothing moves a task between modules except deleting a module (all ungrouped) and an idea's project change, which now takes the todos' subtasks along.
+- `Task` lost `stepCount`/`stepsDone` and gained `parentId`, `parentTitle`, `subtaskCount`, `subtasksDone`. `query::with_subtasks` adds a listed parent's missing subtasks to My Day, Important and the Tasks filters; the UI groups them (`pages/tasks/nest.ts`). Only the top level is dragged; subtasks keep the order they were added in, open first.
+- Finishing a task finishes its open subtasks and stops a timer running on one of them. Undo snapshots a task's subtasks and their timer sessions with it.
+- Safety line (`work.rs::planned`): a task without subtasks counts as before. With subtasks, estimated ones count their own estimate; unestimated ones share the parent's estimate (or, with none, its share of the module budget) minus that; with every subtask estimated, what is left stays on the parent. A parent without an estimate whose subtasks are all estimated is their total, also when the module budget is shared out. A subtask without dates of its own is placed by its parent's Do on and Due.
+- Project totals count top-level tasks only, and a parent's time is the larger of its estimate and its subtasks' total; the module header in the project page sums the same way (`groupMinutes`). The board shows top-level cards with a subtask count.
+- Fix after trying it (user report 2026-11-21): the migrated subtasks, having no dates, all showed in To schedule although their parent was due today. A subtask with neither Do on nor Due is planned with its parent, so `schedule::unscheduled` leaves it out.
+- NOTE: migrated ticked steps under an estimated parent now count a share of it as done on that day in the history.
+
 ## Fewer sidebar entries, step 3: Research as one entry (2026-11-20)
 
 - The sidebar has one Research entry (lit on any of its tabs); `ResearchLayout` shows the title and the Overview / Ideas / Library tabs above the three pages, which lost their own titles. The tabs are still separate `MainPage`s, so `openIdea` and `openPage('papers')` from elsewhere land on the right tab. Dividers now group the sidebar: lists, Calendar and Stats; Research; Reader and Monitor.

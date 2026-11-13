@@ -1,14 +1,16 @@
-//! Reading tasks: the four built-in lists and a task's steps.
+//! Reading tasks: the built-in lists and a task's subtasks.
 //!
 //! Every list shows pinned tasks first, then open before done, then the
 //! user's manual order. Done tasks stay in the list; the UI folds them
 //! into a "Completed" section like Microsoft To Do.
 
+use std::collections::HashSet;
+
 use rusqlite::{params, Connection, OptionalExtension};
 use serde::{Deserialize, Serialize};
 use specta::Type;
 
-use crate::entity::task::{Task, TaskStep, STEP_COLUMNS, TASK_COLUMNS};
+use crate::entity::task::{Task, TASK_COLUMNS};
 use crate::errors::{AppError, AppResult};
 
 /// The built-in lists in the sidebar.
@@ -48,7 +50,7 @@ pub fn list(conn: &Connection, view: TaskView, today: &str) -> AppResult<Vec<Tas
     let sql = format!("SELECT {TASK_COLUMNS} FROM tasks t WHERE {filter} {ORDER}");
     let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map(params![today], Task::from_row)?;
-    Ok(rows.collect::<Result<_, _>>()?)
+    with_subtasks(conn, rows.collect::<Result<_, _>>()?)
 }
 
 // ---------------------------------------------------------------------------
@@ -103,17 +105,36 @@ pub fn get(conn: &Connection, id: i64) -> AppResult<Task> {
         .ok_or_else(|| AppError::not_found("task", id))
 }
 
-pub fn steps(conn: &Connection, task_id: i64) -> AppResult<Vec<TaskStep>> {
-    let sql =
-        format!("SELECT {STEP_COLUMNS} FROM task_steps WHERE task_id = ?1 ORDER BY sort_order, id");
+// ---------------------------------------------------------------------------
+// Subtasks
+
+/// A task's subtasks: open first, then in their order.
+pub fn subtasks(conn: &Connection, parent: i64) -> AppResult<Vec<Task>> {
+    let sql = format!(
+        "SELECT {TASK_COLUMNS} FROM tasks t WHERE t.parent_id = ?1
+         ORDER BY (t.done_at IS NOT NULL), t.sort_order, t.id"
+    );
     let mut stmt = conn.prepare(&sql)?;
-    let rows = stmt.query_map(params![task_id], TaskStep::from_row)?;
+    let rows = stmt.query_map(params![parent], Task::from_row)?;
     Ok(rows.collect::<Result<_, _>>()?)
 }
 
-pub fn get_step(conn: &Connection, id: i64) -> AppResult<TaskStep> {
-    let sql = format!("SELECT {STEP_COLUMNS} FROM task_steps WHERE id = ?1");
-    conn.query_row(&sql, params![id], TaskStep::from_row)
-        .optional()?
-        .ok_or_else(|| AppError::not_found("step", id))
+/// A list with the subtasks of every parent in it (user decision
+/// 2026-11-21: a list that shows a task shows its subtasks under it). A
+/// subtask that is in the list on its own, without its parent, stays as
+/// it is; the UI shows it with its parent's title.
+pub fn with_subtasks(conn: &Connection, mut tasks: Vec<Task>) -> AppResult<Vec<Task>> {
+    let listed: HashSet<i64> = tasks.iter().map(|t| t.id).collect();
+    let parents: Vec<i64> = tasks
+        .iter()
+        .filter(|t| t.subtask_count > 0)
+        .map(|t| t.id)
+        .collect();
+    for parent in parents {
+        let missing = subtasks(conn, parent)?
+            .into_iter()
+            .filter(|s| !listed.contains(&s.id));
+        tasks.extend(missing);
+    }
+    Ok(tasks)
 }

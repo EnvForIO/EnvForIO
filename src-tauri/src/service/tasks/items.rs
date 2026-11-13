@@ -39,7 +39,7 @@ pub fn list(conn: &Connection, status: ItemStatus, project: Option<i64>) -> AppR
     );
     let mut stmt = conn.prepare(&sql)?;
     let rows = stmt.query_map(params![project], Task::from_row)?;
-    Ok(rows.collect::<Result<_, _>>()?)
+    super::query::with_subtasks(conn, rows.collect::<Result<_, _>>()?)
 }
 
 #[cfg(test)]

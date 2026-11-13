@@ -48,7 +48,7 @@ vi.mock('@/lib/tauri-bindings', () => ({
       .mockResolvedValue({ status: 'ok', data: 0 }),
     getToday: vi.fn().mockResolvedValue('2026-11-19'),
     listTasks: vi.fn().mockResolvedValue({ status: 'ok', data: [] }),
-    listTaskSteps: vi.fn().mockResolvedValue({ status: 'ok', data: [] }),
+    listSubtasks: vi.fn().mockResolvedValue({ status: 'ok', data: [] }),
     undo: vi.fn().mockResolvedValue({ status: 'ok', data: 'Edit task' }),
   },
   unwrapResult: vi.fn((result: { status: string; data?: unknown }) => {

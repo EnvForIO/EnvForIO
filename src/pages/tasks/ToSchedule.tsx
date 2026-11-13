@@ -41,7 +41,14 @@ export function ToSchedule({ today }: { today: string }) {
             key={task.id}
             className="flex items-center gap-2 rounded-md px-3 py-1 text-sm hover:bg-accent/40"
           >
-            <span className="min-w-0 flex-1 truncate">{task.title}</span>
+            <span className="min-w-0 flex-1 truncate">
+              {task.title}
+              {task.parentTitle !== null && (
+                <span className="ms-2 text-xs text-muted-foreground">
+                  {t('tasks.inParent', { title: task.parentTitle })}
+                </span>
+              )}
+            </span>
             {task.estimateMinutes !== null && (
               <span className="text-xs text-muted-foreground">
                 {formatMinutes(task.estimateMinutes)}

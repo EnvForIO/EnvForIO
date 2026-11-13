@@ -18,6 +18,7 @@ import { DatePicker } from '@/components/ui/date-picker'
 import { formatMinutes } from '@/lib/duration'
 import type { Module, Task } from '@/lib/tauri-bindings'
 import { formatDate, parseDate } from '@/pages/tasks/dates'
+import { groupMinutes, nest } from '@/pages/tasks/nest'
 import { SortableTasks } from '@/pages/tasks/SortableTasks'
 import { isEnter } from '@/lib/keys'
 
@@ -74,10 +75,7 @@ export function ModuleSection({ projectId, module, tasks }: Props) {
   const [renaming, setRenaming] = useState(false)
   const [name, setName] = useState(module?.name ?? '')
 
-  const total = tasks.reduce(
-    (sum, task) => sum + (task.estimateMinutes ?? 0),
-    0
-  )
+  const total = nest(tasks).reduce((sum, g) => sum + groupMinutes(g), 0)
 
   const add = () => {
     if (title.trim() === '') return

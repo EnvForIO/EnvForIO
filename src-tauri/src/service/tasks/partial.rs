@@ -45,7 +45,8 @@ pub fn complete_partially(conn: &Connection, id: i64, done: &str, today: &str) -
     conn.execute(
         "UPDATE tasks SET project_id = ?2, module_id = ?3, estimate_minutes = ?4,
              scheduled_date = ?5, due_date = ?6, is_important = ?7, split_from_id = ?8,
-             start_time = NULL, end_time = NULL, updated_at = ?9
+             start_time = NULL, end_time = NULL, updated_at = ?9,
+             parent_id = (SELECT parent_id FROM tasks WHERE id = ?8)
          WHERE id = ?1",
         params![
             rest.id,

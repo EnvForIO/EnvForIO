@@ -28,9 +28,12 @@ const DRAG_TYPE = 'application/x-envio-board-task'
 const stageOf = (task: Task): TaskStage =>
   task.doneAt !== null ? 'Done' : task.startedAt !== null ? 'Doing' : 'Todo'
 
-/** Open columns keep the manual order; Done shows the latest finished first. */
+/** Open columns keep the manual order; Done shows the latest finished first.
+ * Subtasks are counted on their parent's card, not shown as cards. */
 function inColumn(tasks: Task[], stage: TaskStage): Task[] {
-  const here = tasks.filter(task => stageOf(task) === stage)
+  const here = tasks.filter(
+    task => task.parentId === null && stageOf(task) === stage
+  )
   return stage === 'Done'
     ? here.sort((a, b) => (b.doneAt ?? '').localeCompare(a.doneAt ?? ''))
     : here
@@ -137,9 +140,9 @@ function Card({ task, module }: { task: Task; module?: string | null }) {
       icon: TimerIcon,
       text: formatMinutes(task.estimateMinutes),
     },
-    task.stepCount > 0 && {
+    task.subtaskCount > 0 && {
       icon: ListChecksIcon,
-      text: `${task.stepsDone}/${task.stepCount}`,
+      text: `${task.subtasksDone}/${task.subtaskCount}`,
     },
   ].filter(f => f !== false)
 

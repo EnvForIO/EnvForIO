@@ -5,6 +5,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  CornerLeftUpIcon,
   LightbulbIcon,
   PinIcon,
   StarIcon,
@@ -32,7 +33,7 @@ import { formatMinutes } from '@/lib/duration'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel, formatDate, parseDate } from './dates'
-import { TaskSteps } from './TaskSteps'
+import { TaskSubtasks } from './TaskSubtasks'
 import { TimerSection } from '@/pages/timer/TimerSection'
 import { isEnter } from '@/lib/keys'
 
@@ -144,8 +145,20 @@ function TaskDetailsForm({ task }: { task: Task }) {
       </div>
 
       {task.ideaId !== null && <FromIdea ideaId={task.ideaId} />}
+      {task.parentId !== null && task.parentTitle !== null && (
+        <button
+          type="button"
+          onClick={() => task.parentId !== null && selectTask(task.parentId)}
+          className="flex items-center gap-2 rounded-md border px-2.5 py-1.5 text-start text-sm hover:bg-accent/60"
+        >
+          <CornerLeftUpIcon className="size-4 shrink-0 text-muted-foreground" />
+          <span className="text-muted-foreground">{t('tasks.subtaskOf')}</span>
+          <span className="truncate font-medium">{task.parentTitle}</span>
+        </button>
+      )}
 
-      <TaskSteps taskId={task.id} />
+      {/* One level deep: a subtask has no subtasks of its own. */}
+      {task.parentId === null && <TaskSubtasks task={task} />}
 
       <TimerSection task={task} />
 
@@ -195,7 +208,18 @@ function TaskDetailsForm({ task }: { task: Task }) {
         onKeyDown={e => isEnter(e) && e.currentTarget.blur()}
         placeholder={t('tasks.addEstimate')}
         aria-label={t('tasks.estimate')}
+        aria-describedby={
+          task.subtaskCount > 0 ? `budget-hint-${task.id}` : undefined
+        }
       />
+      {task.subtaskCount > 0 && (
+        <p
+          id={`budget-hint-${task.id}`}
+          className="-mt-2 px-1 text-xs text-muted-foreground"
+        >
+          {t('tasks.budgetHint')}
+        </p>
+      )}
       {updateTask.error && (
         <p className="text-xs text-destructive">{t('tasks.saveFailed')}</p>
       )}

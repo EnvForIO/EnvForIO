@@ -6,6 +6,10 @@ import { useTranslation } from 'react-i18next'
 import {
   CalendarCheckIcon,
   CalendarClockIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
+  CornerDownRightIcon,
+  ListTreeIcon,
   PinIcon,
   PlayIcon,
   SquareIcon,
@@ -20,7 +24,23 @@ import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel, isOverdue } from './dates'
 
-export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
+interface Props {
+  task: Task
+  view: TaskView
+  /** Its subtasks are listed under it: folded or not (undefined = none listed). */
+  folded?: boolean
+  onToggleFold?: () => void
+  /** Shown under its parent, so the parent's title is not repeated. */
+  nested?: boolean
+}
+
+export function TaskRow({
+  task,
+  view,
+  folded,
+  onToggleFold,
+  nested = false,
+}: Props) {
   const { t } = useTranslation()
   const today = useToday()
   const selectedTaskId = useUIStore(state => state.selectedTaskId)
@@ -50,6 +70,12 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
   // Do on and Due each carry their word, so the two dates never look alike
   // (critique 2026-11-21).
   const meta = [
+    task.parentTitle !== null && !nested && (
+      <span key="parent" className="flex min-w-0 items-center gap-1">
+        <CornerDownRightIcon className="size-3 shrink-0" />
+        <span className="truncate">{task.parentTitle}</span>
+      </span>
+    ),
     inMyDay && view !== 'MyDay' && (
       <span key="day" className="flex items-center gap-1">
         <SunIcon className="size-3" /> {t('tasks.myDay')}
@@ -69,11 +95,12 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
     task.estimateMinutes !== null && (
       <span key="estimate">{formatMinutes(task.estimateMinutes)}</span>
     ),
-    task.stepCount > 0 && (
-      <span key="steps">
-        {t('tasks.stepsProgress', {
-          done: task.stepsDone,
-          total: task.stepCount,
+    task.subtaskCount > 0 && (
+      <span key="subtasks" className="flex items-center gap-1">
+        <ListTreeIcon className="size-3" />
+        {t('tasks.subtasksProgress', {
+          done: task.subtasksDone,
+          total: task.subtaskCount,
         })}
       </span>
     ),
@@ -113,6 +140,26 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
         selectedTaskId === task.id && 'bg-accent'
       )}
     >
+      {folded !== undefined && (
+        <button
+          type="button"
+          aria-label={
+            folded ? t('tasks.showSubtasks') : t('tasks.hideSubtasks')
+          }
+          aria-expanded={!folded}
+          onClick={e => {
+            e.stopPropagation()
+            onToggleFold?.()
+          }}
+          className="-ms-1.5 -me-2 rounded text-muted-foreground hover:text-foreground"
+        >
+          {folded ? (
+            <ChevronRightIcon className="size-4" />
+          ) : (
+            <ChevronDownIcon className="size-4" />
+          )}
+        </button>
+      )}
       <button
         type="button"
         aria-label={done ? t('tasks.markOpen') : t('tasks.markDone')}
@@ -135,7 +182,9 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
           {task.title}
         </div>
         {meta.length > 0 && (
-          <div className="flex gap-3 text-xs text-muted-foreground">{meta}</div>
+          <div className="flex min-w-0 gap-3 text-xs text-muted-foreground">
+            {meta}
+          </div>
         )}
       </div>
       {task.isPinned && <PinIcon className="size-4 text-muted-foreground" />}

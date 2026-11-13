@@ -77,7 +77,8 @@ pub fn set_project(conn: &mut Connection, id: i64, project_id: Option<i64>) -> A
     }
     tx.execute(
         "UPDATE tasks SET project_id = ?2, module_id = NULL
-         WHERE idea_id = ?1 AND project_id IS NOT ?2",
+         WHERE (idea_id = ?1 OR parent_id IN (SELECT id FROM tasks WHERE idea_id = ?1))
+           AND project_id IS NOT ?2",
         params![id, project_id],
     )?;
     tx.commit()?;

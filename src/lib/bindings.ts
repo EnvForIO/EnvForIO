@@ -252,33 +252,25 @@ async deleteTask(id: number) : Promise<Result<null, AppError>> {
     else return { status: "error", error: e  as any };
 }
 },
-async listTaskSteps(taskId: number) : Promise<Result<TaskStep[], AppError>> {
+/**
+ * A task's subtasks, open first. Ticking, editing and deleting one use the
+ * ordinary task commands.
+ */
+async listSubtasks(parentId: number) : Promise<Result<Task[], AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("list_task_steps", { taskId }) };
+    return { status: "ok", data: await TAURI_INVOKE("list_subtasks", { parentId }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
 }
 },
-async addTaskStep(taskId: number, title: string) : Promise<Result<TaskStep, AppError>> {
+/**
+ * A new subtask at the bottom of a task's subtasks, with an optional
+ * estimate typed like "45m".
+ */
+async addSubtask(parentId: number, title: string, estimate: string | null) : Promise<Result<Task, AppError>> {
     try {
-    return { status: "ok", data: await TAURI_INVOKE("add_task_step", { taskId, title }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async setTaskStepDone(id: number, done: boolean) : Promise<Result<TaskStep, AppError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("set_task_step_done", { id, done }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-async deleteTaskStep(id: number) : Promise<Result<null, AppError>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("delete_task_step", { id }) };
+    return { status: "ok", data: await TAURI_INVOKE("add_subtask", { parentId, title, estimate }) };
 } catch (e) {
     if(e instanceof Error) throw e;
     else return { status: "error", error: e  as any };
@@ -1495,7 +1487,11 @@ export type Task = { id: number; title: string; note: string; isImportant: boole
 /**
  * 'YYYY-MM-DD': the day the task is planned for. "In My Day" means this is today.
  */
-scheduledDate: string | null; startTime: string | null; endTime: string | null; stepCount: number; stepsDone: number; createdAt: string; 
+scheduledDate: string | null; startTime: string | null; endTime: string | null; 
+/**
+ * The task this one is a subtask of (one level deep), and its title.
+ */
+parentId: number | null; parentTitle: string | null; subtaskCount: number; subtasksDone: number; createdAt: string; 
 /**
  * The idea this task is a todo of, if any.
  */
@@ -1508,7 +1504,6 @@ startedAt: string | null }
  * Where a task stands on a project's board.
  */
 export type TaskStage = "Todo" | "Doing" | "Done"
-export type TaskStep = { id: number; taskId: number; title: string; isDone: boolean; sortOrder: number }
 /**
  * Everything the details pane can edit, sent whole on every save.
  */

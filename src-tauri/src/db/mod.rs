@@ -32,6 +32,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../../migrations/0018_feeds.sql"),
     include_str!("../../migrations/0019_merge_my_day.sql"),
     include_str!("../../migrations/0020_phases.sql"),
+    include_str!("../../migrations/0021_subtasks.sql"),
 ];
 
 /// Open (or create) the database file and migrate it.
@@ -85,5 +86,44 @@ mod tests {
         assert_eq!(version, MIGRATIONS.len());
         // Running again is a no-op rather than a "table already exists" error.
         migrate(&mut conn).unwrap();
+    }
+
+    #[test]
+    fn steps_become_subtasks() {
+        let mut conn = Connection::open_in_memory().unwrap();
+        configure(&conn).unwrap();
+        for sql in &MIGRATIONS[..20] {
+            conn.execute_batch(sql).unwrap();
+        }
+        conn.pragma_update(None, "user_version", 20).unwrap();
+        conn.execute_batch(
+            "INSERT INTO tasks (id, title, done_at, created_at, updated_at)
+                 VALUES (1, 'paper', NULL, 'c', '2026-11-20T10:00:00Z');
+             INSERT INTO task_steps (task_id, title, is_done, sort_order)
+                 VALUES (1, 'outline', 1, 1), (1, 'draft', 0, 2);",
+        )
+        .unwrap();
+        migrate(&mut conn).unwrap();
+
+        let subtasks: Vec<(String, Option<i64>, Option<String>)> = conn
+            .prepare(
+                "SELECT title, parent_id, done_at FROM tasks WHERE id <> 1 ORDER BY sort_order",
+            )
+            .unwrap()
+            .query_map([], |r| Ok((r.get(0)?, r.get(1)?, r.get(2)?)))
+            .unwrap()
+            .collect::<Result<_, _>>()
+            .unwrap();
+        assert_eq!(
+            subtasks,
+            [
+                (
+                    "outline".into(),
+                    Some(1),
+                    Some("2026-11-20T10:00:00Z".into())
+                ),
+                ("draft".into(), Some(1), None),
+            ]
+        );
     }
 }

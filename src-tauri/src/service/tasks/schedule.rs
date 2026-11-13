@@ -25,11 +25,14 @@ pub fn in_range(conn: &Connection, from: &str, to: &str) -> AppResult<Vec<Task>>
 
 /// Open tasks to plan: project tasks first (they feed the safety line).
 /// A task planned for a past day and not finished comes back here rather
-/// than moving to today by itself (user decision 2026-11-20).
+/// than moving to today by itself (user decision 2026-11-20). A subtask
+/// with no dates of its own is planned with its parent, so only the parent
+/// is here (user report 2026-11-21).
 pub fn unscheduled(conn: &Connection, today: &str) -> AppResult<Vec<Task>> {
     let sql = format!(
         "SELECT {TASK_COLUMNS} FROM tasks t
          WHERE (t.scheduled_date IS NULL OR t.scheduled_date < ?1) AND t.done_at IS NULL
+           AND NOT (t.parent_id IS NOT NULL AND t.scheduled_date IS NULL AND t.due_date IS NULL)
          ORDER BY (t.project_id IS NULL), t.due_date IS NULL, t.due_date, t.sort_order, t.id"
     );
     let mut stmt = conn.prepare(&sql)?;
@@ -96,5 +99,12 @@ mod tests {
         schedule(&conn, a.id, None).unwrap();
         assert_eq!(pool(TODAY), [a.id]);
         assert!(schedule(&conn, a.id, Some("soon".into())).is_err());
+
+        // A subtask without dates goes with its parent; one planned for a
+        // day that passed needs planning on its own.
+        let sub = crate::service::tasks::mutation::add_subtask(&conn, a.id, "part", &None).unwrap();
+        assert_eq!(pool(TODAY), [a.id]);
+        schedule(&conn, sub.id, Some("2026-11-19".into())).unwrap();
+        assert_eq!(pool(TODAY), [a.id, sub.id]);
     }
 }

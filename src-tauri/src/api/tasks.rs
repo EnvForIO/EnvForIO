@@ -5,7 +5,7 @@ use tauri::State;
 
 use crate::config::AppState;
 use crate::domain::day::today;
-use crate::entity::task::{Task, TaskStep};
+use crate::entity::task::Task;
 use crate::errors::AppResult;
 use crate::service::tasks::items::{self, ItemStatus};
 use crate::service::tasks::mutation::{self, TaskStage, TaskUpdate};
@@ -66,39 +66,26 @@ pub fn delete_task(state: State<'_, AppState>, id: i64) -> AppResult<()> {
     state.changing("Delete task", &[id], |db| mutation::delete(db, id))
 }
 
+/// A task's subtasks, open first. Ticking, editing and deleting one use the
+/// ordinary task commands.
 #[tauri::command]
 #[specta::specta]
-pub fn list_task_steps(state: State<'_, AppState>, task_id: i64) -> AppResult<Vec<TaskStep>> {
-    query::steps(&state.db(), task_id)
+pub fn list_subtasks(state: State<'_, AppState>, parent_id: i64) -> AppResult<Vec<Task>> {
+    query::subtasks(&state.db(), parent_id)
 }
 
+/// A new subtask at the bottom of a task's subtasks, with an optional
+/// estimate typed like "45m".
 #[tauri::command]
 #[specta::specta]
-pub fn add_task_step(
+pub fn add_subtask(
     state: State<'_, AppState>,
-    task_id: i64,
+    parent_id: i64,
     title: String,
-) -> AppResult<TaskStep> {
-    state.changing("Add step", &[task_id], |db| {
-        mutation::add_step(db, task_id, &title)
-    })
-}
-
-#[tauri::command]
-#[specta::specta]
-pub fn set_task_step_done(state: State<'_, AppState>, id: i64, done: bool) -> AppResult<TaskStep> {
-    let task_id = query::get_step(&state.db(), id)?.task_id;
-    state.changing("Tick step", &[task_id], |db| {
-        mutation::set_step_done(db, id, done)
-    })
-}
-
-#[tauri::command]
-#[specta::specta]
-pub fn delete_task_step(state: State<'_, AppState>, id: i64) -> AppResult<()> {
-    let task_id = query::get_step(&state.db(), id)?.task_id;
-    state.changing("Delete step", &[task_id], |db| {
-        mutation::delete_step(db, id)
+    estimate: Option<String>,
+) -> AppResult<Task> {
+    state.creating("Add subtask", |db| {
+        mutation::add_subtask(db, parent_id, &title, &estimate)
     })
 }
 

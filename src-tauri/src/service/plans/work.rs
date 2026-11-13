@@ -16,6 +16,9 @@
 //! share what the estimated ones leave of it, so a phase can be planned
 //! before every task is estimated. A budgeted phase with no tasks yet
 //! counts its whole budget until its end date.
+//!
+//! Subtasks (user decision 2026-11-21): a task with subtasks is a budget
+//! for them in the same way; see `planned`.
 
 use std::collections::{BTreeSet, HashMap};
 
@@ -157,6 +160,8 @@ pub struct Estimates {
 }
 
 struct TaskRow {
+    id: i64,
+    parent: Option<i64>,
     project: i64,
     module: Option<i64>,
     estimate: Option<i64>,
@@ -165,11 +170,62 @@ struct TaskRow {
     phase: bool, // its module has an end date
 }
 
+/// What a task with subtasks is known to take: its own estimate, or, with
+/// none, its subtasks' total once every one of them is estimated.
+fn known(task: &TaskRow, subtasks: &[&TaskRow]) -> Option<i64> {
+    task.estimate.or_else(|| {
+        let estimates: Option<Vec<i64>> = subtasks.iter().map(|s| s.estimate).collect();
+        estimates.filter(|e| !e.is_empty()).map(|e| e.iter().sum())
+    })
+}
+
+/// The minutes each task counts for in the plan, and the dates that place
+/// them. A task without subtasks counts its estimate (or its share of its
+/// module's budget). A task with subtasks is a budget, like a phase (user
+/// decision 2026-11-21): estimated subtasks count their own estimates,
+/// unestimated ones share what that leaves of the parent's, and with none
+/// unestimated the rest stays on the parent. A subtask without dates of its
+/// own is placed by its parent's.
+fn planned<'a>(
+    tasks: &'a [TaskRow],
+    children: &HashMap<i64, Vec<&'a TaskRow>>,
+    share: &HashMap<i64, i64>,
+) -> Vec<(&'a TaskRow, i64, Due)> {
+    let mut out = Vec::new();
+    for t in tasks.iter().filter(|t| t.parent.is_none()) {
+        let subtasks = children.get(&t.id).map(Vec::as_slice).unwrap_or(&[]);
+        let budget = known(t, subtasks).or_else(|| t.module.and_then(|m| share.get(&m).copied()));
+        if subtasks.is_empty() {
+            if let Some(minutes) = budget {
+                out.push((t, minutes, t.due));
+            }
+            continue;
+        }
+        let estimated: i64 = subtasks.iter().filter_map(|s| s.estimate).sum();
+        let unestimated = subtasks.iter().filter(|s| s.estimate.is_none()).count() as i64;
+        let rest = budget.map(|b| (b - estimated).max(0));
+        for s in subtasks {
+            let minutes = s.estimate.or_else(|| rest.map(|r| r / unestimated));
+            let due = Due {
+                on: s.due.on.or(t.due.on),
+                due: s.due.due.or(t.due.due),
+            };
+            if let Some(minutes) = minutes {
+                out.push((*s, minutes, due));
+            }
+        }
+        if let (Some(rest), 0) = (rest, unestimated) {
+            out.push((t, rest, t.due));
+        }
+    }
+    out
+}
+
 impl Estimates {
     pub fn load(conn: &Connection) -> AppResult<Self> {
         let mut stmt = conn.prepare(
             "SELECT t.project_id, t.module_id, t.estimate_minutes, t.done_at, m.end_date IS NOT NULL,
-                    t.due_date, t.scheduled_date
+                    t.due_date, t.scheduled_date, t.id, t.parent_id
              FROM tasks t LEFT JOIN modules m ON m.id = t.module_id
              WHERE t.project_id IS NOT NULL",
         )?;
@@ -186,6 +242,8 @@ impl Estimates {
                         due: date(r.get(5)?),
                         on: date(r.get(6)?),
                     },
+                    id: r.get(7)?,
+                    parent: r.get(8)?,
                 })
             })?
             .collect::<Result<_, _>>()?;
@@ -210,13 +268,25 @@ impl Estimates {
                 (project, budget, end.as_deref().and_then(parse_date)),
             );
         }
+        let mut children: HashMap<i64, Vec<&TaskRow>> = HashMap::new();
+        for t in &tasks {
+            if let Some(parent) = t.parent {
+                children.entry(parent).or_default().push(t);
+            }
+        }
+        // Shares go to the module's top-level tasks; a task with subtasks
+        // passes its share on to them (`planned`).
         let mut share: HashMap<i64, i64> = HashMap::new();
         let mut untasked = HashMap::new();
         for (module, (project, budget, end)) in &budgets {
-            let in_module = tasks.iter().filter(|t| t.module == Some(*module));
-            let estimated: i64 = in_module.clone().filter_map(|t| t.estimate).sum();
-            let unestimated = in_module.clone().filter(|t| t.estimate.is_none()).count() as i64;
-            if in_module.count() == 0 {
+            let in_module: Vec<Option<i64>> = tasks
+                .iter()
+                .filter(|t| t.module == Some(*module) && t.parent.is_none())
+                .map(|t| known(t, children.get(&t.id).map(Vec::as_slice).unwrap_or(&[])))
+                .collect();
+            let estimated: i64 = in_module.iter().flatten().sum();
+            let unestimated = in_module.iter().filter(|e| e.is_none()).count() as i64;
+            if in_module.is_empty() {
                 untasked.insert((*project, *module), (*budget, *end));
             } else if unestimated > 0 {
                 share.insert(*module, (budget - estimated).max(0) / unestimated);
@@ -230,17 +300,13 @@ impl Estimates {
             let counts = task_counts.entry(t.project).or_default();
             counts.0 += 1;
             counts.1 += i64::from(t.done_at.is_none());
-            let minutes = t
-                .estimate
-                .or_else(|| t.module.and_then(|m| share.get(&m).copied()));
-            let Some(minutes) = minutes else {
-                continue;
-            };
+        }
+        for (t, minutes, due) in planned(&tasks, &children, &share) {
             let unit = t.module.filter(|_| t.phase);
             match t.done_at.as_deref().map(day_of_timestamp) {
-                None => *open.entry((t.project, unit, t.due)).or_default() += minutes,
+                None => *open.entry((t.project, unit, due)).or_default() += minutes,
                 Some(Some(day)) => {
-                    *done_on.entry((day, t.project, unit, t.due)).or_default() += minutes
+                    *done_on.entry((day, t.project, unit, due)).or_default() += minutes
                 }
                 Some(None) => {} // unreadable timestamp: ignore
             }

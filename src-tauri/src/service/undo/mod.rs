@@ -1,7 +1,7 @@
 //! Undo for task changes.
 //!
 //! Before a command changes tasks, the API layer snapshots each affected
-//! task (its row, steps and timer sessions). Undo puts the snapshots back:
+//! task (its row, its subtasks and their timer sessions). Undo puts the snapshots back:
 //! a task that did not exist before is deleted again, any other is restored
 //! exactly. The stack lives in memory and holds the last 50 changes.
 
@@ -18,8 +18,8 @@ type Rows = (Vec<String>, Vec<Vec<Value>>);
 #[derive(Debug, Clone)]
 pub struct Snapshot {
     task: Rows,
-    steps: Rows,
-    sessions: Rows,
+    subtasks: Rows,
+    sessions: Rows, // the task's and its subtasks'
 }
 
 #[derive(Debug, Clone)]
@@ -52,8 +52,13 @@ pub fn snapshot(conn: &Connection, id: i64) -> AppResult<Option<Snapshot>> {
     }
     Ok(Some(Snapshot {
         task,
-        steps: rows(conn, "SELECT * FROM task_steps WHERE task_id = ?1", id)?,
-        sessions: rows(conn, "SELECT * FROM time_entries WHERE task_id = ?1", id)?,
+        subtasks: rows(conn, "SELECT * FROM tasks WHERE parent_id = ?1", id)?,
+        sessions: rows(
+            conn,
+            "SELECT * FROM time_entries WHERE task_id = ?1
+                OR task_id IN (SELECT id FROM tasks WHERE parent_id = ?1)",
+            id,
+        )?,
     }))
 }
 
@@ -123,11 +128,11 @@ impl UndoStack {
             .ok_or_else(|| AppError::invalid("nothing to undo"))?;
         let tx = conn.transaction()?;
         for (id, before) in change.tasks.iter().rev() {
-            // Steps and timer sessions go with the row (ON DELETE CASCADE).
+            // Subtasks and timer sessions go with the row (ON DELETE CASCADE).
             tx.execute("DELETE FROM tasks WHERE id = ?1", params![id])?;
             if let Some(s) = before {
                 insert(&tx, "tasks", &s.task)?;
-                insert(&tx, "task_steps", &s.steps)?;
+                insert(&tx, "tasks", &s.subtasks)?;
                 insert(&tx, "time_entries", &s.sessions)?;
             }
         }
@@ -140,29 +145,43 @@ impl UndoStack {
 mod tests {
     use super::*;
     use crate::db::open_in_memory;
-    use crate::service::tasks::mutation::{add_step, create, delete, set_done};
+    use crate::service::tasks::mutation::{add_subtask, create, delete, set_done};
     use crate::service::tasks::query::{self, TaskView};
 
     #[test]
-    fn undo_restores_deleted_tasks_with_steps_and_removes_created_ones() {
+    fn undo_restores_deleted_tasks_with_subtasks_and_removes_created_ones() {
         let mut conn = open_in_memory();
         let mut stack = UndoStack::default();
         let t = create(&conn, "draft", TaskView::Tasks, "2026-11-20").unwrap();
         stack.record_created("add", t.id);
-        add_step(&conn, t.id, "outline").unwrap();
+        let sub = add_subtask(&conn, t.id, "outline", &None).unwrap();
+        crate::service::timer::start(&conn, sub.id).unwrap();
 
         stack.record(&conn, "done", &[t.id]).unwrap();
-        set_done(&conn, t.id, true).unwrap();
+        set_done(&conn, t.id, true).unwrap(); // finishes the subtask, stops its timer
         stack.record(&conn, "delete", &[t.id]).unwrap();
         delete(&conn, t.id).unwrap();
+        assert!(query::get(&conn, sub.id).is_err());
 
         assert_eq!(stack.undo(&mut conn).unwrap(), "delete");
         let back = query::get(&conn, t.id).unwrap();
-        assert_eq!((back.title.as_str(), back.step_count), ("draft", 1));
+        assert_eq!(
+            (back.title.as_str(), back.subtask_count, back.subtasks_done),
+            ("draft", 1, 1)
+        );
         assert!(back.done_at.is_some());
+        let sessions: i64 = conn
+            .query_row(
+                "SELECT count(*) FROM time_entries WHERE task_id = ?1",
+                params![sub.id],
+                |r| r.get(0),
+            )
+            .unwrap();
+        assert_eq!(sessions, 1);
 
-        stack.undo(&mut conn).unwrap(); // un-done
+        stack.undo(&mut conn).unwrap(); // un-done: the subtask is open again
         assert!(query::get(&conn, t.id).unwrap().done_at.is_none());
+        assert!(query::get(&conn, sub.id).unwrap().done_at.is_none());
         stack.undo(&mut conn).unwrap(); // un-created
         assert!(query::get(&conn, t.id).is_err());
         assert!(stack.undo(&mut conn).is_err());

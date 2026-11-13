@@ -91,7 +91,6 @@ export type {
   RecoveryError,
   Task,
   TaskStage,
-  TaskStep,
   TaskUpdate,
   TaskView,
 } from './bindings'

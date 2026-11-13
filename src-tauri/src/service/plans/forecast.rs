@@ -429,4 +429,59 @@ mod tests {
             Health::Behind
         );
     }
+
+    #[test]
+    fn a_task_with_subtasks_is_a_budget_for_them() {
+        use crate::service::tasks::mutation::{add_subtask, set_done};
+        let mut conn = open_in_memory();
+        let p = project(&mut conn, "2027-01-23");
+        let parent =
+            projects::add_task(&conn, p, None, "experiments", &Some("10h".into())).unwrap();
+        let left = |conn: &Connection| project_health(conn, "2026-11-20").unwrap()[0].remaining;
+        assert_eq!(left(&conn), 600);
+
+        // An estimated subtask takes its part of the 10h; the unestimated
+        // ones share the rest, so the total stays 10h.
+        let runs = add_subtask(&conn, parent.id, "runs", &Some("4h".into())).unwrap();
+        let a = add_subtask(&conn, parent.id, "ablation a", &None).unwrap();
+        add_subtask(&conn, parent.id, "ablation b", &None).unwrap();
+        assert_eq!(left(&conn), 600);
+        set_done(&conn, a.id, true).unwrap();
+        conn.execute(
+            "UPDATE tasks SET done_at = '2026-11-19T12:00:00Z' WHERE id = ?1",
+            params![a.id],
+        )
+        .unwrap(); // done yesterday: today's numbers still count today's work
+        assert_eq!(left(&conn), 600 - 180);
+
+        // Due tomorrow, a subtask is planned by then; one without a date of
+        // its own follows its parent's.
+        conn.execute(
+            "UPDATE tasks SET due_date = '2026-11-21' WHERE id = ?1",
+            params![runs.id],
+        )
+        .unwrap();
+        let h = &project_health(&conn, "2026-11-20").unwrap()[0];
+        assert_eq!(h.needed_per_day, Some(120));
+
+        // Subtasks estimated past the parent's 10h count in full, and with
+        // every subtask estimated, nothing is left over on the parent.
+        let mut conn = open_in_memory();
+        let p = project(&mut conn, "2027-01-23");
+        let parent = projects::add_task(&conn, p, None, "writing", &Some("1h".into())).unwrap();
+        add_subtask(&conn, parent.id, "intro", &Some("2h".into())).unwrap();
+        assert_eq!(left(&conn), 120);
+        // A parent without an estimate is its subtasks' total.
+        let mut conn = open_in_memory();
+        let p = project(&mut conn, "2027-01-23");
+        let parent = projects::add_task(&conn, p, None, "figures", &None).unwrap();
+        add_subtask(&conn, parent.id, "plot", &Some("30m".into())).unwrap();
+        add_subtask(&conn, parent.id, "caption", &Some("15m".into())).unwrap();
+        assert_eq!(left(&conn), 45);
+        let projects = crate::service::projects::query::list(&conn).unwrap();
+        assert_eq!(
+            (projects[0].task_count, projects[0].estimate_minutes),
+            (1, 45)
+        );
+    }
 }

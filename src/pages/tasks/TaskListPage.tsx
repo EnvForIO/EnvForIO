@@ -21,8 +21,8 @@ import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from './dates'
 import { SortableTasks } from './SortableTasks'
 import { POOL, type TaskFilter } from './filter'
+import { flatten, nest } from './nest'
 import { TaskFilters } from './TaskFilters'
-import { TaskRow } from './TaskRow'
 import { TodayNote } from './TodayNote'
 import { ToSchedule } from './ToSchedule'
 
@@ -40,9 +40,15 @@ export function TaskListPage() {
   const [showCompleted, setShowCompleted] = useState(false)
 
   // "Done" lists only finished tasks, so it shows them instead of folding them.
+  // A parent decides where its subtasks go: an open parent keeps its done
+  // subtasks under it, and a done one takes them to Completed.
   const onlyDone = filtering && filter.status === 'Done'
-  const open = onlyDone ? [] : tasks.filter(task => task.doneAt === null)
-  const completed = onlyDone ? [] : tasks.filter(task => task.doneAt !== null)
+  const groups = nest(tasks)
+  const open = onlyDone
+    ? []
+    : flatten(groups.filter(g => g.task.doneAt === null))
+  const done = onlyDone ? [] : groups.filter(g => g.task.doneAt !== null)
+  const completed = flatten(done)
   // "With deadline" and "Done" are sorted by date, so a dragged order would not show.
   const sortable = !filtering || filter.status === 'All'
   // A new task goes into the pool (no project, no date): only offer it where it will show.
@@ -103,12 +109,12 @@ export function TaskListPage() {
           )}
 
           {onlyDone ? (
-            tasks.map(task => <TaskRow key={task.id} task={task} view={view} />)
+            <SortableTasks tasks={tasks} view={view} sortable={false} />
           ) : (
             <SortableTasks tasks={open} view={view} sortable={sortable} />
           )}
 
-          {completed.length > 0 && (
+          {done.length > 0 && (
             <>
               <button
                 type="button"
@@ -120,12 +126,11 @@ export function TaskListPage() {
                 ) : (
                   <ChevronRightIcon className="size-4" />
                 )}
-                {t('tasks.completed', { count: completed.length })}
+                {t('tasks.completed', { count: done.length })}
               </button>
-              {showCompleted &&
-                completed.map(task => (
-                  <TaskRow key={task.id} task={task} view={view} />
-                ))}
+              {showCompleted && (
+                <SortableTasks tasks={completed} view={view} sortable={false} />
+              )}
             </>
           )}
 

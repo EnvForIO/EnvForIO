@@ -18,20 +18,28 @@ pub struct Project {
     pub is_archived: bool,
     pub sort_order: f64,
     // Totals over the project's tasks, for the sidebar and the project header.
+    // Subtasks are not counted as tasks; a parent's estimate is its own or
+    // its subtasks' total, whichever is larger (a parent is a budget).
     pub task_count: i64,
     pub done_count: i64,
     pub estimate_minutes: i64,      // sum of estimates
-    pub done_estimate_minutes: i64, // sum of estimates of done tasks
+    pub done_estimate_minutes: i64, // done tasks, plus done subtasks of open ones
 }
 
 pub const PROJECT_COLUMNS: &str = "p.id, p.name, p.color, p.template, p.start_date, p.deadline, \
      p.buffer_days, date(p.deadline, printf('-%d days', p.buffer_days)), \
      p.is_archived, p.sort_order, \
-     (SELECT count(*) FROM tasks t WHERE t.project_id = p.id), \
-     (SELECT count(*) FROM tasks t WHERE t.project_id = p.id AND t.done_at IS NOT NULL), \
-     (SELECT coalesce(sum(t.estimate_minutes), 0) FROM tasks t WHERE t.project_id = p.id), \
-     (SELECT coalesce(sum(t.estimate_minutes), 0) FROM tasks t \
-        WHERE t.project_id = p.id AND t.done_at IS NOT NULL)";
+     (SELECT count(*) FROM tasks t WHERE t.project_id = p.id AND t.parent_id IS NULL), \
+     (SELECT count(*) FROM tasks t WHERE t.project_id = p.id AND t.parent_id IS NULL \
+        AND t.done_at IS NOT NULL), \
+     (SELECT coalesce(sum(max(coalesce(t.estimate_minutes, 0), \
+        (SELECT coalesce(sum(c.estimate_minutes), 0) FROM tasks c WHERE c.parent_id = t.id))), 0) \
+        FROM tasks t WHERE t.project_id = p.id AND t.parent_id IS NULL), \
+     (SELECT coalesce(sum(CASE WHEN t.done_at IS NOT NULL THEN max(coalesce(t.estimate_minutes, 0), \
+        (SELECT coalesce(sum(c.estimate_minutes), 0) FROM tasks c WHERE c.parent_id = t.id)) \
+        ELSE (SELECT coalesce(sum(c.estimate_minutes), 0) FROM tasks c \
+          WHERE c.parent_id = t.id AND c.done_at IS NOT NULL) END), 0) \
+        FROM tasks t WHERE t.project_id = p.id AND t.parent_id IS NULL)";
 
 impl Project {
     pub fn from_row(row: &Row) -> rusqlite::Result<Self> {

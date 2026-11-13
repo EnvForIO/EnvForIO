@@ -135,27 +135,102 @@ mod tests {
     }
 
     #[test]
-    fn steps_count_and_delete_with_their_task() {
+    fn subtasks_count_go_one_level_deep_and_delete_with_their_task() {
         let conn = open_in_memory();
         let t = mutation::create(&conn, "experiment", TaskView::Tasks, TODAY).unwrap();
-        let s1 = mutation::add_step(&conn, t.id, "prepare data").unwrap();
-        mutation::add_step(&conn, t.id, "run baseline").unwrap();
-        mutation::set_step_done(&conn, s1.id, true).unwrap();
+        let s1 = mutation::add_subtask(&conn, t.id, "prepare data", &Some("1h".into())).unwrap();
+        let s2 = mutation::add_subtask(&conn, t.id, "run baseline", &None).unwrap();
+        assert_eq!(
+            (
+                s1.parent_id,
+                s1.parent_title.as_deref(),
+                s1.estimate_minutes
+            ),
+            (Some(t.id), Some("experiment"), Some(60))
+        );
+        mutation::set_done(&conn, s1.id, true).unwrap();
 
         let t = query::get(&conn, t.id).unwrap();
-        assert_eq!((t.step_count, t.steps_done), (2, 1));
-        assert_eq!(query::steps(&conn, t.id).unwrap()[0].title, "prepare data");
+        assert_eq!((t.subtask_count, t.subtasks_done), (2, 1));
+        // Open first, then in the order they were added.
+        let order: Vec<i64> = query::subtasks(&conn, t.id)
+            .unwrap()
+            .iter()
+            .map(|s| s.id)
+            .collect();
+        assert_eq!(order, [s2.id, s1.id]);
+
+        assert!(matches!(
+            mutation::add_subtask(&conn, s1.id, "deeper", &None),
+            Err(AppError::Invalid { .. })
+        ));
+        assert!(mutation::add_subtask(&conn, t.id, "x", &Some("soon".into())).is_err());
 
         mutation::delete(&conn, t.id).unwrap();
-        assert!(query::steps(&conn, t.id).unwrap().is_empty());
+        assert!(query::subtasks(&conn, t.id).unwrap().is_empty());
         assert!(matches!(
-            query::get(&conn, t.id),
+            query::get(&conn, s2.id),
             Err(AppError::NotFound { .. })
         ));
         assert!(matches!(
             mutation::delete(&conn, t.id),
             Err(AppError::NotFound { .. })
         ));
+    }
+
+    #[test]
+    fn finishing_a_task_finishes_its_subtasks_but_reopening_does_not() {
+        let conn = open_in_memory();
+        let t = mutation::create(&conn, "figures", TaskView::Tasks, TODAY).unwrap();
+        let a = mutation::add_subtask(&conn, t.id, "plot a", &None).unwrap();
+        mutation::add_subtask(&conn, t.id, "plot b", &None).unwrap();
+        crate::service::timer::start(&conn, a.id).unwrap();
+
+        let t = mutation::set_done(&conn, t.id, true).unwrap();
+        assert_eq!(t.subtasks_done, 2);
+        assert!(crate::service::timer::running(&conn).unwrap().is_none());
+        let t = mutation::set_done(&conn, t.id, false).unwrap();
+        assert_eq!((t.done_at, t.subtasks_done), (None, 2));
+    }
+
+    #[test]
+    fn lists_show_subtasks_under_their_parent_or_alone() {
+        let conn = open_in_memory();
+        let t = mutation::create(&conn, "draft", TaskView::Tasks, TODAY).unwrap();
+        let a = mutation::add_subtask(&conn, t.id, "intro", &None).unwrap();
+        let b = mutation::add_subtask(&conn, t.id, "method", &None).unwrap();
+        // The pool lists the parent with both subtasks, once each.
+        assert_eq!(
+            titles(&query::list(&conn, TaskView::Tasks, TODAY).unwrap()),
+            ["draft", "intro", "method"]
+        );
+        // Planned for today, a subtask is in My Day without its parent.
+        let plan = TaskUpdate {
+            title: "method".into(),
+            note: String::new(),
+            is_important: false,
+            is_pinned: false,
+            scheduled_date: Some(TODAY.into()),
+            due_date: None,
+            estimate: None,
+        };
+        mutation::update(&conn, b.id, &plan).unwrap();
+        let my_day = query::list(&conn, TaskView::MyDay, TODAY).unwrap();
+        assert_eq!(titles(&my_day), ["method"]);
+        assert_eq!(my_day[0].parent_title.as_deref(), Some("draft"));
+        // With the parent in My Day too, its other subtask comes along.
+        let plan = TaskUpdate {
+            title: "draft".into(),
+            ..plan
+        };
+        mutation::update(&conn, t.id, &plan).unwrap();
+        let mut ids: Vec<i64> = query::list(&conn, TaskView::MyDay, TODAY)
+            .unwrap()
+            .iter()
+            .map(|t| t.id)
+            .collect();
+        ids.sort();
+        assert_eq!(ids, [t.id, a.id, b.id]);
     }
 
     #[test]

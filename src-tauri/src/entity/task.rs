@@ -1,4 +1,5 @@
-//! The `tasks` and `task_steps` tables as Rust types.
+//! The `tasks` table as a Rust type. A task can hold subtasks, which are
+//! tasks too (`parent_id`), one level deep.
 //!
 //! These are also the shapes the frontend receives (via tauri-specta), so
 //! only columns the UI uses are exposed; the rest get fields when needed.
@@ -26,8 +27,11 @@ pub struct Task {
     pub scheduled_date: Option<String>,
     pub start_time: Option<String>, // 'HH:MM', from quick capture
     pub end_time: Option<String>,   // 'HH:MM'
-    pub step_count: i64,
-    pub steps_done: i64,
+    /// The task this one is a subtask of (one level deep), and its title.
+    pub parent_id: Option<i64>,
+    pub parent_title: Option<String>,
+    pub subtask_count: i64,
+    pub subtasks_done: i64,
     pub created_at: String,
     /// The idea this task is a todo of, if any.
     pub idea_id: Option<i64>,
@@ -35,13 +39,15 @@ pub struct Task {
     pub started_at: Option<String>,
 }
 
-/// Columns in the order `Task::from_row` reads them. Step counts come from a subquery.
+/// Columns in the order `Task::from_row` reads them. The parent's title and
+/// the subtask counts come from subqueries.
 pub const TASK_COLUMNS: &str = "t.id, t.title, t.note, t.is_important, t.is_pinned, \
      t.due_date, t.done_at, t.sort_order, \
      t.project_id, t.module_id, t.estimate_minutes, t.actual_minutes, t.scheduled_date, \
      t.start_time, t.end_time, \
-     (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id), \
-     (SELECT count(*) FROM task_steps s WHERE s.task_id = t.id AND s.is_done = 1), \
+     t.parent_id, (SELECT p.title FROM tasks p WHERE p.id = t.parent_id), \
+     (SELECT count(*) FROM tasks c WHERE c.parent_id = t.id), \
+     (SELECT count(*) FROM tasks c WHERE c.parent_id = t.id AND c.done_at IS NOT NULL), \
      t.created_at, t.idea_id, t.started_at";
 
 impl Task {
@@ -62,35 +68,13 @@ impl Task {
             scheduled_date: row.get(12)?,
             start_time: row.get(13)?,
             end_time: row.get(14)?,
-            step_count: row.get(15)?,
-            steps_done: row.get(16)?,
-            created_at: row.get(17)?,
-            idea_id: row.get(18)?,
-            started_at: row.get(19)?,
-        })
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Type)]
-#[serde(rename_all = "camelCase")]
-pub struct TaskStep {
-    pub id: i64,
-    pub task_id: i64,
-    pub title: String,
-    pub is_done: bool,
-    pub sort_order: f64,
-}
-
-pub const STEP_COLUMNS: &str = "id, task_id, title, is_done, sort_order";
-
-impl TaskStep {
-    pub fn from_row(row: &Row) -> rusqlite::Result<Self> {
-        Ok(Self {
-            id: row.get(0)?,
-            task_id: row.get(1)?,
-            title: row.get(2)?,
-            is_done: row.get(3)?,
-            sort_order: row.get(4)?,
+            parent_id: row.get(15)?,
+            parent_title: row.get(16)?,
+            subtask_count: row.get(17)?,
+            subtasks_done: row.get(18)?,
+            created_at: row.get(19)?,
+            idea_id: row.get(20)?,
+            started_at: row.get(21)?,
         })
     }
 }

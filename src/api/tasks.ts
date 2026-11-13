@@ -25,7 +25,7 @@ import {
 export const taskKeys = {
   all: ['tasks'] as const,
   list: (view: TaskView) => ['tasks', 'list', view] as const,
-  steps: (taskId: number) => ['tasks', 'steps', taskId] as const,
+  subtasks: (parentId: number) => ['tasks', 'subtasks', parentId] as const,
   today: ['tasks', 'today'] as const,
   day: (date: string) => ['tasks', 'day', date] as const,
   completion: (from: string, to: string) =>
@@ -87,12 +87,13 @@ export function useTask(id: number | null) {
   })
 }
 
-export function useTaskSteps(taskId: number | null) {
+/** A task's subtasks, open first (the details pane). */
+export function useSubtasks(parentId: number | null) {
   return useQuery({
-    queryKey: taskKeys.steps(taskId ?? -1),
+    queryKey: taskKeys.subtasks(parentId ?? -1),
     queryFn: async () =>
-      unwrapResult(await commands.listTaskSteps(taskId ?? -1)),
-    enabled: taskId !== null,
+      unwrapResult(await commands.listSubtasks(parentId ?? -1)),
+    enabled: parentId !== null,
   })
 }
 
@@ -183,20 +184,18 @@ export const useDeleteTask = () =>
     unwrapResult(await commands.deleteTask(id))
   )
 
-export const useAddTaskStep = () =>
+/** A subtask at the bottom of a task's subtasks; `estimate` is typed, e.g. "45m". */
+export const useAddSubtask = () =>
   useTaskMutation(
-    async ({ taskId, title }: { taskId: number; title: string }) =>
-      unwrapResult(await commands.addTaskStep(taskId, title))
-  )
-
-export const useSetTaskStepDone = () =>
-  useTaskMutation(async ({ id, done }: { id: number; done: boolean }) =>
-    unwrapResult(await commands.setTaskStepDone(id, done))
-  )
-
-export const useDeleteTaskStep = () =>
-  useTaskMutation(async (id: number) =>
-    unwrapResult(await commands.deleteTaskStep(id))
+    async ({
+      parentId,
+      title,
+      estimate,
+    }: {
+      parentId: number
+      title: string
+      estimate: string | null
+    }) => unwrapResult(await commands.addSubtask(parentId, title, estimate))
   )
 
 /** Undo the last task change; resolves to what was undone (e.g. "Delete task"). */

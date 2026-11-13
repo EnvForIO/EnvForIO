@@ -1,4 +1,4 @@
-//! Changing tasks and steps. Every function returns the row as it is now,
+//! Changing tasks and subtasks. Every function returns the row as it is now,
 //! so the UI can update without a second round trip.
 
 use rusqlite::{params, Connection};
@@ -8,7 +8,7 @@ use specta::Type;
 use super::query::{self, TaskView};
 use crate::domain::day::now_timestamp;
 use crate::domain::time_parse::capture;
-use crate::entity::task::{Task, TaskStep};
+use crate::entity::task::Task;
 use crate::errors::{AppError, AppResult};
 use crate::service::timer;
 use crate::service::validate::{check_date, clean_name as clean_title, estimate_minutes};
@@ -105,10 +105,22 @@ pub fn update(conn: &Connection, id: i64, update: &TaskUpdate) -> AppResult<Task
     query::get(conn, id)
 }
 
+/// Finishing a task finishes its open subtasks too, so no work is left
+/// planned under a task marked done. Reopening it leaves them as they are.
 pub fn set_done(conn: &Connection, id: i64, done: bool) -> AppResult<Task> {
-    // Finishing the task the timer is running on stops the timer (and records its time).
-    if done && timer::running(conn)?.is_some_and(|t| t.task_id == id) {
-        timer::stop(conn)?;
+    // Finishing the task the timer is running on (or one of its subtasks)
+    // stops the timer and records its time.
+    if done {
+        if let Some(running) = timer::running(conn)? {
+            let on_subtask: bool = conn.query_row(
+                "SELECT count(*) > 0 FROM tasks WHERE id = ?1 AND parent_id = ?2",
+                params![running.task_id, id],
+                |r| r.get(0),
+            )?;
+            if running.task_id == id || on_subtask {
+                timer::stop(conn)?;
+            }
+        }
     }
     let now = now_timestamp();
     let done_at = done.then_some(now.as_str());
@@ -118,6 +130,13 @@ pub fn set_done(conn: &Connection, id: i64, done: bool) -> AppResult<Task> {
     )?;
     if changed == 0 {
         return Err(AppError::not_found("task", id));
+    }
+    if done {
+        conn.execute(
+            "UPDATE tasks SET done_at = ?2, updated_at = ?2
+             WHERE parent_id = ?1 AND done_at IS NULL",
+            params![id, now],
+        )?;
     }
     query::get(conn, id)
 }
@@ -172,7 +191,7 @@ pub fn reorder(conn: &mut Connection, ids: &[i64]) -> AppResult<()> {
 }
 
 pub fn delete(conn: &Connection, id: i64) -> AppResult<()> {
-    // Steps go with it (ON DELETE CASCADE).
+    // Subtasks go with it (ON DELETE CASCADE).
     if conn.execute("DELETE FROM tasks WHERE id = ?1", params![id])? == 0 {
         return Err(AppError::not_found("task", id));
     }
@@ -180,37 +199,42 @@ pub fn delete(conn: &Connection, id: i64) -> AppResult<()> {
 }
 
 // ---------------------------------------------------------------------------
-// Steps
+// Subtasks
 
-pub fn add_step(conn: &Connection, task_id: i64, title: &str) -> AppResult<TaskStep> {
+/// Add a subtask at the bottom of a task's subtasks. It takes the parent's
+/// project and module, so project views and the safety line see it there;
+/// its dates and estimate are its own. Subtasks go one level deep.
+pub fn add_subtask(
+    conn: &Connection,
+    parent_id: i64,
+    title: &str,
+    estimate: &Option<String>,
+) -> AppResult<Task> {
     let title = clean_title(title)?;
-    query::get(conn, task_id)?; // a clear NotFound instead of a foreign key error
+    let minutes = estimate_minutes(estimate)?;
+    let parent = query::get(conn, parent_id)?;
+    if parent.parent_id.is_some() {
+        return Err(AppError::invalid("a subtask cannot have subtasks"));
+    }
     let bottom: f64 = conn.query_row(
-        "SELECT coalesce(max(sort_order), 0) + 1 FROM task_steps WHERE task_id = ?1",
-        params![task_id],
+        "SELECT coalesce(max(sort_order), 0) + 1 FROM tasks WHERE parent_id = ?1",
+        params![parent_id],
         |r| r.get(0),
     )?;
+    let now = now_timestamp();
     conn.execute(
-        "INSERT INTO task_steps (task_id, title, sort_order) VALUES (?1, ?2, ?3)",
-        params![task_id, title, bottom],
+        "INSERT INTO tasks (title, parent_id, project_id, module_id, estimate_minutes,
+                            sort_order, created_at, updated_at)
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?7)",
+        params![
+            title,
+            parent_id,
+            parent.project_id,
+            parent.module_id,
+            minutes,
+            bottom,
+            now
+        ],
     )?;
-    query::get_step(conn, conn.last_insert_rowid())
-}
-
-pub fn set_step_done(conn: &Connection, id: i64, done: bool) -> AppResult<TaskStep> {
-    if conn.execute(
-        "UPDATE task_steps SET is_done = ?2 WHERE id = ?1",
-        params![id, done],
-    )? == 0
-    {
-        return Err(AppError::not_found("step", id));
-    }
-    query::get_step(conn, id)
-}
-
-pub fn delete_step(conn: &Connection, id: i64) -> AppResult<()> {
-    if conn.execute("DELETE FROM task_steps WHERE id = ?1", params![id])? == 0 {
-        return Err(AppError::not_found("step", id));
-    }
-    Ok(())
+    query::get(conn, conn.last_insert_rowid())
 }
