@@ -41,9 +41,10 @@ export function PhaseEditor({
           <Input
             value={phase.budget ?? ''}
             onChange={e => set(i, { budget: e.target.value || null })}
-            placeholder={t('projects.phaseBudget')}
+            placeholder={t('projects.phaseBudgetPlaceholder')}
             aria-label={t('projects.phaseBudget')}
-            className="h-8 w-24"
+            title={t('projects.phaseBudgetHint')}
+            className="h-8 w-28"
           />
           <Button
             type="button"

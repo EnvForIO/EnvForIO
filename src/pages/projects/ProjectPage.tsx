@@ -24,6 +24,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatMinutes } from '@/lib/duration'
 import type { Project } from '@/lib/tauri-bindings'
 import { useTodayLine } from '@/api/plans'
+import { cn } from '@/lib/utils'
+import { DAY_MINUTES } from '@/pages/plans/limit'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from '@/pages/tasks/dates'
 import { ModuleSection } from './ModuleSection'
@@ -55,9 +57,12 @@ function ProjectView({ project }: { project: Project }) {
   const [moduleName, setModuleName] = useState('')
 
   const ungrouped = tasks.filter(task => task.moduleId === null)
-  const todayLine = useTodayLine().data?.projects.find(
-    p => p.projectId === project.id
-  )
+  const line = useTodayLine().data
+  const todayLine = line?.projects.find(p => p.projectId === project.id)
+  // Red when this project alone asks more than today holds.
+  const todayTooMuch =
+    todayLine !== undefined &&
+    todayLine.minutes > (line?.capacity ?? DAY_MINUTES)
   const dates = [
     project.startDate &&
       t('projects.starts', { date: dateLabel(project.startDate) }),
@@ -90,7 +95,12 @@ function ProjectView({ project }: { project: Project }) {
             })}
           </p>
           {todayLine && (
-            <p className="text-sm font-medium text-primary">
+            <p
+              className={cn(
+                'text-sm font-medium',
+                todayTooMuch ? 'text-destructive' : 'text-primary'
+              )}
+            >
               {t('plans.projectToday', {
                 minutes: formatMinutes(todayLine.minutes),
                 done: formatMinutes(todayLine.doneMinutes),

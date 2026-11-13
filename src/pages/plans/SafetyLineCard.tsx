@@ -1,21 +1,28 @@
 /**
  * Today's safety line at the top of My Day: how much project work today
  * needs, how much is done, the split by project, the check-in streak,
- * yesterday's shortfall, and (folded) the next 14 days.
+ * yesterday's shortfall, and (folded) the next 14 days. When today asks
+ * more than the day holds (the time set for it, or 24 hours), it says so
+ * and names what causes it; with no time set it asks for one.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDownIcon, ChevronRightIcon, FlameIcon } from 'lucide-react'
-import { useCheckIns, useTodayLine } from '@/api/plans'
+import { useCheckIns, useProjectHealth, useTodayLine } from '@/api/plans'
+import { Button } from '@/components/ui/button'
 import { formatMinutes } from '@/lib/duration'
+import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
+import { DAY_MINUTES, limitText } from './limit'
 import { LoadForecast } from './LoadForecast'
 
 export function SafetyLineCard() {
   const { t } = useTranslation()
   const { data: line } = useTodayLine()
   const { data: checkIns } = useCheckIns()
+  const { data: health = [] } = useProjectHealth()
   const selectProject = useUIStore(state => state.selectProject)
+  const openPreferencesAt = useUIStore(state => state.openPreferencesAt)
   const [showForecast, setShowForecast] = useState(false)
   if (!line) return null
   const hasLine = line.projects.length > 0
@@ -25,11 +32,25 @@ export function SafetyLineCard() {
     line.minutes === 0
       ? 100
       : Math.min(100, (line.doneMinutes / line.minutes) * 100)
+  const over = line.minutes > (line.capacity ?? DAY_MINUTES)
+  // The biggest asks first (the line arrives sorted that way).
+  const causes = line.projects.slice(0, 3).map(p => {
+    const limit = health.find(h => h.projectId === p.projectId)?.limit
+    return {
+      id: p.projectId,
+      text: [
+        `${p.name}: ${formatMinutes(p.minutes)}`,
+        limit && limitText(t, limit),
+      ]
+        .filter(Boolean)
+        .join(' '),
+    }
+  })
 
   return (
     <div className="flex flex-col gap-2 rounded-md border bg-card p-3">
       <div className="flex items-baseline gap-3 text-sm">
-        <span className="font-medium">
+        <span className={cn('font-medium', over && 'text-destructive')}>
           {t('plans.todayLine', { minutes: formatMinutes(line.minutes) })}
         </span>
         <span className="flex-1 text-muted-foreground">
@@ -66,6 +87,41 @@ export function SafetyLineCard() {
           </button>
         ))}
       </div>
+      {over && (
+        <div className="flex flex-col gap-0.5 text-xs" role="status">
+          <p className="font-medium text-destructive">
+            {line.capacity === null
+              ? t('plans.overDay', { minutes: formatMinutes(line.minutes) })
+              : t('plans.overCapacity', {
+                  minutes: formatMinutes(line.minutes),
+                  capacity: formatMinutes(line.capacity),
+                })}
+          </p>
+          {causes.map(cause => (
+            <button
+              key={cause.id}
+              type="button"
+              onClick={() => selectProject(cause.id)}
+              className="self-start text-start text-muted-foreground hover:text-foreground hover:underline"
+            >
+              {cause.text}
+            </button>
+          ))}
+        </div>
+      )}
+      {hasLine && line.capacity === null && (
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          {t('plans.noDailyTimeHint')}
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-6 px-2 text-xs"
+            onClick={() => openPreferencesAt('planning')}
+          >
+            {t('plans.setDailyTime')}
+          </Button>
+        </div>
+      )}
       {checkIns && checkIns.shortfall > 0 && (
         <p className="text-xs text-muted-foreground">
           {t('plans.shortfall', { minutes: formatMinutes(checkIns.shortfall) })}

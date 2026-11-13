@@ -169,6 +169,16 @@ Decisions (user, 2026-11-20): no Conferences page and no following; a conference
 - Not done here: moving a project's deadline does not move its phases.
 - Fix after trying it (user report 2026-11-21): a 200-minute task in a project due in two months got nothing on today's line, because the line ignored task dates. Within each unit, a task with Do on today or later now has a one-day window on that day, and a task due before the unit's target has a window ending on its due date (`work.rs::split_by_due`). Also, a project with no tasks at all is Not estimated, not Done.
 
+## Trustworthy numbers (2026-11-21)
+
+A live UX critique (22/40) found the plan could ask for a 40-hour day while the project said On track: with no daily time set every project was On track, and the badge showed the smallest need among equally healthy parts.
+
+Decisions (user, 2026-11-21): with no daily time set, show a neutral state that asks for it rather than On track; fix the three P1 issues of the critique, this one first.
+
+- `Health::NoDailyTime` when none of a part's days has available time; a part needing more than 24 hours a day is Behind whatever is set. The worst part decides, ties going to the larger need. `ProjectHealth.limit` names that part (`LimitKind`: Deadline, Phase with its name, Due, DoOn, and its date) and the badge and My Day say it in words.
+- My Day's line turns red when today asks more than the day's time (or 24 hours), with the biggest projects and their limits listed; "Set daily time" opens Preferences on Planning (`openPreferencesAt`, the pane now lives in the UI store). The 14-day bars carry their hours.
+- Phases ending on the same day share a window; before, the second one got no days and everything landed on today.
+
 ## Fewer sidebar entries, step 3: Research as one entry (2026-11-20)
 
 - The sidebar has one Research entry (lit on any of its tabs); `ResearchLayout` shows the title and the Overview / Ideas / Library tabs above the three pages, which lost their own titles. The tabs are still separate `MainPage`s, so `openIdea` and `openPage('papers')` from elsewhere land on the right tab. Dividers now group the sidebar: lists, Calendar and Stats; Research; Reader and Monitor.

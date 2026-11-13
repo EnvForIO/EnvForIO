@@ -58,11 +58,12 @@ export const URGENCY_COLOR: Record<Urgency, string> = {
   calm: 'var(--muted-foreground)',
 }
 
-/** "Thu, May 15, 19:59" in local time, with the year when it is not this year's. */
+/** "Thu, May 15, 19:59" in local time, with the year when it is not this
+ * year's; the same day format as everywhere else (`dayLabel`). */
 export function when(ms: number, now: number): string {
   const date = new Date(ms)
   const sameYear = date.getFullYear() === new Date(now).getFullYear()
-  return date.toLocaleString(undefined, {
+  return date.toLocaleString('en', {
     weekday: 'short',
     month: 'short',
     day: 'numeric',

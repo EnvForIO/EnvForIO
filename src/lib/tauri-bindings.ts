@@ -71,6 +71,8 @@ export type {
   ReadingStatus,
   Tag,
   Health,
+  Limit,
+  LimitKind,
   Period,
   PlanningSettings,
   Stats,

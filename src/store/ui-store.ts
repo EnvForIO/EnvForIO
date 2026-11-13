@@ -7,6 +7,8 @@ interface UIState {
   rightSidebarVisible: boolean
   commandPaletteOpen: boolean
   preferencesOpen: boolean
+  /** The pane Preferences shows (kept here so other screens can open one). */
+  preferencesPane: PreferencePane
   /** Which built-in list the main pane shows. */
   selectedView: TaskView
   /** The project shown in the middle pane instead of a built-in list, if any. */
@@ -30,6 +32,9 @@ interface UIState {
   setCommandPaletteOpen: (open: boolean) => void
   togglePreferences: () => void
   setPreferencesOpen: (open: boolean) => void
+  setPreferencesPane: (pane: PreferencePane) => void
+  /** Opens Preferences on one pane, e.g. Planning for "Set daily time". */
+  openPreferencesAt: (pane: PreferencePane) => void
   setSquareCorners: (enabled: boolean) => void
   selectView: (view: TaskView) => void
   selectTask: (id: number | null) => void
@@ -39,6 +44,8 @@ interface UIState {
   setProjectView: (view: 'list' | 'board') => void
   openCalendarAt: (date: string) => void
 }
+
+export type PreferencePane = 'general' | 'planning' | 'appearance' | 'advanced'
 
 /** The full pages the middle pane can show instead of a list or project. */
 export type MainPage =
@@ -51,6 +58,7 @@ export const useUIStore = create<UIState>()(
       rightSidebarVisible: false, // the details pane opens when a task is selected
       commandPaletteOpen: false,
       preferencesOpen: false,
+      preferencesPane: 'general',
       selectedView: 'MyDay',
       selectedProjectId: null,
       page: null,
@@ -106,6 +114,16 @@ export const useUIStore = create<UIState>()(
 
       setPreferencesOpen: open =>
         set({ preferencesOpen: open }, undefined, 'setPreferencesOpen'),
+
+      setPreferencesPane: pane =>
+        set({ preferencesPane: pane }, undefined, 'setPreferencesPane'),
+
+      openPreferencesAt: pane =>
+        set(
+          { preferencesOpen: true, preferencesPane: pane },
+          undefined,
+          'openPreferencesAt'
+        ),
 
       selectView: view =>
         set(

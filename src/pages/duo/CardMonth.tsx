@@ -12,7 +12,7 @@ import { useMonthMarks } from '@/api/month'
 import { commands, type DayMarks } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { calendarRange, shiftAnchor } from '@/pages/calendar/calendar-range'
-import { parseDate } from '@/pages/tasks/dates'
+import { dateLabel, parseDate } from '@/pages/tasks/dates'
 import { BUSY_COLOR, busy, isDeadline } from './busy'
 import { selectDuoDay } from './events'
 
@@ -25,7 +25,7 @@ export function CardMonth({ today, day }: { today: string; day: string }) {
   const { data: marks = [] } = useMonthMarks(range.from, range.to)
   const byDate = new Map(marks.map(m => [m.date, m]))
   const month = parseDate(anchor).getMonth()
-  const title = parseDate(anchor).toLocaleDateString(undefined, {
+  const title = parseDate(anchor).toLocaleDateString('en', {
     month: 'long',
     year: 'numeric',
   })
@@ -154,11 +154,7 @@ function DayList({
 }) {
   const { t } = useTranslation()
   const items = marks?.items ?? []
-  const label = parseDate(date).toLocaleDateString(undefined, {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  })
+  const label = dateLabel(date)
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-1 border-t border-foreground/10 px-1 pt-1.5">
       <p className="text-xs font-medium">{label}</p>

@@ -2,6 +2,7 @@
  * Turning the database's 'YYYY-MM-DD' strings into what the task views show.
  * Display only: which day "today" is comes from Rust (`useToday`).
  */
+import { dayLabel } from '@/lib/day-label'
 
 /** 'YYYY-MM-DD' -> a local Date at midnight (not UTC, which would shift the day). */
 export function parseDate(date: string): Date {
@@ -15,13 +16,9 @@ export function formatDate(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
 
-/** 'Wed, Nov 19' style label for a due date or the My Day header. */
+/** 'Wed, Nov 19' (with the year when it is not this year's): see `dayLabel`. */
 export function dateLabel(date: string): string {
-  return parseDate(date).toLocaleDateString('en', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  })
+  return dayLabel(parseDate(date))
 }
 
 /** Dates compare correctly as strings because they are zero-padded ISO dates. */

@@ -44,9 +44,10 @@ function PhaseControls({ module }: { module: Module }) {
         onChange={e => setBudget(e.target.value)}
         onBlur={() => budget !== saved && save(module.endDate, budget)}
         onKeyDown={e => isEnter(e) && e.currentTarget.blur()}
-        placeholder={t('projects.phaseBudget')}
+        placeholder={t('projects.phaseBudgetPlaceholder')}
         aria-label={t('projects.phaseBudget')}
-        className="h-7 w-20 rounded-md border bg-transparent px-2 text-right text-xs outline-none"
+        title={t('projects.phaseBudgetHint')}
+        className="h-7 w-24 rounded-md border bg-transparent px-2 text-right text-xs outline-none"
       />
       {setPhase.error && (
         <span className="text-xs text-destructive">

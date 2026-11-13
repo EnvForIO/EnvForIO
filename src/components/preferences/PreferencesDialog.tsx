@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Settings, Palette, Zap, CalendarClock } from 'lucide-react'
 import {
@@ -25,13 +24,11 @@ import {
   SidebarMenuItem,
   SidebarProvider,
 } from '@/components/ui/sidebar'
-import { useUIStore } from '@/store/ui-store'
+import { useUIStore, type PreferencePane } from '@/store/ui-store'
 import { GeneralPane } from './panes/GeneralPane'
 import { AppearancePane } from './panes/AppearancePane'
 import { AdvancedPane } from './panes/AdvancedPane'
 import { PlanningPane } from './panes/PlanningPane'
-
-type PreferencePane = 'general' | 'planning' | 'appearance' | 'advanced'
 
 const navigationItems = [
   {
@@ -58,7 +55,9 @@ const navigationItems = [
 
 export function PreferencesDialog() {
   const { t } = useTranslation()
-  const [activePane, setActivePane] = useState<PreferencePane>('general')
+  // In the store, so "Set daily time" elsewhere can open the Planning pane.
+  const activePane = useUIStore(state => state.preferencesPane)
+  const setActivePane = useUIStore(state => state.setPreferencesPane)
   const preferencesOpen = useUIStore(state => state.preferencesOpen)
   const setPreferencesOpen = useUIStore(state => state.setPreferencesOpen)
 

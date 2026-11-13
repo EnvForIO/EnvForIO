@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { ChevronDownIcon } from 'lucide-react'
 
+import { dayLabel } from '@/lib/day-label'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -31,7 +32,7 @@ function DatePicker({
           variant="outline"
           className={`w-full justify-between font-normal ${className || ''}`}
         >
-          {value ? value.toLocaleDateString() : placeholder}
+          {value ? dayLabel(value) : placeholder}
           <ChevronDownIcon className="size-4" />
         </Button>
       </PopoverTrigger>

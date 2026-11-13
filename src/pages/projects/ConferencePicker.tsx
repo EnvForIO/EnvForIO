@@ -21,7 +21,7 @@ import {
   type Round,
 } from '@/pages/conferences/deadline'
 
-const SHOWN = 6 // conferences listed at once; typing narrows them down
+const SHOWN = 5 // conferences listed at once; typing narrows them down
 
 export interface Picked {
   conference: Conference
@@ -111,9 +111,14 @@ export function ConferencePicker({
           </Button>
         </p>
       )}
-      <div className="grid max-h-52 gap-1 overflow-y-auto">
+      {/* Rows never grow wider than the dialog: a long description is
+          clipped on its own line instead of scrolling the list sideways. */}
+      <div className="grid max-h-56 grid-cols-1 gap-1 overflow-x-hidden overflow-y-auto">
         {matches.map(({ c, rounds }) => (
-          <div key={c.key} className="rounded-md border px-2 py-1.5 text-sm">
+          <div
+            key={c.key}
+            className="min-w-0 rounded-md border px-2 py-1.5 text-sm"
+          >
             <div className="flex items-baseline gap-2">
               <span className="font-medium">{c.title}</span>
               {c.ccf !== '' && c.ccf !== 'N' && (
@@ -121,10 +126,15 @@ export function ConferencePicker({
                   CCF {c.ccf}
                 </span>
               )}
-              <span className="min-w-0 truncate text-xs text-muted-foreground">
-                {c.description}
-              </span>
             </div>
+            {c.description && (
+              <p
+                className="truncate text-xs text-muted-foreground"
+                title={c.description}
+              >
+                {c.description}
+              </p>
+            )}
             <div className="mt-1 flex flex-wrap gap-1">
               {rounds.map(round => (
                 <Button

@@ -17,7 +17,7 @@ use rusqlite::Connection;
 use serde::Serialize;
 use specta::Type;
 
-use super::work::{parse_date, projects, units_at, work_at, Estimates};
+use super::work::{parse_date, projects, units_at, work_at, Estimates, Limit};
 use crate::domain::safety_line::{allocate, window, ProjectWork};
 use crate::errors::{AppError, AppResult};
 use crate::service::capacity::CapacityTable;
@@ -60,11 +60,16 @@ pub fn load_forecast(conn: &Connection, today: &str, days: i64) -> AppResult<Vec
 pub enum Health {
     Done,        // every task finished (and there is at least one)
     Unestimated, // no tasks yet, or open ones without estimates or budgets
+    NoDailyTime, // no available time set for the days it needs: cannot judge
     OnTrack,     // needs well under the available time
     Tight,       // needs more than 80% of the available time
-    Behind,      // needs more than the available time, or a phase ended with work left
-    Overdue,     // past the deadline with work left
+    Behind, // needs more than the available time (or than a day holds), or a phase ended with work left
+    Overdue, // past the deadline with work left
 }
+
+/// More than this a day cannot be done, whatever time is set (user report
+/// 2026-11-21: "On track" next to a 40-hour day).
+const DAY_MINUTES: i64 = 24 * 60;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Type)]
 #[serde(rename_all = "camelCase")]
@@ -74,8 +79,10 @@ pub struct ProjectHealth {
     pub samples: i64,                // finished tasks behind the ratio (0 = default 1.0)
     pub remaining: i64,              // estimated minutes left
     pub predicted_remaining: i64,    // remaining × ratio
-    pub needed_per_day: Option<i64>, // predicted remaining / work days left
+    pub needed_per_day: Option<i64>, // in the part that decides the health
     pub health: Health,
+    /// What the part that decides the health must be finished by.
+    pub limit: Option<Limit>,
 }
 
 /// (sum of actual, sum of estimate, count) per project, over finished tasks with both.
@@ -109,9 +116,17 @@ fn unit_health(
     }
     let days = window(unit, today, 1.0, &|d| capacity.on(d));
     let needed = predicted / (days.len() as i64).max(1);
+    if needed > DAY_MINUTES {
+        return (needed, Health::Behind); // no day holds that, time set or not
+    }
     let limits: Vec<i64> = days.iter().filter_map(|d| capacity.on(*d)).collect();
-    if limits.len() < days.len() || limits.is_empty() {
-        return (needed, Health::OnTrack); // some days have no limit: it always fits
+    if limits.is_empty() {
+        // Without the user's time there is nothing to compare with; saying
+        // "On track" here was what made the badge meaningless.
+        return (needed, Health::NoDailyTime);
+    }
+    if limits.len() < days.len() {
+        return (needed, Health::OnTrack); // some days have no limit: it fits there
     }
     let average = limits.iter().sum::<i64>() / limits.len() as i64;
     let health = if needed > average {
@@ -144,22 +159,24 @@ pub fn project_health(conn: &Connection, today: &str) -> AppResult<Vec<ProjectHe
                 _ => overall.map_or((1.0, 0), |r| (r, all_count)),
             };
             // Work done today is not left, unlike in today's line.
-            let units: Vec<ProjectWork> = units_at(p, &estimates, today, false);
-            let remaining: i64 = units.iter().map(|u| u.remaining).sum();
+            let units = units_at(p, &estimates, today, false);
+            let remaining: i64 = units.iter().map(|(_, u)| u.remaining).sum();
+            // The worst part decides; among equally bad ones, the one that
+            // needs the most a day (it used to pick the smallest need).
             let worst = units
                 .iter()
-                .filter(|u| u.remaining > 0)
-                .map(|u| {
+                .filter(|(_, u)| u.remaining > 0)
+                .map(|(limit, u)| {
                     let predicted = (u.remaining as f64 * ratio).round() as i64;
                     let last = p.deadline.is_none_or(|d| u.deadline >= d);
                     let (needed, health) = unit_health(u, today, predicted, last, &capacity);
-                    (health, std::cmp::Reverse(u.deadline), needed)
+                    (health, needed, std::cmp::Reverse(u.deadline), limit)
                 })
-                .max();
-            let (needed_per_day, health) = match worst {
-                Some((health, _, needed)) => (Some(needed), health),
-                None if estimates.all_done(p.id) => (None, Health::Done),
-                None => (None, Health::Unestimated),
+                .max_by(|a, b| (a.0, a.1, a.2).cmp(&(b.0, b.1, b.2)));
+            let (needed_per_day, health, limit) = match worst {
+                Some((health, needed, _, limit)) => (Some(needed), health, Some(limit.clone())),
+                None if estimates.all_done(p.id) => (None, Health::Done, None),
+                None => (None, Health::Unestimated, None),
             };
             ProjectHealth {
                 project_id: p.id,
@@ -169,6 +186,7 @@ pub fn project_health(conn: &Connection, today: &str) -> AppResult<Vec<ProjectHe
                 predicted_remaining: (remaining as f64 * ratio).round() as i64,
                 needed_per_day,
                 health,
+                limit,
             }
         })
         .collect())
@@ -280,6 +298,53 @@ mod tests {
                                                  // (not Overdue: the paper is not due yet).
         let later = &project_health(&conn, "2026-12-01").unwrap()[0];
         assert_eq!(later.health, Health::Behind);
+    }
+
+    #[test]
+    fn without_daily_time_health_says_so_and_more_than_a_day_is_behind() {
+        use crate::service::plans::work::LimitKind;
+        let mut conn = open_in_memory();
+        let (p, m) = paper(&mut conn);
+        projects::add_task(&conn, p, Some(m[0]), "runs", &Some("2h".into())).unwrap();
+        // No time set for any day: no verdict, but it names what decides.
+        let h = &project_health(&conn, "2026-11-20").unwrap()[0];
+        assert_eq!(h.health, Health::NoDailyTime);
+        let limit = h.limit.as_ref().unwrap();
+        assert_eq!(
+            (limit.kind, limit.name.as_str(), limit.date.as_str()),
+            (LimitKind::Phase, "Experiments", "2026-11-29")
+        );
+
+        // 40 hours planned for today: impossible, time set or not, and it
+        // is that part (the biggest need), not a smaller one, that is shown.
+        let t = projects::add_task(&conn, p, Some(m[1]), "draft", &Some("40h".into())).unwrap();
+        conn.execute(
+            "UPDATE tasks SET scheduled_date = '2026-11-20' WHERE id = ?1",
+            params![t.id],
+        )
+        .unwrap();
+        let h = &project_health(&conn, "2026-11-20").unwrap()[0];
+        assert_eq!((h.health, h.needed_per_day), (Health::Behind, Some(2400)));
+        assert_eq!(h.limit.as_ref().unwrap().kind, LimitKind::DoOn);
+    }
+
+    #[test]
+    fn phases_ending_on_the_same_day_share_their_window() {
+        let mut conn = open_in_memory();
+        for weekday in 0..7 {
+            set_weekday(&conn, weekday, Some(24 * 60)).unwrap();
+        }
+        let (p, m) = paper(&mut conn);
+        // Experiments and Writing both end Nov 22; 12h of writing.
+        projects::set_phase(&conn, m[0], &Some("2026-11-22".into()), &None).unwrap();
+        projects::set_phase(&conn, m[1], &Some("2026-11-22".into()), &None).unwrap();
+        projects::add_task(&conn, p, Some(m[1]), "draft", &Some("12h".into())).unwrap();
+        // Over Nov 20 to 22, not all on today.
+        let h = &project_health(&conn, "2026-11-20").unwrap()[0];
+        assert_eq!(h.needed_per_day, Some(240));
+        let days = load_forecast(&conn, "2026-11-20", 3).unwrap();
+        assert_eq!(days.iter().map(|d| d.minutes).sum::<i64>(), 720);
+        assert!(days[0].minutes < 720, "{}", days[0].minutes);
     }
 
     #[test]

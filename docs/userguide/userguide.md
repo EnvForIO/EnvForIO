@@ -61,13 +61,14 @@ Preferences → Appearance sets the sticky's material, font and text size.
   - The safety line plans a phase's tasks between the end of the phase before it and its own end, so experiments are not spread over the writing weeks.
   - A **budget** (e.g. `40h`) is the time you expect the phase to take. Its tasks without an estimate share what the estimated ones leave of it, and a phase with no tasks yet counts its whole budget until it ends. So you can plan before every task is estimated.
 - **Project page**: dates, progress, today's share of the safety line and a health badge. A conference project also shows its round: a countdown to the paper deadline, the abstract and paper deadlines in your local time (the conference's own time zone on hover) and the website. If ccfddl later moves the deadline, the page says so; **Use the new deadline** updates the project (it never changes by itself). The switch at the top right toggles between two views:
-  - **Health**: the worst phase decides it. **On track**, **Tight** (needs over 80% of your available time), **Behind** (needs more than your available time, or a phase ended with work left), **Overdue** (past the deadline), **Done**, or **Not estimated** (open tasks, but no estimates or budgets to plan with).
+  - **Health**: the worst phase decides it, and the badge says which ("needs 12h a day for phase Method, ending Sun, Nov 22"). **On track**, **Tight** (needs over 80% of your available time), **Behind** (needs more than your available time or more than 24 hours a day, or a phase ended with work left), **Overdue** (past the deadline), **Done**, **Not estimated** (no tasks, or open tasks without estimates or budgets), or **Daily time not set** (EnvIO cannot judge until you set your available time; **Set daily time** opens it).
   - **List**: tasks grouped by module, each with an add row that takes a title and an estimate.
   - **Board**: To do / Doing / Done. Drag cards between the columns. Starting a task's timer moves it to Doing. Moving a card to Done completes it, and moving a card back to To do stops its timer.
 - **Available time**: set per weekday in Preferences → Planning (0 = rest day). On the calendar, right-click a day to change it for that date only.
 - **Safety line**: each morning EnvIO works out how much of each project's estimated work to do today, so that each phase finishes by its end and the rest by the plan date (the deadline minus the finish-early days). It spreads the work over your work days.
   - A task's own dates come first: a task with **Do on** today or later is asked for on that day, and a task **Due** before its phase or project ends is planned up to its due date. A **Do on** day that passed with the task unfinished no longer counts.
-  - My Day shows the line, your streak, yesterday's shortfall and a 14-day load forecast.
+  - My Day shows the line, your streak, yesterday's shortfall and a 14-day load forecast with each day's hours. When today asks more than your available time (or more than 24 hours), the line turns red and lists the projects and phases causing it.
+  - Phases that end on the same day share their days.
   - Estimates are adjusted by how long tasks really take once you have timed a few.
   - Preferences → Planning sets the day start (default 07:00), levelling, and "earliest deadline first".
 

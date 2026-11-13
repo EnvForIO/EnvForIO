@@ -4,7 +4,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import {
-  CalendarIcon,
+  CalendarCheckIcon,
+  CalendarClockIcon,
   PinIcon,
   PlayIcon,
   SquareIcon,
@@ -38,11 +39,26 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
       update: { ...toUpdate(task), isImportant: !task.isImportant },
     })
 
+  // A day still to come that the task is planned for ("Do on"); today's is
+  // "My Day", and a planned day that passed no longer counts.
+  const doOn =
+    !done && task.scheduledDate !== null && today && task.scheduledDate > today
+      ? task.scheduledDate
+      : null
+
   // The meta line only repeats what the current list does not already say.
+  // Do on and Due each carry their word, so the two dates never look alike
+  // (critique 2026-11-21).
   const meta = [
     inMyDay && view !== 'MyDay' && (
       <span key="day" className="flex items-center gap-1">
         <SunIcon className="size-3" /> {t('tasks.myDay')}
+      </span>
+    ),
+    doOn && (
+      <span key="do-on" className="flex items-center gap-1">
+        <CalendarCheckIcon className="size-3" />
+        {t('tasks.doOnLabel', { date: dateLabel(doOn) })}
       </span>
     ),
     task.startTime !== null && (
@@ -69,8 +85,11 @@ export function TaskRow({ task, view }: { task: Task; view: TaskView }) {
           !done && isOverdue(task.dueDate, today) && 'text-destructive'
         )}
       >
-        <CalendarIcon className="size-3" />
-        {task.dueDate === today ? t('tasks.today') : dateLabel(task.dueDate)}
+        <CalendarClockIcon className="size-3" />
+        {t('tasks.dueLabel', {
+          date:
+            task.dueDate === today ? t('tasks.today') : dateLabel(task.dueDate),
+        })}
       </span>
     ),
   ].filter(Boolean)

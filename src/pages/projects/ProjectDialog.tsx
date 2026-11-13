@@ -241,7 +241,15 @@ export function ProjectDialog({
             </p>
           )}
         </div>
-        <DialogFooter>
+        <DialogFooter className="items-center">
+          {/* A disabled button says why (critique 2026-11-21). */}
+          {form.name.trim() === '' && (
+            <p className="me-auto text-xs text-muted-foreground">
+              {template === 'conference' && !picked && !project
+                ? t('projects.needConferenceOrName')
+                : t('projects.needName')}
+            </p>
+          )}
           <Button onClick={submit} disabled={form.name.trim() === ''}>
             {project ? t('projects.save') : t('projects.create')}
           </Button>

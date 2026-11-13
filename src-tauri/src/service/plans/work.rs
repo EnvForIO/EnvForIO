@@ -21,6 +21,8 @@ use std::collections::{BTreeSet, HashMap};
 
 use chrono::{Duration, NaiveDate};
 use rusqlite::Connection;
+use serde::Serialize;
+use specta::Type;
 
 use crate::domain::day::day_of_timestamp;
 use crate::domain::safety_line::ProjectWork;
@@ -32,7 +34,36 @@ pub type Unit = Option<i64>;
 
 pub struct Phase {
     pub module: i64,
+    pub name: String,
     pub end: NaiveDate,
+}
+
+/// What a piece of planned work has to be finished by, so the UI can say
+/// why a day is full ("for phase Method, ending Sun, Nov 22").
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Type)]
+pub enum LimitKind {
+    Deadline, // the project's own deadline (minus finish-early days)
+    Phase,    // a dated phase's end
+    Due,      // tasks due on a day before their phase or project ends
+    DoOn,     // tasks planned for one day
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Type)]
+#[serde(rename_all = "camelCase")]
+pub struct Limit {
+    pub kind: LimitKind,
+    pub name: String, // the phase's name; "" for the other kinds
+    pub date: String, // the day the work must be done by, 'YYYY-MM-DD'
+}
+
+impl Limit {
+    fn new(kind: LimitKind, name: &str, date: NaiveDate) -> Self {
+        Self {
+            kind,
+            name: name.to_string(),
+            date: date.to_string(),
+        }
+    }
 }
 
 pub struct ProjectRow {
@@ -53,7 +84,7 @@ pub fn parse_date(s: &str) -> Option<NaiveDate> {
 pub fn projects(conn: &Connection) -> AppResult<Vec<ProjectRow>> {
     let mut phases: HashMap<i64, Vec<Phase>> = HashMap::new();
     let mut stmt = conn.prepare(
-        "SELECT project_id, id, end_date FROM modules
+        "SELECT project_id, id, end_date, name FROM modules
          WHERE end_date IS NOT NULL ORDER BY end_date, sort_order, id",
     )?;
     for row in stmt.query_map([], |r| {
@@ -61,14 +92,15 @@ pub fn projects(conn: &Connection) -> AppResult<Vec<ProjectRow>> {
             r.get::<_, i64>(0)?,
             r.get::<_, i64>(1)?,
             r.get::<_, String>(2)?,
+            r.get::<_, String>(3)?,
         ))
     })? {
-        let (project, module, end) = row?;
+        let (project, module, end, name) = row?;
         if let Some(end) = parse_date(&end) {
             phases
                 .entry(project)
                 .or_default()
-                .push(Phase { module, end });
+                .push(Phase { module, name, end });
         }
     }
 
@@ -300,36 +332,45 @@ fn split_by_due(
     estimates: &Estimates,
     p: &ProjectRow,
     unit: Unit,
-    window: ProjectWork,
+    (limit, window): (Limit, ProjectWork),
     day: NaiveDate,
     with_today: bool,
-) -> Vec<ProjectWork> {
+) -> Vec<(Limit, ProjectWork)> {
     let target = window.deadline - Duration::days(window.buffer_days);
     let mut out = Vec::new();
     let mut rest = estimates.budget(day, p.id, unit);
     for dates in estimates.dues(p.id, unit) {
         let minutes = estimates.remaining(day, p.id, unit, dates, with_today);
         match (dates.on, dates.due) {
-            (Some(on), _) if on >= day => out.push(ProjectWork {
-                start: Some(on),
-                deadline: on,
-                buffer_days: 0,
-                remaining: minutes,
-                ..window.clone()
-            }),
-            (_, Some(due)) if due < target => out.push(ProjectWork {
-                deadline: due,
-                buffer_days: 0,
-                remaining: minutes,
-                ..window.clone()
-            }),
+            (Some(on), _) if on >= day => out.push((
+                Limit::new(LimitKind::DoOn, "", on),
+                ProjectWork {
+                    start: Some(on),
+                    deadline: on,
+                    buffer_days: 0,
+                    remaining: minutes,
+                    ..window.clone()
+                },
+            )),
+            (_, Some(due)) if due < target => out.push((
+                Limit::new(LimitKind::Due, "", due),
+                ProjectWork {
+                    deadline: due,
+                    buffer_days: 0,
+                    remaining: minutes,
+                    ..window.clone()
+                },
+            )),
             _ => rest += minutes,
         }
     }
-    out.push(ProjectWork {
-        remaining: rest,
-        ..window
-    });
+    out.push((
+        limit,
+        ProjectWork {
+            remaining: rest,
+            ..window
+        },
+    ));
     out
 }
 
@@ -338,15 +379,27 @@ fn split_by_due(
 /// within each, tasks due earlier in windows of their own. They all carry
 /// the project's id, so the allocation adds them up per project.
 /// `with_today`: count work finished today as still left (today's line).
+/// Each unit comes with what it must be finished by.
 pub fn units_at(
     p: &ProjectRow,
     estimates: &Estimates,
     day: NaiveDate,
     with_today: bool,
-) -> Vec<ProjectWork> {
+) -> Vec<(Limit, ProjectWork)> {
     let mut windows = Vec::new();
     let mut from = p.start;
+    let mut previous: Option<(Option<NaiveDate>, NaiveDate)> = None; // (from, end)
     for phase in &p.phases {
+        // Phases ending on the same day share a window; starting the second
+        // one the day after the first ended would leave it no days at all
+        // (user report 2026-11-21: 37h piled onto today).
+        if let Some((prev_from, prev_end)) = previous {
+            from = if prev_end < phase.end {
+                Some(prev_end + Duration::days(1))
+            } else {
+                prev_from
+            };
+        }
         // The buffer moves only a phase that ends with the project.
         let buffer = match p.deadline {
             Some(deadline) if phase.end >= deadline => p.buffer_days,
@@ -354,6 +407,7 @@ pub fn units_at(
         };
         windows.push((
             Some(phase.module),
+            Limit::new(LimitKind::Phase, &phase.name, phase.end),
             ProjectWork {
                 id: p.id,
                 start: from,
@@ -362,11 +416,13 @@ pub fn units_at(
                 remaining: 0,
             },
         ));
-        from = Some(phase.end + Duration::days(1));
+        previous = Some((from, phase.end));
     }
     if let Some(deadline) = p.deadline {
+        let target = deadline - Duration::days(p.buffer_days);
         windows.push((
             None,
+            Limit::new(LimitKind::Deadline, "", target),
             ProjectWork {
                 id: p.id,
                 start: p.start,
@@ -378,7 +434,9 @@ pub fn units_at(
     }
     windows
         .into_iter()
-        .flat_map(|(unit, window)| split_by_due(estimates, p, unit, window, day, with_today))
+        .flat_map(|(unit, limit, window)| {
+            split_by_due(estimates, p, unit, (limit, window), day, with_today)
+        })
         .collect()
 }
 
@@ -386,5 +444,6 @@ pub fn units_at(
 pub fn work_at(rows: &[ProjectRow], estimates: &Estimates, day: NaiveDate) -> Vec<ProjectWork> {
     rows.iter()
         .flat_map(|p| units_at(p, estimates, day, true))
+        .map(|(_, work)| work)
         .collect()
 }

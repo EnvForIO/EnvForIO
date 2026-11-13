@@ -1347,7 +1347,7 @@ processes: GpuProcess[] }
 /**
  * Ordered from best to worst, so the worst phase is the max.
  */
-export type Health = "Done" | "Unestimated" | "OnTrack" | "Tight" | "Behind" | "Overdue"
+export type Health = "Done" | "Unestimated" | "NoDailyTime" | "OnTrack" | "Tight" | "Behind" | "Overdue"
 export type Idea = { id: number; title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; stepCount: number; stepsDone: number; currentStep: string | null; openTodos: number; openProblems: number; logCount: number; tags: Tag[]; createdAt: string; 
 /**
  * The project this idea is worked on in; its todos are that project's tasks.
@@ -1380,6 +1380,12 @@ export type IdeaTodo = { id: number; ideaId: number; title: string; dueDate: str
 export type IdeaUpdate = { title: string; description: string; status: IdeaStatus; priority: number; isPinned: boolean; venue: string; deadline: string | null; tagIds: number[] }
 export type ItemStatus = "All" | "WithDeadline" | "Done"
 export type JsonValue = null | boolean | number | string | JsonValue[] | Partial<{ [key in string]: JsonValue }>
+export type Limit = { kind: LimitKind; name: string; date: string }
+/**
+ * What a piece of planned work has to be finished by, so the UI can say
+ * why a day is full ("for phase Method, ending Sun, Nov 22").
+ */
+export type LimitKind = "Deadline" | "Phase" | "Due" | "DoOn"
 export type MachineInfo = { hostName: string; os: string; cpuBrand: string; logicalCores: number; physicalCores: number | null; memoryTotal: number; gpus: GpuInfo[] }
 /**
  * One machine's readings, as sent to the UI in each second's batch.
@@ -1422,7 +1428,11 @@ export type Period = "Week" | "Month" | "Year"
 export type PhaseInput = { name: string; endDate: string | null; budget: string | null }
 export type PlanningSettings = { dayStart: string; level: boolean; earliestFirst: boolean }
 export type Project = { id: number; name: string; color: string; template: string; startDate: string | null; deadline: string | null; bufferDays: number; planDate: string | null; isArchived: boolean; sortOrder: number; taskCount: number; doneCount: number; estimateMinutes: number; doneEstimateMinutes: number }
-export type ProjectHealth = { projectId: number; ratio: number; samples: number; remaining: number; predictedRemaining: number; neededPerDay: number | null; health: Health }
+export type ProjectHealth = { projectId: number; ratio: number; samples: number; remaining: number; predictedRemaining: number; neededPerDay: number | null; health: Health; 
+/**
+ * What the part that decides the health must be finished by.
+ */
+limit: Limit | null }
 /**
  * The project dialog's fields, sent whole on create and on every save.
  */
