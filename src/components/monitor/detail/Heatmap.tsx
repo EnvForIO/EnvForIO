@@ -1,6 +1,6 @@
 /**
  * DCGM-style heatmap: a row per GPU (or one CPU row on a machine without
- * GPUs), a cell per second of the last minute, coloured from pale green
+ * GPUs), a cell per second of the last 30, coloured from pale green
  * through yellow to red like the rest of the Monitor page, and the latest
  * value at the end in its level colour, as the GPU tiles show it.
  *
@@ -17,11 +17,15 @@ import { Tile } from '../parts'
 
 const SCALE = Array.from({ length: 24 }, (_, i) => (i * 100) / 23)
 
+/** Seconds a row shows, one cell each: 60 was too dense (user, 2026-11-21). */
+const SHOWN = Math.min(30, HISTORY)
+
 function Row({ label, values }: { label: string; values: number[] }) {
   const { t } = useTranslation()
+  const recent = values.slice(-SHOWN)
   const padded = [
-    ...Array<number | null>(Math.max(0, HISTORY - values.length)).fill(null),
-    ...values,
+    ...Array<number | null>(SHOWN - recent.length).fill(null),
+    ...recent,
   ]
   const latest = values.at(-1)
   return (
@@ -30,8 +34,8 @@ function Row({ label, values }: { label: string; values: number[] }) {
         {label}
       </span>
       <div
-        className="grid flex-1 gap-px overflow-hidden rounded-lg"
-        style={{ gridTemplateColumns: `repeat(${HISTORY}, minmax(0, 1fr))` }}
+        className="grid flex-1 gap-0.5 overflow-hidden rounded-lg"
+        style={{ gridTemplateColumns: `repeat(${SHOWN}, minmax(0, 1fr))` }}
       >
         {padded.map((v, i) => (
           <span
@@ -40,7 +44,7 @@ function Row({ label, values }: { label: string; values: number[] }) {
               v === null
                 ? undefined
                 : t('monitor.secondsAgo', {
-                    count: HISTORY - 1 - i,
+                    count: SHOWN - 1 - i,
                     value: percent(v),
                   })
             }
@@ -72,7 +76,7 @@ export function Heatmap({ history }: { history: Sample[] }) {
             : t('monitor.cpuUtilisation')}
         </span>
         <span className="ms-auto text-[11px] text-[var(--m-muted)]">
-          {t('monitor.lastMinute')}
+          {t('monitor.lastSeconds', { count: SHOWN })}
         </span>
       </div>
       <div className="flex flex-1 flex-col gap-2.5">

@@ -486,7 +486,7 @@
   "monitor.remove": "Remove from overview",
   "monitor.gpuUtilisation": "GPU utilisation",
   "monitor.cpuUtilisation": "CPU utilisation",
-  "monitor.lastMinute": "last 60 s",
+  "monitor.lastSeconds": "last {{count}} s",
   "monitor.secondsAgo_zero": "Now: {{value}}",
   "monitor.secondsAgo_one": "{{count}} second ago: {{value}}",
   "monitor.secondsAgo_other": "{{count}} seconds ago: {{value}}",
