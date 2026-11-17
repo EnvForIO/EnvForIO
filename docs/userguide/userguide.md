@@ -4,7 +4,7 @@ EnvIO is a desktop app for researchers. It covers tasks, planning back from dead
 
 ## Getting around
 
-The left sidebar has the task lists (My Day, Important, Tasks), then the pages: Calendar and Stats; Research (with its Overview, Ideas and Library tabs); Reader and Monitor. Your projects are listed below them.
+The left sidebar has the task lists (My Day, Important, Tasks) and Calendar; Research (with its Overview, Ideas and Library tabs); then Reader, Monitor and Stats. Your projects are listed below them.
 
 Clicking a task opens its details on the right. Closing the window hides EnvIO to the tray; to quit, use the tray menu's **Quit EnvIO**. Preferences → General → **Launch at login** starts EnvIO hidden in the tray when you sign in.
 

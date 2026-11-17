@@ -86,12 +86,13 @@ export function SidebarNav() {
         <NavItem key={item.view} {...item} />
       ))}
       <PageItem page="calendar" icon={CalendarRangeIcon} />
-      <PageItem page="stats" icon={ChartColumnIcon} />
       <div className="my-1 border-t" />
       <PageItem page="research" icon={LightbulbIcon} />
       <div className="my-1 border-t" />
       <PageItem page="reader" icon={RssIcon} />
       <PageItem page="monitor" icon={ActivityIcon} />
+      {/* Below Monitor (user request 2026-11-21). */}
+      <PageItem page="stats" icon={ChartColumnIcon} />
     </nav>
   )
 }
