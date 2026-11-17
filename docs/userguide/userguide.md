@@ -35,6 +35,7 @@ Right-clicking empty space does nothing. In text boxes, or on selected text, rig
   - Finishing the parent finishes its open subtasks. Deleting it deletes them.
   - **Time**: the parent's estimate is a budget, like a phase's. Subtasks with an estimate count their own; those without share what is left of the parent's. A subtask with no dates of its own follows the parent's, and is not listed in **To schedule** (its parent is). A parent with no estimate counts its subtasks' total.
 - **Timer**: the play button on a task row starts it (starting another stops the first). Stopping adds the time to the task. **Did part of it** finishes the part you did and moves the rest to the next work day.
+- **Task menu**: right-click a task (in a list, a project or its board) to open it, add it to My Day, flag, pin or finish it, or delete it (with its subtasks).
 - **Undo**: Ctrl+Z, or the Undo button that appears after deleting a task. It keeps the last 50 changes until EnvIO closes.
 
 ## Todo Duo (mini mode)

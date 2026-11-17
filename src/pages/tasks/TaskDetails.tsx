@@ -14,15 +14,7 @@ import {
   XIcon,
 } from 'lucide-react'
 import { useIdea } from '@/api/ideas'
-import {
-  toUpdate,
-  useDeleteTask,
-  useTask,
-  useToday,
-  useUndo,
-  useUpdateTask,
-} from '@/api/tasks'
-import { toast } from 'sonner'
+import { toUpdate, useTask, useToday, useUpdateTask } from '@/api/tasks'
 import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
@@ -34,6 +26,7 @@ import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel, formatDate, parseDate } from './dates'
 import { TaskSubtasks } from './TaskSubtasks'
+import { useDeleteWithUndo } from './useDeleteWithUndo'
 import { TimerSection } from '@/pages/timer/TimerSection'
 import { isEnter } from '@/lib/keys'
 
@@ -80,8 +73,7 @@ function TaskDetailsForm({ task }: { task: Task }) {
   const today = useToday()
   const selectTask = useUIStore(state => state.selectTask)
   const updateTask = useUpdateTask()
-  const deleteTask = useDeleteTask()
-  const undo = useUndo()
+  const deleteWithUndo = useDeleteWithUndo()
   const [title, setTitle] = useState(task.title)
   const [note, setNote] = useState(task.note)
   const [estimate, setEstimate] = useState(
@@ -242,18 +234,7 @@ function TaskDetailsForm({ task }: { task: Task }) {
           variant="ghost"
           size="icon"
           aria-label={t('tasks.delete')}
-          onClick={() => {
-            deleteTask.mutate(task.id, {
-              onSuccess: () =>
-                toast(t('undo.deleted', { title: task.title }), {
-                  action: {
-                    label: t('undo.undo'),
-                    onClick: () => undo.mutate(undefined),
-                  },
-                }),
-            })
-            selectTask(null)
-          }}
+          onClick={() => deleteWithUndo(task)}
         >
           <Trash2Icon className="size-4" />
         </Button>

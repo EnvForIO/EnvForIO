@@ -15,6 +15,7 @@ import { useDropTarget } from '@/hooks/useDropTarget'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel } from '@/pages/tasks/dates'
+import { TaskMenu } from '@/pages/tasks/TaskMenu'
 import { isEnter } from '@/lib/keys'
 
 const STAGES: TaskStage[] = ['Todo', 'Doing', 'Done']
@@ -147,44 +148,46 @@ function Card({ task, module }: { task: Task; module?: string | null }) {
   ].filter(f => f !== false)
 
   return (
-    <button
-      type="button"
-      draggable
-      onDragStart={e => {
-        e.dataTransfer.setData(DRAG_TYPE, String(task.id))
-        e.dataTransfer.effectAllowed = 'move'
-      }}
-      onClick={() => selectTask(task.id)}
-      className={cn(
-        'flex shrink-0 cursor-grab flex-col gap-1.5 rounded-md border bg-card p-2.5 text-start shadow-xs hover:border-ring/60 active:cursor-grabbing',
-        selected && 'border-primary'
-      )}
-    >
-      <span
+    <TaskMenu task={task}>
+      <button
+        type="button"
+        draggable
+        onDragStart={e => {
+          e.dataTransfer.setData(DRAG_TYPE, String(task.id))
+          e.dataTransfer.effectAllowed = 'move'
+        }}
+        onClick={() => selectTask(task.id)}
         className={cn(
-          'flex items-start gap-1.5 text-sm',
-          done && 'text-muted-foreground line-through'
+          'flex shrink-0 cursor-grab flex-col gap-1.5 rounded-md border bg-card p-2.5 text-start shadow-xs hover:border-ring/60 active:cursor-grabbing',
+          selected && 'border-primary'
         )}
       >
-        {done && (
-          <CheckIcon className="mt-0.5 size-3.5 shrink-0 text-[#34c759]" />
-        )}
-        {task.title}
-      </span>
-      {(module || task.dueDate || facts.length > 0) && (
-        <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
-          {module && (
-            <span className="rounded bg-muted px-1.5 py-0.5">{module}</span>
+        <span
+          className={cn(
+            'flex items-start gap-1.5 text-sm',
+            done && 'text-muted-foreground line-through'
           )}
-          {task.dueDate && <span>{dateLabel(task.dueDate)}</span>}
-          {facts.map(({ icon: Icon, text }) => (
-            <span key={text} className="flex items-center gap-1">
-              <Icon className="size-3" />
-              {text}
-            </span>
-          ))}
+        >
+          {done && (
+            <CheckIcon className="mt-0.5 size-3.5 shrink-0 text-[#34c759]" />
+          )}
+          {task.title}
         </span>
-      )}
-    </button>
+        {(module || task.dueDate || facts.length > 0) && (
+          <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-muted-foreground">
+            {module && (
+              <span className="rounded bg-muted px-1.5 py-0.5">{module}</span>
+            )}
+            {task.dueDate && <span>{dateLabel(task.dueDate)}</span>}
+            {facts.map(({ icon: Icon, text }) => (
+              <span key={text} className="flex items-center gap-1">
+                <Icon className="size-3" />
+                {text}
+              </span>
+            ))}
+          </span>
+        )}
+      </button>
+    </TaskMenu>
   )
 }

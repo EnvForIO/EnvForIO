@@ -1,6 +1,6 @@
 /**
  * One task in a list: round checkbox, title, a meta line, and a star.
- * Clicking the row opens it in the details pane.
+ * Clicking the row opens it in the details pane; right-click for its menu.
  */
 import { useTranslation } from 'react-i18next'
 import {
@@ -23,6 +23,7 @@ import { formatMinutes } from '@/lib/duration'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 import { dateLabel, isOverdue } from './dates'
+import { TaskMenu } from './TaskMenu'
 
 interface Props {
   task: Task
@@ -122,115 +123,117 @@ export function TaskRow({
   ].filter(Boolean)
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={() => selectTask(task.id)}
-      onKeyDown={e => {
-        // Keys pressed on the buttons inside bubble up here; only the row
-        // itself opens the task.
-        if (e.target !== e.currentTarget) return
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault() // Space would scroll the list
-          selectTask(task.id)
-        }
-      }}
-      className={cn(
-        'group flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-left hover:bg-accent/50',
-        selectedTaskId === task.id && 'bg-accent'
-      )}
-    >
-      {folded !== undefined && (
+    <TaskMenu task={task}>
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={() => selectTask(task.id)}
+        onKeyDown={e => {
+          // Keys pressed on the buttons inside bubble up here; only the row
+          // itself opens the task.
+          if (e.target !== e.currentTarget) return
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault() // Space would scroll the list
+            selectTask(task.id)
+          }
+        }}
+        className={cn(
+          'group flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-left hover:bg-accent/50 data-[state=open]:bg-accent/50',
+          selectedTaskId === task.id && 'bg-accent'
+        )}
+      >
+        {folded !== undefined && (
+          <button
+            type="button"
+            aria-label={
+              folded ? t('tasks.showSubtasks') : t('tasks.hideSubtasks')
+            }
+            aria-expanded={!folded}
+            onClick={e => {
+              e.stopPropagation()
+              onToggleFold?.()
+            }}
+            className="-ms-1.5 -me-2 rounded text-muted-foreground hover:text-foreground"
+          >
+            {folded ? (
+              <ChevronRightIcon className="size-4" />
+            ) : (
+              <ChevronDownIcon className="size-4" />
+            )}
+          </button>
+        )}
+        <button
+          type="button"
+          aria-label={done ? t('tasks.markOpen') : t('tasks.markDone')}
+          onClick={e => {
+            e.stopPropagation()
+            setDone.mutate({ id: task.id, done: !done })
+          }}
+          className={cn(
+            'flex size-5 shrink-0 items-center justify-center rounded-full border-2 border-primary/60',
+            done && 'border-primary bg-primary'
+          )}
+        />
+        <div className="min-w-0 flex-1">
+          <div
+            className={cn(
+              'truncate text-sm',
+              done && 'text-muted-foreground line-through'
+            )}
+          >
+            {task.title}
+          </div>
+          {meta.length > 0 && (
+            <div className="flex min-w-0 gap-3 text-xs text-muted-foreground">
+              {meta}
+            </div>
+          )}
+        </div>
+        {task.isPinned && <PinIcon className="size-4 text-muted-foreground" />}
+        {!done && (
+          <button
+            type="button"
+            aria-label={running ? t('timer.stop') : t('timer.start')}
+            title={running ? t('timer.stop') : t('timer.start')}
+            onClick={e => {
+              e.stopPropagation()
+              if (running) stopTimer.mutate(undefined)
+              else startTimer.mutate(task.id)
+            }}
+            className={cn(
+              !running &&
+                'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+            )}
+          >
+            {running ? (
+              <SquareIcon className="size-3.5 fill-red-500 text-red-500" />
+            ) : (
+              <PlayIcon className="size-3.5 text-muted-foreground" />
+            )}
+          </button>
+        )}
         <button
           type="button"
           aria-label={
-            folded ? t('tasks.showSubtasks') : t('tasks.hideSubtasks')
-          }
-          aria-expanded={!folded}
-          onClick={e => {
-            e.stopPropagation()
-            onToggleFold?.()
-          }}
-          className="-ms-1.5 -me-2 rounded text-muted-foreground hover:text-foreground"
-        >
-          {folded ? (
-            <ChevronRightIcon className="size-4" />
-          ) : (
-            <ChevronDownIcon className="size-4" />
-          )}
-        </button>
-      )}
-      <button
-        type="button"
-        aria-label={done ? t('tasks.markOpen') : t('tasks.markDone')}
-        onClick={e => {
-          e.stopPropagation()
-          setDone.mutate({ id: task.id, done: !done })
-        }}
-        className={cn(
-          'flex size-5 shrink-0 items-center justify-center rounded-full border-2 border-primary/60',
-          done && 'border-primary bg-primary'
-        )}
-      />
-      <div className="min-w-0 flex-1">
-        <div
-          className={cn(
-            'truncate text-sm',
-            done && 'text-muted-foreground line-through'
-          )}
-        >
-          {task.title}
-        </div>
-        {meta.length > 0 && (
-          <div className="flex min-w-0 gap-3 text-xs text-muted-foreground">
-            {meta}
-          </div>
-        )}
-      </div>
-      {task.isPinned && <PinIcon className="size-4 text-muted-foreground" />}
-      {!done && (
-        <button
-          type="button"
-          aria-label={running ? t('timer.stop') : t('timer.start')}
-          title={running ? t('timer.stop') : t('timer.start')}
-          onClick={e => {
-            e.stopPropagation()
-            if (running) stopTimer.mutate(undefined)
-            else startTimer.mutate(task.id)
-          }}
-          className={cn(
-            !running &&
-              'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
-          )}
-        >
-          {running ? (
-            <SquareIcon className="size-3.5 fill-red-500 text-red-500" />
-          ) : (
-            <PlayIcon className="size-3.5 text-muted-foreground" />
-          )}
-        </button>
-      )}
-      <button
-        type="button"
-        aria-label={
-          task.isImportant
-            ? t('tasks.unmarkImportant')
-            : t('tasks.markImportant')
-        }
-        onClick={e => {
-          e.stopPropagation()
-          toggleStar()
-        }}
-      >
-        <StarIcon
-          className={cn(
-            'size-4',
             task.isImportant
-              ? 'fill-primary text-primary'
-              : 'text-muted-foreground'
-          )}
-        />
-      </button>
-    </div>
+              ? t('tasks.unmarkImportant')
+              : t('tasks.markImportant')
+          }
+          onClick={e => {
+            e.stopPropagation()
+            toggleStar()
+          }}
+        >
+          <StarIcon
+            className={cn(
+              'size-4',
+              task.isImportant
+                ? 'fill-primary text-primary'
+                : 'text-muted-foreground'
+            )}
+          />
+        </button>
+      </div>
+    </TaskMenu>
   )
 }
