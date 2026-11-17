@@ -75,25 +75,23 @@ Automatically saves and restores window position, size, and state (maximized, et
 
 ### Context Menus
 
-Native context menus using the built-in Tauri Menu API (no plugin required).
+EnvIO draws its right-click menus itself (`src/components/ui/context-menu.tsx`, Radix) so they match the app; the native Windows menu looked out of place (user, 2026-11-21), and the template's native helper was removed. Wrap the element in `ContextMenu` / `ContextMenuTrigger asChild`, give each item an icon, and mark delete `variant="destructive"`. Use `modal={false}` when an item opens a dialog or an input. The WebView's own browser menu is turned off outside text fields (`src/lib/browser-menu.ts`).
 
-**Usage** (`src/lib/context-menu.ts`):
-
-```typescript
-import { showContextMenu, showEditContextMenu } from '@/lib/context-menu'
-
-// Custom menu
-await showContextMenu([
-  { id: 'copy', label: 'Copy', accelerator: 'CmdOrCtrl+C', action: handleCopy },
-  { type: 'separator' },
-  { id: 'delete', label: 'Delete', action: handleDelete },
-])
-
-// Standard edit menu (Cut, Copy, Paste, Select All)
-await showEditContextMenu()
-
-// Text input menu (includes Undo/Redo)
-await showTextInputContextMenu()
+```tsx
+<ContextMenu modal={false}>
+  <ContextMenuTrigger asChild>{row}</ContextMenuTrigger>
+  <ContextMenuContent>
+    <ContextMenuItem onSelect={open}>
+      <PencilIcon />
+      Edit
+    </ContextMenuItem>
+    <ContextMenuSeparator />
+    <ContextMenuItem variant="destructive" onSelect={remove}>
+      <Trash2Icon />
+      Delete
+    </ContextMenuItem>
+  </ContextMenuContent>
+</ContextMenu>
 ```
 
 ### Dialog
@@ -180,7 +178,7 @@ Built into Tauri v2 via the `tray-icon` feature. See [Tauri docs](https://v2.tau
 The Menu API is built into `@tauri-apps/api/menu`. This app uses it for:
 
 - Application menu (File, Edit, View, etc.)
-- Context menus via `src/lib/context-menu.ts`
+- Context menus are app-drawn (`src/components/ui/context-menu.tsx`), not native
 
 ## Plugins to Consider Adding
 

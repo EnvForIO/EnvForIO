@@ -2,9 +2,8 @@
  * Turns off the WebView's own right-click menu (Back, Refresh, Save as,
  * Print, More tools), which belongs to a browser, not a desktop app (user
  * decision 2026-11-20). It stays where it does a job: in text fields and
- * on selected text, for cut, copy and paste. Menus the app draws itself
- * (Radix context menus, native Tauri menus) prevent the default first and
- * are left alone.
+ * on selected text, for cut, copy and paste. The app's own menus
+ * (`ui/context-menu.tsx`) prevent the default first and are left alone.
  */
 
 function editable(target: EventTarget | null): boolean {

@@ -5,9 +5,15 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { PlusIcon } from 'lucide-react'
+import { FolderOpenIcon, PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 import { useProjects } from '@/api/projects'
-import { showContextMenu } from '@/lib/context-menu'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
 import type { Project } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
 import { DeleteProjectDialog } from '@/pages/projects/DeleteProjectDialog'
@@ -22,28 +28,6 @@ export function SidebarProjects() {
   const [creating, setCreating] = useState(false)
   const [editing, setEditing] = useState<Project | null>(null)
   const [deleting, setDeleting] = useState<Project | null>(null)
-
-  const openMenu = (e: React.MouseEvent, project: Project) => {
-    e.preventDefault()
-    void showContextMenu([
-      {
-        id: 'open',
-        label: t('projects.open'),
-        action: () => selectProject(project.id),
-      },
-      {
-        id: 'edit',
-        label: t('projects.edit'),
-        action: () => setEditing(project),
-      },
-      { type: 'separator' },
-      {
-        id: 'delete',
-        label: t('projects.delete'),
-        action: () => setDeleting(project),
-      },
-    ])
-  }
 
   return (
     <div className="flex flex-col gap-1 border-t p-2">
@@ -60,27 +44,51 @@ export function SidebarProjects() {
       {projects
         .filter(p => !p.isArchived)
         .map(project => (
-          <button
-            key={project.id}
-            type="button"
-            onClick={() => selectProject(project.id)}
-            onContextMenu={e => openMenu(e, project)}
-            className={cn(
-              'flex items-center gap-3 rounded-md px-3 py-1.5 text-sm hover:bg-accent/60',
-              selectedProjectId === project.id && 'bg-accent font-medium'
-            )}
-          >
-            <span
-              className="size-2.5 rounded-full"
-              style={{ background: project.color }}
-            />
-            <span className="flex-1 truncate text-left">{project.name}</span>
-            {project.taskCount > project.doneCount && (
-              <span className="text-xs text-muted-foreground">
-                {project.taskCount - project.doneCount}
-              </span>
-            )}
-          </button>
+          // Not modal: its items open dialogs, which a modal menu would
+          // leave the page unclickable behind.
+          <ContextMenu key={project.id} modal={false}>
+            <ContextMenuTrigger asChild>
+              <button
+                type="button"
+                onClick={() => selectProject(project.id)}
+                className={cn(
+                  'flex items-center gap-3 rounded-md px-3 py-1.5 text-sm hover:bg-accent/60 data-[state=open]:bg-accent/60',
+                  selectedProjectId === project.id && 'bg-accent font-medium'
+                )}
+              >
+                <span
+                  className="size-2.5 rounded-full"
+                  style={{ background: project.color }}
+                />
+                <span className="flex-1 truncate text-left">
+                  {project.name}
+                </span>
+                {project.taskCount > project.doneCount && (
+                  <span className="text-xs text-muted-foreground">
+                    {project.taskCount - project.doneCount}
+                  </span>
+                )}
+              </button>
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem onSelect={() => selectProject(project.id)}>
+                <FolderOpenIcon />
+                {t('projects.open')}
+              </ContextMenuItem>
+              <ContextMenuItem onSelect={() => setEditing(project)}>
+                <PencilIcon />
+                {t('projects.edit')}
+              </ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem
+                variant="destructive"
+                onSelect={() => setDeleting(project)}
+              >
+                <Trash2Icon />
+                {t('projects.delete')}
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
         ))}
       <ProjectDialog open={creating} onOpenChange={setCreating} />
       {editing && (
