@@ -125,10 +125,12 @@ export function CardRow({ task, day }: { task: Task; day: string }) {
           <PencilIcon />
           {t('duo.menu.rename')}
         </ContextMenuItem>
-        <ContextMenuItem onSelect={() => save({ isPinned: !task.isPinned })}>
-          <PinIcon />
-          {task.isPinned ? t('tasks.unpin') : t('tasks.pin')}
-        </ContextMenuItem>
+        {task.parentId === null && (
+          <ContextMenuItem onSelect={() => save({ isPinned: !task.isPinned })}>
+            <PinIcon />
+            {task.isPinned ? t('tasks.unpin') : t('tasks.pin')}
+          </ContextMenuItem>
+        )}
         <ContextMenuItem
           onSelect={() => save({ isImportant: !task.isImportant })}
         >

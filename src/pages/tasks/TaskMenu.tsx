@@ -72,10 +72,13 @@ export function TaskMenu({
             ? t('tasks.unmarkImportant')
             : t('tasks.markImportant')}
         </ContextMenuItem>
-        <ContextMenuItem onSelect={() => save({ isPinned: !task.isPinned })}>
-          {task.isPinned ? <PinOffIcon /> : <PinIcon />}
-          {task.isPinned ? t('tasks.unpin') : t('tasks.pin')}
-        </ContextMenuItem>
+        {/* A subtask keeps its place under its parent, so it has no pin. */}
+        {task.parentId === null && (
+          <ContextMenuItem onSelect={() => save({ isPinned: !task.isPinned })}>
+            {task.isPinned ? <PinOffIcon /> : <PinIcon />}
+            {task.isPinned ? t('tasks.unpin') : t('tasks.pin')}
+          </ContextMenuItem>
+        )}
         <ContextMenuItem
           onSelect={() => setDone.mutate({ id: task.id, done: !done })}
         >

@@ -106,13 +106,18 @@ function TaskDetailsForm({ task }: { task: Task }) {
         : t('tasks.markImportant'),
       change: { isImportant: !task.isImportant },
     },
-    {
-      key: 'pin',
-      on: task.isPinned,
-      icon: PinIcon,
-      label: task.isPinned ? t('tasks.unpin') : t('tasks.pin'),
-      change: { isPinned: !task.isPinned },
-    },
+    // A subtask keeps its place under its parent, so it has no pin.
+    ...(task.parentId === null
+      ? [
+          {
+            key: 'pin',
+            on: task.isPinned,
+            icon: PinIcon,
+            label: task.isPinned ? t('tasks.unpin') : t('tasks.pin'),
+            change: { isPinned: !task.isPinned },
+          },
+        ]
+      : []),
   ]
 
   return (
