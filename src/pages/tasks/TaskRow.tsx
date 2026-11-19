@@ -1,11 +1,13 @@
 /**
- * One task in a list: round checkbox, title, a meta line, and a star.
+ * One task in a list, as a ledger row (user choice 2026-11-21): no box,
+ * a hairline under it, the title with a short meta line, and two aligned
+ * columns at the right for the estimate and the date, so a list reads
+ * down like a table. The star shows on hover unless the task is starred.
  * Clicking the row opens it in the details pane; right-click for its menu.
  */
 import { useTranslation } from 'react-i18next'
 import {
-  CalendarCheckIcon,
-  CalendarClockIcon,
+  CheckIcon,
   ChevronDownIcon,
   ChevronRightIcon,
   CornerDownRightIcon,
@@ -44,7 +46,7 @@ export function TaskRow({
 }: Props) {
   const { t } = useTranslation()
   const today = useToday()
-  const selectedTaskId = useUIStore(state => state.selectedTaskId)
+  const selected = useUIStore(state => state.selectedTaskId === task.id)
   const selectTask = useUIStore(state => state.selectTask)
   const setDone = useSetTaskDone()
   const updateTask = useUpdateTask()
@@ -60,16 +62,25 @@ export function TaskRow({
       update: { ...toUpdate(task), isImportant: !task.isImportant },
     })
 
-  // A day still to come that the task is planned for ("Do on"); today's is
-  // "My Day", and a planned day that passed no longer counts.
-  const doOn =
-    !done && task.scheduledDate !== null && today && task.scheduledDate > today
-      ? task.scheduledDate
-      : null
+  // The date column: the deadline when there is one, else a day still to
+  // come that the task is planned for ("Do on"). Each carries its word, so
+  // the two never look alike (critique 2026-11-21).
+  const overdue =
+    !done && task.dueDate !== null && isOverdue(task.dueDate, today)
+  const date =
+    task.dueDate !== null
+      ? t('tasks.dueLabel', {
+          date:
+            task.dueDate === today ? t('tasks.today') : dateLabel(task.dueDate),
+        })
+      : !done &&
+          task.scheduledDate !== null &&
+          today &&
+          task.scheduledDate > today
+        ? t('tasks.doOnLabel', { date: dateLabel(task.scheduledDate) })
+        : null
 
-  // The meta line only repeats what the current list does not already say.
-  // Do on and Due each carry their word, so the two dates never look alike
-  // (critique 2026-11-21).
+  // The meta line only says what the columns and the list do not.
   const meta = [
     task.parentTitle !== null && !nested && (
       <span key="parent" className="flex min-w-0 items-center gap-1">
@@ -82,19 +93,10 @@ export function TaskRow({
         <SunIcon className="size-3" /> {t('tasks.myDay')}
       </span>
     ),
-    doOn && (
-      <span key="do-on" className="flex items-center gap-1">
-        <CalendarCheckIcon className="size-3" />
-        {t('tasks.doOnLabel', { date: dateLabel(doOn) })}
-      </span>
-    ),
     task.startTime !== null && (
-      <span key="time">
+      <span key="time" className="tabular-nums">
         {task.endTime ? `${task.startTime}–${task.endTime}` : task.startTime}
       </span>
-    ),
-    task.estimateMinutes !== null && (
-      <span key="estimate">{formatMinutes(task.estimateMinutes)}</span>
     ),
     task.subtaskCount > 0 && (
       <span key="subtasks" className="flex items-center gap-1">
@@ -102,21 +104,6 @@ export function TaskRow({
         {t('tasks.subtasksProgress', {
           done: task.subtasksDone,
           total: task.subtaskCount,
-        })}
-      </span>
-    ),
-    task.dueDate !== null && (
-      <span
-        key="due"
-        className={cn(
-          'flex items-center gap-1',
-          !done && isOverdue(task.dueDate, today) && 'text-destructive'
-        )}
-      >
-        <CalendarClockIcon className="size-3" />
-        {t('tasks.dueLabel', {
-          date:
-            task.dueDate === today ? t('tasks.today') : dateLabel(task.dueDate),
         })}
       </span>
     ),
@@ -138,46 +125,64 @@ export function TaskRow({
           }
         }}
         className={cn(
-          'group flex items-center gap-3 rounded-md border bg-card px-3 py-2 text-left hover:bg-accent/50 data-[state=open]:bg-accent/50',
-          selectedTaskId === task.id && 'bg-accent'
+          'group flex items-center gap-3 border-b px-2 text-start outline-none hover:bg-foreground/[0.03] focus-visible:bg-foreground/[0.03] data-[state=open]:bg-foreground/[0.03]',
+          nested ? 'min-h-9 py-1.5' : 'min-h-11 py-2',
+          selected && 'bg-ink-soft/60 hover:bg-ink-soft/60'
         )}
       >
-        {folded !== undefined && (
-          <button
-            type="button"
-            aria-label={
-              folded ? t('tasks.showSubtasks') : t('tasks.hideSubtasks')
-            }
-            aria-expanded={!folded}
-            onClick={e => {
-              e.stopPropagation()
-              onToggleFold?.()
-            }}
-            className="-ms-1.5 -me-2 rounded text-muted-foreground hover:text-foreground"
-          >
-            {folded ? (
-              <ChevronRightIcon className="size-4" />
-            ) : (
-              <ChevronDownIcon className="size-4" />
+        {/* A gutter for the fold chevron on every top-level row, so all
+            the checkboxes and titles line up. */}
+        {!nested && (
+          <span className="-me-1.5 flex w-4 shrink-0 justify-center">
+            {folded !== undefined && (
+              <button
+                type="button"
+                aria-label={
+                  folded ? t('tasks.showSubtasks') : t('tasks.hideSubtasks')
+                }
+                aria-expanded={!folded}
+                onClick={e => {
+                  e.stopPropagation()
+                  onToggleFold?.()
+                }}
+                className="rounded text-muted-foreground hover:text-foreground"
+              >
+                {folded ? (
+                  <ChevronRightIcon className="size-4" />
+                ) : (
+                  <ChevronDownIcon className="size-4" />
+                )}
+              </button>
             )}
-          </button>
+          </span>
         )}
         <button
           type="button"
+          role="checkbox"
+          aria-checked={done}
           aria-label={done ? t('tasks.markOpen') : t('tasks.markDone')}
           onClick={e => {
             e.stopPropagation()
             setDone.mutate({ id: task.id, done: !done })
           }}
           className={cn(
-            'flex size-5 shrink-0 items-center justify-center rounded-full border-2 border-primary/60',
+            'flex shrink-0 items-center justify-center rounded-[5px] border-[1.5px] border-muted-foreground/50 transition-colors hover:border-primary',
+            nested ? 'size-3.5' : 'size-4',
             done && 'border-primary bg-primary'
           )}
-        />
+        >
+          {done && (
+            <CheckIcon
+              className="size-3 text-primary-foreground"
+              strokeWidth={3}
+            />
+          )}
+        </button>
         <div className="min-w-0 flex-1">
           <div
             className={cn(
-              'truncate text-sm',
+              'truncate',
+              nested ? 'text-[13px]' : 'text-sm',
               done && 'text-muted-foreground line-through'
             )}
           >
@@ -189,7 +194,9 @@ export function TaskRow({
             </div>
           )}
         </div>
-        {task.isPinned && <PinIcon className="size-4 text-muted-foreground" />}
+        {task.isPinned && (
+          <PinIcon className="size-3.5 shrink-0 text-muted-foreground" />
+        )}
         {!done && (
           <button
             type="button"
@@ -206,12 +213,23 @@ export function TaskRow({
             )}
           >
             {running ? (
-              <SquareIcon className="size-3.5 fill-red-500 text-red-500" />
+              <SquareIcon className="size-3.5 fill-destructive text-destructive" />
             ) : (
               <PlayIcon className="size-3.5 text-muted-foreground" />
             )}
           </button>
         )}
+        <span className="w-12 shrink-0 text-end text-xs text-muted-foreground tabular-nums">
+          {task.estimateMinutes !== null && formatMinutes(task.estimateMinutes)}
+        </span>
+        <span
+          className={cn(
+            'w-28 shrink-0 truncate text-end text-xs text-muted-foreground',
+            overdue && 'text-destructive'
+          )}
+        >
+          {date}
+        </span>
         <button
           type="button"
           aria-label={
@@ -223,6 +241,10 @@ export function TaskRow({
             e.stopPropagation()
             toggleStar()
           }}
+          className={cn(
+            !task.isImportant &&
+              'opacity-0 group-hover:opacity-100 focus-visible:opacity-100'
+          )}
         >
           <StarIcon
             className={cn(

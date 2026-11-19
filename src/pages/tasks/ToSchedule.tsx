@@ -22,11 +22,11 @@ export function ToSchedule({ today }: { today: string }) {
   if (tasks.length === 0) return null
 
   return (
-    <div className="mt-3 flex flex-col gap-1">
+    <div className="mt-5 flex flex-col gap-1">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-sm font-medium"
+        className="mb-1 flex items-center gap-1 text-[13px] font-medium text-muted-foreground hover:text-foreground"
       >
         {open ? (
           <ChevronDownIcon className="size-4" />

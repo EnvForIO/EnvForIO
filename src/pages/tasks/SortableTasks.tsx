@@ -95,7 +95,7 @@ export function SortableTasks({
         drop()
       }}
       className={cn(
-        'relative flex flex-col gap-1',
+        'relative flex flex-col',
         dragged === task.id && 'opacity-40'
       )}
     >
@@ -103,7 +103,7 @@ export function SortableTasks({
         <span
           className={cn(
             'pointer-events-none absolute inset-x-1 z-10 h-0.5 rounded-full bg-primary',
-            target.after ? '-bottom-[3px]' : '-top-[3px]'
+            target.after ? '-bottom-px' : '-top-px'
           )}
         />
       )}
@@ -114,7 +114,9 @@ export function SortableTasks({
         onToggleFold={() => toggle(task.id)}
       />
       {subtasks.length > 0 && !folded.has(task.id) && (
-        <div className="ms-7 flex flex-col gap-1">
+        // Indented past the parent's gutter and checkbox, with an ink rule
+        // marking them as one group.
+        <div className="ms-[3.25rem] flex flex-col border-s-2 border-ink-soft ps-1">
           {subtasks.map(subtask => (
             <TaskRow key={subtask.id} task={subtask} view={view} nested />
           ))}

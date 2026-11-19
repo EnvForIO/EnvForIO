@@ -16,6 +16,16 @@ The lasting decisions behind EnvIO: technology, the libraries used instead of ou
 | UI language            | English only (decided 2026-11-19: the template's Arabic and French files were removed). The `i18next` + `react-i18next` setup stays, and every string goes through the translation function. |
 | Docs language          | English (decided 2026-11-19)                                                                                                                                                                 |
 
+## Look: Ledger with a day strip
+
+Chosen by the user on 2026-11-21 from seven drawn directions ("B + F"), after a review found the app was still the shadcn template's grey: a bordered card per row, four styles of the same control, and Monitor's Apple look beside the rest.
+
+- **Ledger**: white paper, cool grey hairlines, one ink-blue accent (`--primary`, `--ink-soft`, `--ink-text` in `theme-variables.css`) for what is selected or primary, red only for what is late. IBM Plex Sans, bundled (`@fontsource-variable/ibm-plex-sans`, OFL), 14px body.
+- **Lists are ledger rows**, not cards: a hairline under each row, the estimate and the date in aligned columns at the right (`TaskRow`), subtasks indented behind an ink rule, the star shown on hover unless set.
+- **Sidebar**: a tinted panel; entries share `components/layout/nav-item.ts`, the selected one in ink on `--ink-soft`.
+- **Day strip** (`pages/plans/DayStrip.tsx`) beside My Day: the day's available time as a column, a block per project's share of today's safety line and per other task of today with an estimate or a time slot, the free time dashed, and a red rule where the day runs out.
+- Still to bring into this look: one segmented control for the filter and view switches, the Calendar, Research, Stats, Reader and Monitor pages, and one chart palette.
+
 ## What we do not build ourselves
 
 Rule: the project skeleton and general capabilities come from mature open-source projects; only logic specific to EnvIO is written by us.
