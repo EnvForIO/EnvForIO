@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { useTasks } from '@/api/tasks'
 import type { TaskView } from '@/lib/tauri-bindings'
-import { cn } from '@/lib/utils'
+import { navCountClass, navItemClass } from './nav-item'
 import { isResearchTab } from '@/pages/research/tabs'
 import { useUIStore, type MainPage } from '@/store/ui-store'
 
@@ -42,15 +42,12 @@ function NavItem({ view, icon: Icon }: { view: TaskView; icon: LucideIcon }) {
     <button
       type="button"
       onClick={() => selectView(view)}
-      className={cn(
-        'flex items-center gap-3 rounded-md px-3 py-1.5 text-sm hover:bg-accent/60',
-        selected && 'bg-accent font-medium'
-      )}
+      className={navItemClass(selected)}
     >
       <Icon className="size-4" />
-      <span className="flex-1 text-left">{t(`tasks.view.${view}`)}</span>
+      <span className="text-start">{t(`tasks.view.${view}`)}</span>
       {openCount > 0 && (
-        <span className="text-xs text-muted-foreground">{openCount}</span>
+        <span className={navCountClass(selected)}>{openCount}</span>
       )}
     </button>
   )
@@ -68,27 +65,24 @@ function PageItem({ page, icon: Icon }: { page: MainPage; icon: LucideIcon }) {
     <button
       type="button"
       onClick={() => openPage(page)}
-      className={cn(
-        'flex items-center gap-3 rounded-md px-3 py-1.5 text-sm hover:bg-accent/60',
-        open && 'bg-accent font-medium'
-      )}
+      className={navItemClass(open)}
     >
       <Icon className="size-4" />
-      <span className="flex-1 text-left">{t(`${page}.title`)}</span>
+      <span className="text-start">{t(`${page}.title`)}</span>
     </button>
   )
 }
 
 export function SidebarNav() {
   return (
-    <nav className="flex flex-col gap-1 p-2">
+    <nav className="flex flex-col gap-0.5 px-2 pt-3 pb-2">
       {VIEWS.map(item => (
         <NavItem key={item.view} {...item} />
       ))}
       <PageItem page="calendar" icon={CalendarRangeIcon} />
-      <div className="my-1 border-t" />
+      <div className="mx-2.5 my-2 border-t border-sidebar-border" />
       <PageItem page="research" icon={LightbulbIcon} />
-      <div className="my-1 border-t" />
+      <div className="mx-2.5 my-2 border-t border-sidebar-border" />
       <PageItem page="reader" icon={RssIcon} />
       <PageItem page="monitor" icon={ActivityIcon} />
       {/* Below Monitor (user request 2026-11-21). */}

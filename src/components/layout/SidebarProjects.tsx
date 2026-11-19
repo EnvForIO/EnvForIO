@@ -15,7 +15,7 @@ import {
   ContextMenuTrigger,
 } from '@/components/ui/context-menu'
 import type { Project } from '@/lib/tauri-bindings'
-import { cn } from '@/lib/utils'
+import { navCountClass, navItemClass } from './nav-item'
 import { DeleteProjectDialog } from '@/pages/projects/DeleteProjectDialog'
 import { ProjectDialog } from '@/pages/projects/ProjectDialog'
 import { useUIStore } from '@/store/ui-store'
@@ -30,13 +30,14 @@ export function SidebarProjects() {
   const [deleting, setDeleting] = useState<Project | null>(null)
 
   return (
-    <div className="flex flex-col gap-1 border-t p-2">
-      <div className="flex items-center justify-between px-3 pb-1 text-xs font-medium text-muted-foreground">
+    <div className="flex flex-col gap-0.5 border-t border-sidebar-border px-2 pt-3 pb-2">
+      <div className="flex items-center justify-between px-2.5 pb-1 text-xs text-muted-foreground">
         {t('projects.title')}
         <button
           type="button"
           onClick={() => setCreating(true)}
           aria-label={t('projects.new')}
+          className="rounded p-0.5 hover:bg-foreground/5 hover:text-foreground"
         >
           <PlusIcon className="size-4" />
         </button>
@@ -51,20 +52,19 @@ export function SidebarProjects() {
               <button
                 type="button"
                 onClick={() => selectProject(project.id)}
-                className={cn(
-                  'flex items-center gap-3 rounded-md px-3 py-1.5 text-sm hover:bg-accent/60 data-[state=open]:bg-accent/60',
-                  selectedProjectId === project.id && 'bg-accent font-medium'
-                )}
+                className={navItemClass(selectedProjectId === project.id)}
               >
                 <span
-                  className="size-2.5 rounded-full"
+                  className="mx-[3px] size-2.5 shrink-0 rounded-full"
                   style={{ background: project.color }}
                 />
-                <span className="flex-1 truncate text-left">
+                <span className="min-w-0 truncate text-start">
                   {project.name}
                 </span>
                 {project.taskCount > project.doneCount && (
-                  <span className="text-xs text-muted-foreground">
+                  <span
+                    className={navCountClass(selectedProjectId === project.id)}
+                  >
                     {project.taskCount - project.doneCount}
                   </span>
                 )}

@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
+/* Bundled, so the app looks the same offline (IBM Plex Sans, OFL). */
+@import '@fontsource-variable/ibm-plex-sans';
 @import './theme-variables.css';
 
 @custom-variant dark (&:is(.dark *));
@@ -22,8 +24,9 @@
 
   body {
     @apply font-sans text-foreground;
-    font-size: 16px;
-    line-height: 1.6;
+    /* A work tool, not an article: 14px with a working line height. */
+    font-size: 14px;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     user-select: none;

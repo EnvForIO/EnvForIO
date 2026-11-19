@@ -16,7 +16,7 @@ export function SidebarTimer() {
   if (!timer) return null
 
   return (
-    <div className="mt-auto flex items-center gap-2 border-t p-3 text-sm">
+    <div className="mt-auto flex items-center gap-2 border-t border-sidebar-border p-3 text-sm text-foreground">
       <span className="size-2 animate-pulse rounded-full bg-red-500" />
       <button
         type="button"
