@@ -15,6 +15,12 @@ const windowName =
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 async function mount(): Promise<void> {
+  // A plain browser in development (design checks): answer the backend
+  // from recorded data. Tree-shaken out of production builds.
+  if (import.meta.env.DEV && !('__TAURI_INTERNALS__' in window)) {
+    const { installBrowserMock } = await import('./dev/browser-mock')
+    installBrowserMock()
+  }
   if (windowName === 'duo-capsule' || windowName === 'duo-card') {
     const { renderDuo } = await import('./windows/duo')
     renderDuo(root, windowName === 'duo-capsule' ? 'capsule' : 'card')

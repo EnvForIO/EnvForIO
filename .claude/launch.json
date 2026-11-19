@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "envio-web",
+      "runtimeExecutable": "wsl",
+      "runtimeArgs": [
+        "-d",
+        "Ubuntu-24.04",
+        "--",
+        "bash",
+        "-ic",
+        "cd ~/EnvIO && npm run dev"
+      ],
+      "port": 1420
+    }
+  ]
+}
