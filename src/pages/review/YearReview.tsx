@@ -66,12 +66,10 @@ export function YearReview({ offset, open, onOpenChange }: Props) {
         </DialogHeader>
         <div
           ref={card}
-          className="flex flex-col gap-5 rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-fuchsia-500 p-6 text-white"
+          className="flex flex-col gap-5 rounded-xl bg-primary p-6 text-primary-foreground"
         >
           <div>
-            <p className="text-xs tracking-widest uppercase opacity-80">
-              EnvIO
-            </p>
+            <p className="text-sm font-medium opacity-80">EnvIO</p>
             <p className="text-3xl font-bold">
               {t('review.headline', { year })}
             </p>

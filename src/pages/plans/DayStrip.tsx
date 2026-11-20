@@ -85,7 +85,7 @@ export function DayStrip() {
         <div
           className={cn(
             'text-sm font-medium tabular-nums',
-            over ? 'text-destructive' : 'text-ink-text'
+            over ? 'text-destructive' : 'text-foreground'
           )}
         >
           {capacity === null
@@ -115,8 +115,8 @@ export function DayStrip() {
               }
               className={cn(
                 'flex shrink-0 flex-col overflow-hidden rounded-[5px] px-2 text-start text-[11px] leading-tight transition-opacity hover:opacity-80',
-                b.color === null && 'bg-ink-soft text-ink-text',
-                b.done && 'opacity-45'
+                b.color === null && 'bg-selected text-selected-text',
+                b.done && 'line-through decoration-1'
               )}
               style={{
                 height,
@@ -124,7 +124,6 @@ export function DayStrip() {
                 ...(b.color !== null && {
                   background: `color-mix(in oklab, ${b.color} 16%, var(--background))`,
                   color: `color-mix(in oklab, ${b.color} 70%, var(--foreground))`,
-                  boxShadow: `inset 2px 0 0 ${b.color}`,
                 }),
               }}
             >
@@ -173,7 +172,7 @@ export function DayStrip() {
         <button
           type="button"
           onClick={() => openPreferencesAt('planning')}
-          className="text-start text-xs text-ink-text hover:underline"
+          className="text-start text-xs text-primary hover:underline"
         >
           {t('plans.strip.noTime')}
         </button>

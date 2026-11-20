@@ -51,7 +51,7 @@ export function DayCell(props: Props) {
             'flex min-h-0 flex-col gap-0.5 overflow-hidden border-r border-b p-1',
             tall ? 'min-h-64' : 'min-h-20',
             outside && 'bg-muted/40 text-muted-foreground',
-            dropping && 'bg-primary/10'
+            dropping && 'bg-selected/60'
           )}
         >
           <div className="flex items-center gap-1 text-xs">

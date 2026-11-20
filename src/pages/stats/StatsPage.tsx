@@ -15,24 +15,16 @@ import type { Period } from '@/lib/tauri-bindings'
 import { Heatmap } from '@/pages/duo/Heatmap'
 import { dateLabel } from '@/pages/tasks/dates'
 import { YearReview } from '@/pages/review/YearReview'
+import { Section, Summary } from '@/components/ui/ledger'
+import { Segmented } from '@/components/ui/segmented'
 import {
   ProjectProgress,
-  Section,
   Trend,
   WeeklyRhythm,
   WhereTimeWent,
 } from './StatsSections'
 
 const PERIODS: Period[] = ['Week', 'Month', 'Year']
-
-function Tile({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex flex-col rounded-md border p-3">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-xl font-semibold">{value}</span>
-    </div>
-  )
-}
 
 export function StatsPage() {
   const { t } = useTranslation()
@@ -48,24 +40,25 @@ export function StatsPage() {
       : null
 
   return (
-    <div className="flex h-full flex-col gap-3 px-5 py-4">
+    <div className="flex h-full flex-col gap-3 px-8 pt-6">
       <header className="flex items-center gap-2">
-        <h1 className="flex-1 text-xl font-semibold">{t('stats.title')}</h1>
+        <h1 className="flex-1 text-[22px] font-semibold tracking-tight">
+          {t('stats.title')}
+        </h1>
         {period === 'Year' && (
           <Button size="sm" variant="ghost" onClick={() => setReviewing(true)}>
             {t('review.open')}
           </Button>
         )}
-        {PERIODS.map(p => (
-          <Button
-            key={p}
-            size="sm"
-            variant={p === period ? 'default' : 'outline'}
-            onClick={() => (setPeriod(p), setOffset(0))}
-          >
-            {t(`stats.period.${p}`)}
-          </Button>
-        ))}
+        <Segmented
+          value={period}
+          options={PERIODS.map(p => ({
+            value: p,
+            label: t(`stats.period.${p}`),
+          }))}
+          onChange={p => (setPeriod(p), setOffset(0))}
+          label={t('stats.periodLabel')}
+        />
       </header>
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Button
@@ -98,24 +91,28 @@ export function StatsPage() {
           <p className="text-sm text-destructive">{t('stats.loadFailed')}</p>
         )}
         {stats && (
-          <div className="flex flex-col gap-3 pr-3">
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-              <Tile label={t('stats.done')} value={String(stats.done)} />
-              <Tile
-                label={t('stats.time')}
-                value={formatMinutes(stats.minutes)}
-              />
-              <Tile
-                label={t('stats.rate')}
-                value={rate === null ? '–' : `${rate}%`}
-              />
-              <Tile
-                label={t('stats.activeDays')}
-                value={`${stats.activeDays} / ${stats.days}`}
-              />
-            </div>
+          <div className="flex flex-col gap-10 pe-3 pb-6">
+            <Summary
+              items={[
+                {
+                  value: String(stats.done),
+                  label: t('stats.sum.done', { count: stats.done }),
+                },
+                {
+                  value: formatMinutes(stats.minutes),
+                  label: t('stats.sum.time'),
+                },
+                ...(rate === null
+                  ? []
+                  : [{ value: `${rate}%`, label: t('stats.sum.rate') }]),
+                {
+                  value: `${stats.activeDays}`,
+                  label: t('stats.sum.active', { days: stats.days }),
+                },
+              ]}
+            />
             <Trend stats={stats} />
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-x-10 gap-y-8 md:grid-cols-2">
               <WhereTimeWent stats={stats} />
               <WeeklyRhythm stats={stats} />
             </div>

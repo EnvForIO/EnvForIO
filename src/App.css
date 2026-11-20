@@ -1,7 +1,5 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-/* Bundled, so the app looks the same offline (IBM Plex Sans, OFL). */
-@import '@fontsource-variable/ibm-plex-sans';
 @import './theme-variables.css';
 
 @custom-variant dark (&:is(.dark *));
@@ -29,15 +27,50 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    user-select: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
     overscroll-behavior: none;
     min-height: 100vh;
-    min-width: 100vw;
-    overflow: hidden;
+    width: 100%;
+    overflow: clip;
     position: relative;
+    color-scheme: light;
+    accent-color: var(--primary);
+    scrollbar-color: color-mix(in oklab, var(--foreground) 28%, transparent)
+      transparent;
+  }
+  .dark body {
+    color-scheme: dark;
+  }
+
+  /* Chrome is not text to copy, but content is: task titles, notes and
+     articles can be selected (review 2026-11-21; the template turned
+     selection off for the whole app). */
+  button,
+  nav,
+  [role='button'],
+  [role='tab'],
+  [role='radiogroup'],
+  [data-tauri-drag-region] {
+    user-select: none;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 22%, transparent);
+  }
+
+  /* One keyboard focus ring for every control, shown at once. Text fields
+     keep their own field styles. */
+  :where(
+    button,
+    a,
+    summary,
+    [role='button'],
+    [role='tab'],
+    [role='menuitem'],
+    [tabindex]:not([tabindex='-1'])
+  ):focus-visible,
+  :where(input[type='checkbox'], input[type='radio']):focus-visible {
+    outline: 2px solid var(--ring) !important;
+    outline-offset: 2px;
   }
 
   svg {
@@ -67,21 +100,15 @@
   }
 }
 
-/* The Monitor page: Apple's light grey canvas with white tiles (user
-   decision 2026-11-19), Apple's dark greys in dark mode. */
+/* The Monitor page: a light grey canvas with white tiles (user decision
+   2026-11-19), drawn from the Ledger tokens since 2026-11-21 so it shares
+   the app's greys; the green / yellow / red levels stay its own. */
 .monitor {
-  --m-canvas: #f5f5f7;
-  --m-tile: #ffffff;
-  --m-line: #e5e5ea;
-  --m-muted: #86868b;
-  --m-track: #f2f2f7;
-}
-.dark .monitor {
-  --m-canvas: #000000;
-  --m-tile: #1c1c1e;
-  --m-line: #2c2c2e;
-  --m-muted: #8e8e93;
-  --m-track: #2c2c2e;
+  --m-canvas: var(--sidebar);
+  --m-tile: var(--card);
+  --m-line: var(--border);
+  --m-muted: var(--muted-foreground);
+  --m-track: var(--muted);
 }
 
 /* Rendered Markdown (idea notes). Tailwind resets headings and lists, so put them back. */

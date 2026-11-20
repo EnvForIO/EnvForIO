@@ -26,8 +26,10 @@ export function ResearchLayout({
 
   return (
     <div className="flex h-full flex-col">
-      <header className="px-5 pt-4">
-        <h1 className="text-xl font-semibold">{t('research.title')}</h1>
+      <header className="px-8 pt-6">
+        <h1 className="text-[22px] font-semibold tracking-tight">
+          {t('research.title')}
+        </h1>
         <div role="tablist" className="mt-2 flex gap-1 border-b">
           {RESEARCH_TABS.map(id => (
             <button
@@ -37,7 +39,7 @@ export function ResearchLayout({
               aria-selected={id === tab}
               onClick={() => openPage(id)}
               className={cn(
-                '-mb-px border-b-2 px-3 py-1.5 text-sm',
+                '-mb-px border-b-2 px-1 py-2 text-[13px] me-4',
                 id === tab
                   ? 'border-primary font-medium'
                   : 'border-transparent text-muted-foreground hover:text-foreground'

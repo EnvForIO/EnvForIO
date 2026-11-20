@@ -5,7 +5,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { useProjects } from '@/api/projects'
-import { FilterChip } from '@/components/FilterChip'
+import { Segmented } from '@/components/ui/segmented'
 import {
   Select,
   SelectContent,
@@ -32,14 +32,15 @@ export function TaskFilters({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {STATUSES.map(status => (
-        <FilterChip
-          key={status}
-          active={filter.status === status}
-          onClick={() => onChange({ ...filter, status })}
-          label={t(`tasks.filter.${status}`)}
-        />
-      ))}
+      <Segmented
+        value={filter.status}
+        options={STATUSES.map(status => ({
+          value: status,
+          label: t(`tasks.filter.${status}`),
+        }))}
+        onChange={status => onChange({ ...filter, status })}
+        label={t('tasks.filter.status')}
+      />
       <Select
         value={filter.project === null ? ANY : String(filter.project)}
         onValueChange={v =>

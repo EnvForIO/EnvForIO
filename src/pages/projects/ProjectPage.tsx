@@ -85,7 +85,7 @@ function ProjectView({ project }: { project: Project }) {
         />
         <div className="flex-1">
           <h1 className="text-xl font-semibold">{project.name}</h1>
-          <p className="text-sm text-muted-foreground">{dates.join(' · ')}</p>
+          <p className="text-sm text-muted-foreground">{dates.join(', ')}</p>
           <p className="text-sm text-muted-foreground">
             {t('projects.progress', {
               done: project.doneCount,

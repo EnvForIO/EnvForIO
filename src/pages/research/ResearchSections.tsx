@@ -187,7 +187,7 @@ export function DeadlineList({ deadlines }: { deadlines: Deadline[] }) {
           <span className="min-w-0 flex-1 truncate">
             {d.title}
             {d.detail !== '' && (
-              <span className="text-muted-foreground"> · {d.detail}</span>
+              <span className="ms-2 text-muted-foreground">{d.detail}</span>
             )}
           </span>
           <span className="shrink-0 text-xs text-muted-foreground">
@@ -220,7 +220,7 @@ export function TodoList({
         >
           <span className="min-w-0 flex-1 truncate">
             {todo.title}
-            <span className="text-muted-foreground"> · {todo.ideaTitle}</span>
+            <span className="ms-2 text-muted-foreground">{todo.ideaTitle}</span>
           </span>
           {todo.dueDate && (
             <span
@@ -254,7 +254,7 @@ export function ProblemList({ problems }: { problems: OpenProblem[] }) {
         >
           <span className="min-w-0 flex-1 truncate">
             {p.problem}
-            <span className="text-muted-foreground"> · {p.ideaTitle}</span>
+            <span className="ms-2 text-muted-foreground">{p.ideaTitle}</span>
           </span>
         </Row>
       ))}

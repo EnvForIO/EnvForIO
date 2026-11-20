@@ -36,9 +36,9 @@ export function authorsShort(authors: string[]): string {
   return `${family(authors[0] ?? '')} et al.`
 }
 
-/** "Vaswani et al. · 2017 · NeurIPS", skipping what is missing. */
+/** "Vaswani et al., 2017, NeurIPS", skipping what is missing. */
 export function paperByline(paper: Paper): string {
   return [authorsShort(paper.authors), paper.year, paper.venue]
     .filter(part => part !== '' && part !== null)
-    .join(' · ')
+    .join(', ')
 }

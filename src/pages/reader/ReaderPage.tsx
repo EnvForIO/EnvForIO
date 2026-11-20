@@ -36,6 +36,8 @@ import {
 } from '@/components/ui/context-menu'
 import type { FeedItem } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
+import { navCountClass, navItemClass } from '@/components/layout/nav-item'
+import { Segmented } from '@/components/ui/segmented'
 import { ItemView } from './ItemView'
 import { shortDate } from './dates'
 import { isEnter } from '@/lib/keys'
@@ -78,7 +80,9 @@ export function ReaderPage() {
     <div className="flex h-full min-h-0">
       <aside className="flex w-56 shrink-0 flex-col gap-2 border-e p-3">
         <div className="flex items-center gap-1">
-          <h1 className="flex-1 text-lg font-semibold">{t('reader.title')}</h1>
+          <h1 className="flex-1 text-[22px] font-semibold tracking-tight">
+            {t('reader.title')}
+          </h1>
           <Button
             size="icon"
             variant="ghost"
@@ -158,21 +162,15 @@ export function ReaderPage() {
 
       <section className="flex w-80 shrink-0 flex-col border-e">
         <div className="flex items-center gap-1 border-b px-3 py-2 text-xs">
-          {([false, true] as const).map(only => (
-            <button
-              key={String(only)}
-              type="button"
-              onClick={() => setUnreadOnly(only)}
-              className={cn(
-                'rounded-full px-2 py-0.5',
-                unreadOnly === only
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-accent'
-              )}
-            >
-              {only ? t('reader.unread') : t('reader.everything')}
-            </button>
-          ))}
+          <Segmented
+            value={unreadOnly ? 'unread' : 'all'}
+            options={[
+              { value: 'all', label: t('reader.everything') },
+              { value: 'unread', label: t('reader.unread') },
+            ]}
+            onChange={v => setUnreadOnly(v === 'unread')}
+            label={t('reader.showLabel')}
+          />
           <button
             type="button"
             onClick={() => markAll.mutate(feedId)}
@@ -194,8 +192,8 @@ export function ReaderPage() {
                 type="button"
                 onClick={() => open(i)}
                 className={cn(
-                  'flex w-full gap-2.5 border-b px-3 py-2.5 text-start hover:bg-accent/50',
-                  selected === i.id && 'bg-accent'
+                  'flex w-full gap-2.5 border-b px-3 py-2.5 text-start hover:bg-foreground/[0.03]',
+                  selected === i.id && 'bg-selected hover:bg-selected'
                 )}
               >
                 {i.image ? (
@@ -218,7 +216,8 @@ export function ReaderPage() {
                     {i.title}
                   </span>
                   <span className="truncate text-xs text-muted-foreground">
-                    {i.feedTitle} · {shortDate(i.dateMs)}
+                    {i.feedTitle}
+                    <span className="ms-2">{shortDate(i.dateMs)}</span>
                   </span>
                 </span>
               </button>
@@ -252,17 +251,14 @@ function FeedButton(props: {
       type="button"
       onClick={props.onClick}
       title={props.error ?? undefined}
-      className={cn(
-        'flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start text-sm hover:bg-accent/60',
-        props.active && 'bg-accent font-medium'
-      )}
+      className={cn(navItemClass(props.active), 'w-full')}
     >
-      <span className="min-w-0 flex-1 truncate">{props.label}</span>
+      <span className="min-w-0 truncate">{props.label}</span>
       {props.error && (
         <AlertCircleIcon className="size-3.5 shrink-0 text-destructive" />
       )}
       {props.unread > 0 && (
-        <span className="text-xs text-muted-foreground">{props.unread}</span>
+        <span className={navCountClass()}>{props.unread}</span>
       )}
     </button>
   )

@@ -1,20 +1,19 @@
 /**
- * How a sidebar entry looks (Ledger style, 2026-11-21): quiet grey text,
- * a faint wash on hover, and the selected entry in ink on its soft tint.
- * Shared by the lists, the pages and the projects so all three match.
+ * How a sidebar entry looks: plain text, a faint wash on hover, and the
+ * current entry on a neutral grey with a short blue pill at its start, the
+ * way Windows 11 marks the current item (review 2026-11-21: the lavender
+ * tint read as generated). Shared by the lists, the pages, the projects
+ * and Reader's feeds so they match.
  */
 import { cn } from '@/lib/utils'
 
 export const navItemClass = (selected: boolean) =>
   cn(
-    'flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors hover:bg-foreground/5 hover:text-foreground data-[state=open]:bg-foreground/5',
+    'relative flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[13px] transition-colors hover:bg-foreground/[0.05] data-[state=open]:bg-foreground/[0.05]',
     selected &&
-      'bg-ink-soft font-medium text-ink-text hover:bg-ink-soft hover:text-ink-text'
+      "bg-selected font-medium text-selected-text before:absolute before:start-0 before:top-1/2 before:h-4 before:w-[3px] before:-translate-y-1/2 before:rounded-full before:bg-primary before:content-[''] hover:bg-selected"
   )
 
-/** The count at the end of an entry: dim, and ink when the entry is selected. */
-export const navCountClass = (selected: boolean) =>
-  cn(
-    'ms-auto text-xs tabular-nums',
-    selected ? 'text-ink-text/80' : 'text-muted-foreground'
-  )
+/** The count at the end of an entry, always quiet. */
+export const navCountClass = () =>
+  'ms-auto text-xs tabular-nums text-muted-foreground'

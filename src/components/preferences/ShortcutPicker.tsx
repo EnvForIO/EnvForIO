@@ -212,7 +212,7 @@ export function ShortcutPicker({
         )}
       >
         {isCapturing ? (
-          <span className="text-muted-foreground animate-pulse">
+          <span className="text-muted-foreground motion-safe:animate-pulse">
             {pendingShortcut
               ? formatShortcutForDisplay(pendingShortcut)
               : 'Press shortcut...'}

@@ -9,11 +9,13 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* The system's own face: Segoe UI Variable on Windows 11, with YaHei for
+     Chinese, so EnvIO reads as a native app (review 2026-11-21). */
   --font-sans:
-    'IBM Plex Sans Variable', 'Segoe UI', 'Microsoft YaHei UI', 'PingFang SC',
-    sans-serif;
-  --color-ink-soft: var(--ink-soft);
-  --color-ink-text: var(--ink-text);
+    'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', -apple-system,
+    'PingFang SC', sans-serif;
+  --color-selected: var(--selected);
+  --color-selected-text: var(--selected-text);
   --font-mono: ui-monospace, 'Cascadia Code', Consolas, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -54,80 +56,81 @@
 }
 
 /*
- * EnvIO's look, "Ledger" (user choice 2026-11-21): white paper, cool grey
- * hairlines, one ink-blue accent for what is selected or primary, and red
- * only for what is late. Neutrals carry a slight blue tint so the accent
- * belongs to them.
+ * EnvIO's look (revised 2026-11-21 after a review with five design skills
+ * called the Ledger restyle AI-made): Windows 11's own neutrals, its blue
+ * for the one primary action, today and checked boxes, and red only for
+ * what is late. Selection is a neutral grey with a blue pill beside it,
+ * as Windows marks the current item, never a lavender tint.
  */
 :root {
   --background: #ffffff;
-  --foreground: #16181d;
+  --foreground: #1b1b1b;
   --card: #ffffff;
-  --card-foreground: #16181d;
+  --card-foreground: #1b1b1b;
   --popover: #ffffff;
-  --popover-foreground: #16181d;
-  --primary: #23409a;
+  --popover-foreground: #1b1b1b;
+  --primary: #0f6cbd;
   --primary-foreground: #ffffff;
-  --secondary: #f3f4f7;
-  --secondary-foreground: #16181d;
-  --muted: #f3f4f7;
-  --muted-foreground: #646a77;
-  --accent: #eef0f5;
-  --accent-foreground: #16181d;
-  --destructive: #b42318;
-  --border: #e3e5ea;
-  --input: #d6d9e0;
-  --ring: #7d93d6;
-  --ink-soft: #e4e8f4; /* selected rows and nav items */
-  --ink-text: #23409a; /* text on --ink-soft */
+  --secondary: #f5f5f5;
+  --secondary-foreground: #1b1b1b;
+  --muted: #f5f5f5;
+  --muted-foreground: #616161;
+  --accent: #f0f0f0;
+  --accent-foreground: #1b1b1b;
+  --destructive: #c50f1f;
+  --border: #e5e5e5;
+  --input: #d1d1d1;
+  --ring: #0f6cbd;
+  --selected: #ebebeb; /* the current row or nav item */
+  --selected-text: #1b1b1b;
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.5rem;
-  --sidebar: #f4f5f8;
-  --sidebar-foreground: #3f4450;
-  --sidebar-primary: #23409a;
+  --radius: 0.375rem;
+  --sidebar: #f3f3f3;
+  --sidebar-foreground: #242424;
+  --sidebar-primary: #0f6cbd;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e4e8f4;
-  --sidebar-accent-foreground: #23409a;
-  --sidebar-border: #e3e5ea;
-  --sidebar-ring: #7d93d6;
+  --sidebar-accent: #e6e6e6;
+  --sidebar-accent-foreground: #1b1b1b;
+  --sidebar-border: #e5e5e5;
+  --sidebar-ring: #0f6cbd;
 }
 
 .dark {
-  --background: #15171c;
-  --foreground: #e6e8ec;
-  --card: #1a1d23;
-  --card-foreground: #e6e8ec;
-  --popover: #1e2128;
-  --popover-foreground: #e6e8ec;
-  --primary: #8fa8f0;
-  --primary-foreground: #0f1320;
-  --secondary: #22262e;
-  --secondary-foreground: #e6e8ec;
-  --muted: #22262e;
-  --muted-foreground: #8d939e;
-  --accent: #252a33;
-  --accent-foreground: #e6e8ec;
-  --destructive: #f0857a;
-  --border: #2a2e36;
-  --input: #353a45;
-  --ring: #5d78c9;
-  --ink-soft: #222b45;
-  --ink-text: #b8c7f5;
+  --background: #1f1f1f;
+  --foreground: #f0f0f0;
+  --card: #262626;
+  --card-foreground: #f0f0f0;
+  --popover: #2b2b2b;
+  --popover-foreground: #f0f0f0;
+  --primary: #479ef5;
+  --primary-foreground: #0a0a0a;
+  --secondary: #2b2b2b;
+  --secondary-foreground: #f0f0f0;
+  --muted: #2b2b2b;
+  --muted-foreground: #adadad;
+  --accent: #2e2e2e;
+  --accent-foreground: #f0f0f0;
+  --destructive: #f1707b;
+  --border: #333333;
+  --input: #3d3d3d;
+  --ring: #479ef5;
+  --selected: #333333;
+  --selected-text: #f0f0f0;
   --chart-1: oklch(0.809 0.105 251.813);
   --chart-2: oklch(0.623 0.214 259.815);
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: #111317;
-  --sidebar-foreground: #aeb4be;
-  --sidebar-primary: #8fa8f0;
-  --sidebar-primary-foreground: #0f1320;
-  --sidebar-accent: #222b45;
-  --sidebar-accent-foreground: #b8c7f5;
-  --sidebar-border: #23262d;
-  --sidebar-ring: #5d78c9;
+  --sidebar: #191919;
+  --sidebar-foreground: #d6d6d6;
+  --sidebar-primary: #479ef5;
+  --sidebar-primary-foreground: #0a0a0a;
+  --sidebar-accent: #2e2e2e;
+  --sidebar-accent-foreground: #f0f0f0;
+  --sidebar-border: #2b2b2b;
+  --sidebar-ring: #479ef5;
 }

@@ -29,7 +29,8 @@ export function GpuTile({
     <Tile className="flex flex-col gap-2">
       <div className="flex items-baseline gap-2 text-[11px] text-[var(--m-muted)]">
         <span className="truncate">
-          GPU {gpu.index} · {gpuName(gpu.name)}
+          GPU {gpu.index}
+          <span className="ms-2 opacity-80">{gpuName(gpu.name)}</span>
         </span>
         {gpu.temperature !== null && (
           <span

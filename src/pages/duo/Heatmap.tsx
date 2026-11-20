@@ -10,13 +10,17 @@ import { heatmapGrid, type HeatmapRange } from './heatmap-range'
 
 const CELL = { week: 28, month: 22, year: 10 } as const // px per square
 
-/** Four steps of green, like a contribution graph; 0 = has tasks, none done. */
+/**
+ * Four steps of the app's ink, like a contribution graph; 0 = has tasks,
+ * none done. (Green until 2026-11-21; ink since the Ledger look, so the
+ * charts share one colour.)
+ */
 function level(done: number, total: number): string {
   const ratio = done / total
-  if (ratio === 0) return 'bg-emerald-500/15'
-  if (ratio < 0.5) return 'bg-emerald-500/40'
-  if (ratio < 1) return 'bg-emerald-500/70'
-  return 'bg-emerald-500'
+  if (ratio === 0) return 'bg-primary/15'
+  if (ratio < 0.5) return 'bg-primary/40'
+  if (ratio < 1) return 'bg-primary/70'
+  return 'bg-primary'
 }
 
 interface HeatmapProps {

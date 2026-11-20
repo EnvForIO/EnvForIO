@@ -22,9 +22,9 @@ describe('paperByline', () => {
       year: null,
       venue: 'arXiv',
     } as Paper
-    expect(paperByline(paper)).toBe('Lovelace · arXiv')
+    expect(paperByline(paper)).toBe('Lovelace, arXiv')
     expect(paperByline({ ...paper, authors: [], year: 1843 })).toBe(
-      '1843 · arXiv'
+      '1843, arXiv'
     )
   })
 })

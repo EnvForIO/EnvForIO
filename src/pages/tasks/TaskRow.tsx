@@ -125,9 +125,9 @@ export function TaskRow({
           }
         }}
         className={cn(
-          'group flex items-center gap-3 border-b px-2 text-start outline-none hover:bg-foreground/[0.03] focus-visible:bg-foreground/[0.03] data-[state=open]:bg-foreground/[0.03]',
+          'group flex items-center gap-3 rounded-md px-2 text-start hover:bg-foreground/[0.04] data-[state=open]:bg-foreground/[0.04]',
           nested ? 'min-h-9 py-1.5' : 'min-h-11 py-2',
-          selected && 'bg-ink-soft/60 hover:bg-ink-soft/60'
+          selected && 'bg-selected hover:bg-selected'
         )}
       >
         {/* A gutter for the fold chevron on every top-level row, so all
@@ -156,28 +156,28 @@ export function TaskRow({
             )}
           </span>
         )}
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={done}
-          aria-label={done ? t('tasks.markOpen') : t('tasks.markDone')}
-          onClick={e => {
-            e.stopPropagation()
-            setDone.mutate({ id: task.id, done: !done })
-          }}
-          className={cn(
-            'flex shrink-0 items-center justify-center rounded-[5px] border-[1.5px] border-muted-foreground/50 transition-colors hover:border-primary',
-            nested ? 'size-3.5' : 'size-4',
-            done && 'border-primary bg-primary'
-          )}
+        {/* A native checkbox drawn with appearance: none, inside a label
+            that gives it a 28px target (modern-web-guidance `checkbox`). */}
+        <label
+          className="relative -m-1.5 grid size-7 shrink-0 place-items-center"
+          onClick={e => e.stopPropagation()}
         >
-          {done && (
-            <CheckIcon
-              className="size-3 text-primary-foreground"
-              strokeWidth={3}
-            />
-          )}
-        </button>
+          <input
+            type="checkbox"
+            checked={done}
+            onChange={() => setDone.mutate({ id: task.id, done: !done })}
+            aria-label={task.title}
+            className={cn(
+              'peer appearance-none rounded-full border-[1.5px] border-muted-foreground/60 transition-colors checked:border-primary checked:bg-primary hover:border-primary',
+              nested ? 'size-4' : 'size-[18px]'
+            )}
+          />
+          <CheckIcon
+            aria-hidden="true"
+            className="pointer-events-none absolute size-3 text-primary-foreground opacity-0 peer-checked:opacity-100"
+            strokeWidth={3}
+          />
+        </label>
         <div className="min-w-0 flex-1">
           <div
             className={cn(

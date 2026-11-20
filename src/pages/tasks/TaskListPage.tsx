@@ -92,7 +92,7 @@ export function TaskListPage() {
             {canAdd && (
               // A ledger row like the tasks under it: the + sits where their
               // checkboxes are.
-              <div className="flex h-11 items-center gap-3 border-b px-2 focus-within:border-primary/60">
+              <div className="mb-1 flex h-10 items-center gap-3 rounded-md bg-muted px-2 focus-within:bg-background focus-within:ring-1 focus-within:ring-input">
                 <span className="-me-1.5 w-4 shrink-0" />
                 <PlusIcon className="size-4 shrink-0 text-muted-foreground" />
                 <input

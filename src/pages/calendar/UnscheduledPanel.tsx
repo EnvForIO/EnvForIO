@@ -20,11 +20,11 @@ export function UnscheduledPanel({ colors }: { colors: Map<number, string> }) {
     <aside
       {...handlers}
       className={cn(
-        'flex w-56 shrink-0 flex-col gap-1 overflow-y-auto border-l p-2',
-        dropping && 'bg-primary/10'
+        'flex w-56 shrink-0 flex-col gap-1 overflow-y-auto border-l px-3 pt-6 pb-3',
+        dropping && 'bg-selected/60'
       )}
     >
-      <h2 className="px-1 text-sm font-semibold">
+      <h2 className="px-1 text-[13px] font-semibold">
         {t('calendar.toSchedule', { count: tasks.length })}
       </h2>
       <p className="px-1 text-xs text-muted-foreground">

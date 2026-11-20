@@ -27,7 +27,8 @@ function NoteInput({ today, saved }: { today: string; saved: string }) {
       onBlur={() => text !== saved && setNote.mutate({ date: today, text })}
       onKeyDown={e => isEnter(e) && e.currentTarget.blur()}
       placeholder={t('tasks.todayNotePlaceholder')}
-      className="w-full bg-transparent text-sm text-muted-foreground italic outline-none placeholder:text-muted-foreground/60"
+      aria-label={t('tasks.todayNoteLabel')}
+      className="w-full bg-transparent text-sm text-muted-foreground italic outline-none placeholder:text-muted-foreground"
     />
   )
 }

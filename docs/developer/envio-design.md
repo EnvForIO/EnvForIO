@@ -16,15 +16,20 @@ The lasting decisions behind EnvIO: technology, the libraries used instead of ou
 | UI language            | English only (decided 2026-11-19: the template's Arabic and French files were removed). The `i18next` + `react-i18next` setup stays, and every string goes through the translation function. |
 | Docs language          | English (decided 2026-11-19)                                                                                                                                                                 |
 
-## Look: Ledger with a day strip
+## Look: native Windows, with a day strip
 
-Chosen by the user on 2026-11-21 from seven drawn directions ("B + F"), after a review found the app was still the shadcn template's grey: a bordered card per row, four styles of the same control, and Monitor's Apple look beside the rest.
+Chosen by the user on 2026-11-21 ("B + F": a ledger list with a strip of today's hours), then revised the same day when the user found it ugly and AI-made. A review with five design skills (hallmark, taste-skill, frontend-design, astryx, modern-web-guidance; not Impeccable) agreed on the cause: a lavender selection tint (Tailwind's indigo pair), hairlines on everything (the broadsheet look), a row of big figures over small labels, middle-dot meta strings, and IBM Plex. What stands now:
 
-- **Ledger**: white paper, cool grey hairlines, one ink-blue accent (`--primary`, `--ink-soft`, `--ink-text` in `theme-variables.css`) for what is selected or primary, red only for what is late. IBM Plex Sans, bundled (`@fontsource-variable/ibm-plex-sans`, OFL), 14px body.
-- **Lists are ledger rows**, not cards: a hairline under each row, the estimate and the date in aligned columns at the right (`TaskRow`), subtasks indented behind an ink rule, the star shown on hover unless set.
-- **Sidebar**: a tinted panel; entries share `components/layout/nav-item.ts`, the selected one in ink on `--ink-soft`.
+- **Native**: Windows 11's neutrals and the system face (Segoe UI Variable, YaHei for Chinese) in `theme-variables.css`, 14px body. Its blue (`--primary`) only for the primary action, today, checked boxes and the current item's pill; red only for what is late. No lavender, no gradients.
+- **Selection** is a neutral grey (`--selected`) with a short blue pill beside the current sidebar entry, as Windows marks it (`components/layout/nav-item.ts`).
+- **Lists**: task rows have no box and no rule; hover and selection are a rounded background. The estimate and the date sit in aligned columns at the right (`TaskRow`); subtasks are indented behind a grey rule; the star shows on hover unless set.
 - **Day strip** (`pages/plans/DayStrip.tsx`) beside My Day: the day's available time as a column, a block per project's share of today's safety line and per other task of today with an estimate or a time slot, the free time dashed, and a red rule where the day runs out.
-- Still to bring into this look: one segmented control for the filter and view switches, the Calendar, Research, Stats, Reader and Monitor pages, and one chart palette.
+- **Switches**: `components/ui/segmented.tsx` on native radio buttons for every one-of-a-few choice; tag filters stay chips (`FilterChip`).
+- **Overview pages** (Research, Stats): the numbers are one sentence (`Summary` in `components/ui/ledger.tsx`), and sections open with a title and space, not a rule.
+- **No middle dots** joining facts: commas in a phrase, separate spans with space for two facts.
+- **Access**: one focus ring for every control (`App.css`); text can be selected except in chrome; checkboxes and radios are native inputs; `::selection`, `scrollbar-color`, `accent-color` and `color-scheme` follow the theme.
+- **Checks**: `npm run dev` opens the frontend in a browser at localhost:1420 with the backend mocked (`src/dev/browser-mock.ts`, answers recorded into the git-ignored `src/dev/fixture.local.json`), so the skills' checkers can run on it.
+- Not reworked yet: the Ideas and Library tabs, the project page and board, the details pane, Preferences, and a bigger role for the day strip as the app's signature.
 
 ## What we do not build ourselves
 

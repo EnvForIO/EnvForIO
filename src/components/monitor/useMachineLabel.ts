@@ -8,6 +8,6 @@ export function useMachineLabel() {
     target.kind === 'local'
       ? t('monitor.thisPc')
       : target.kind === 'wsl'
-        ? `WSL · ${target.distro}`
+        ? `${target.distro} (WSL)`
         : target.host
 }

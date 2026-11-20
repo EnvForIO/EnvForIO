@@ -88,7 +88,7 @@ export function MachineTile({
           type="button"
           onClick={onOpen}
           className={cn(
-            'flex min-h-44 min-w-0 flex-col gap-2 rounded-[14px] border border-[var(--m-line)] bg-[var(--m-tile)] px-3.5 py-3 text-start transition-colors hover:border-[var(--m-muted)]',
+            'flex min-h-44 min-w-0 flex-col gap-2 rounded-[10px] border border-[var(--m-line)] bg-[var(--m-tile)] px-3.5 py-3 text-start transition-colors hover:border-[var(--m-muted)]',
             offline && 'opacity-60'
           )}
         >

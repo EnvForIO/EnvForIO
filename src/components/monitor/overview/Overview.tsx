@@ -43,7 +43,7 @@ export function Overview({
     <div className="flex flex-col gap-3">
       <header className="flex flex-wrap items-center gap-3">
         <div>
-          <h1 className="text-xl font-medium tracking-tight">
+          <h1 className="text-[22px] font-semibold tracking-tight">
             {t('monitor.overviewTitle')}
           </h1>
           <p className="text-xs text-[var(--m-muted)]">

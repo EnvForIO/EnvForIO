@@ -17,7 +17,7 @@ export function Tile({
   return (
     <div
       className={cn(
-        'min-w-0 rounded-[14px] border border-[var(--m-line)] bg-[var(--m-tile)] px-3.5 py-3',
+        'min-w-0 rounded-[10px] border border-[var(--m-line)] bg-[var(--m-tile)] px-3.5 py-3',
         className
       )}
     >
@@ -31,7 +31,7 @@ export function Meter({ value, color }: { value: number; color: string }) {
   return (
     <div className="h-1.5 overflow-hidden rounded-full bg-[var(--m-track)]">
       <div
-        className="h-full rounded-full transition-[width,background-color] duration-500"
+        className="h-full rounded-full transition-colors duration-500"
         style={{
           width: `${Math.min(100, Math.max(0, value))}%`,
           background: color,

@@ -17,7 +17,7 @@ export function SidebarTimer() {
 
   return (
     <div className="mt-auto flex items-center gap-2 border-t border-sidebar-border p-3 text-sm text-foreground">
-      <span className="size-2 animate-pulse rounded-full bg-red-500" />
+      <span className="size-2 rounded-full bg-destructive motion-safe:animate-pulse" />
       <button
         type="button"
         onClick={() => selectTask(timer.taskId)}

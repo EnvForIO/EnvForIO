@@ -45,7 +45,7 @@ export function CpuTile({
         ))}
       </div>
       <p className="truncate text-[11px] text-[var(--m-muted)]">
-        {facts.join(' · ')}
+        {facts.join(', ')}
       </p>
     </Tile>
   )

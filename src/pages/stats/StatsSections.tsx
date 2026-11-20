@@ -7,22 +7,8 @@ import { useProjects } from '@/api/projects'
 import { formatMinutes } from '@/lib/duration'
 import type { Stats } from '@/lib/tauri-bindings'
 import { parseDate } from '@/pages/tasks/dates'
+import { Section } from '@/components/ui/ledger'
 import { BarChart } from './BarChart'
-
-export function Section({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="flex flex-col gap-2 rounded-md border p-3">
-      <h2 className="text-sm font-semibold">{title}</h2>
-      {children}
-    </section>
-  )
-}
 
 /** 'YYYY-MM-DD' -> day of month, 'YYYY-MM' -> short month name. */
 const bucketLabel = (key: string) =>
@@ -96,7 +82,7 @@ export function WhereTimeWent({ stats }: { stats: Stats }) {
             />
           </div>
           <span className="w-24 text-right text-muted-foreground">
-            {formatMinutes(p.minutes)} ·{' '}
+            {formatMinutes(p.minutes)},{' '}
             {t('stats.doneCount', { count: p.done })}
           </span>
         </div>

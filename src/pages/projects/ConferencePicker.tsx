@@ -150,7 +150,7 @@ export function ConferencePicker({
                 >
                   {round.edition.year}
                   {round.stage.comment && ` ${round.stage.comment}`}
-                  {' · '}
+                  {', '}
                   {when(round.at, now)}
                 </Button>
               ))}

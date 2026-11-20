@@ -20,7 +20,7 @@ export function ItemView({ item }: { item: FeedItem }) {
   const setRead = useSetFeedItemRead()
   const byline = [item.feedTitle, item.author, longDate(item.dateMs)]
     .filter(Boolean)
-    .join(' · ')
+    .join(', ')
 
   return (
     <ScrollArea className="h-full">

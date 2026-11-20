@@ -88,7 +88,7 @@ export function IdeaPlan({ idea }: { idea: Idea }) {
                 total: project.taskCount,
               })}
               {project.deadline &&
-                ` · ${t('ideas.projectDue', { date: project.deadline })}`}
+                `, ${t('ideas.projectDue', { date: project.deadline })}`}
             </span>
             <Button
               size="sm"
@@ -114,7 +114,7 @@ export function IdeaPlan({ idea }: { idea: Idea }) {
               {venue.title} {round.edition.year}
             </span>
             <span className="text-muted-foreground">
-              {' · '}
+              {', '}
               {t('conferences.paper')} {when(round.at, now)}
             </span>
           </span>

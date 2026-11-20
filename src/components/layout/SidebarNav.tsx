@@ -46,9 +46,7 @@ function NavItem({ view, icon: Icon }: { view: TaskView; icon: LucideIcon }) {
     >
       <Icon className="size-4" />
       <span className="text-start">{t(`tasks.view.${view}`)}</span>
-      {openCount > 0 && (
-        <span className={navCountClass(selected)}>{openCount}</span>
-      )}
+      {openCount > 0 && <span className={navCountClass()}>{openCount}</span>}
     </button>
   )
 }

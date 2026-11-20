@@ -62,9 +62,7 @@ export function SidebarProjects() {
                   {project.name}
                 </span>
                 {project.taskCount > project.doneCount && (
-                  <span
-                    className={navCountClass(selectedProjectId === project.id)}
-                  >
+                  <span className={navCountClass()}>
                     {project.taskCount - project.doneCount}
                   </span>
                 )}

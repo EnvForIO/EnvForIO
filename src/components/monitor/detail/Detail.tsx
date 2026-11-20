@@ -51,7 +51,7 @@ export function Detail({
     info?.os,
   ]
     .filter(Boolean)
-    .join(' · ')
+    .join(', ')
 
   return (
     <div className="flex flex-col gap-3">
@@ -59,13 +59,13 @@ export function Detail({
         <button
           type="button"
           onClick={onBack}
-          className="flex items-center gap-0.5 text-sm text-[#0071e3] hover:underline"
+          className="flex items-center gap-0.5 text-sm text-primary hover:underline"
         >
           <ChevronLeftIcon className="size-4" />
           {t('monitor.allMachines')}
         </button>
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-medium tracking-tight">
+          <h1 className="truncate text-[22px] font-semibold tracking-tight">
             {label(target)}
           </h1>
           <p className="truncate text-xs text-[var(--m-muted)]">{spec}</p>
@@ -84,7 +84,7 @@ export function Detail({
       </header>
 
       {error && (
-        <div className="flex items-start gap-2 rounded-[14px] border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">
+        <div className="flex items-start gap-2 rounded-[10px] border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm">
           <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-destructive" />
           <div className="flex flex-col gap-0.5">
             <span>{t('monitor.unreachable')}</span>

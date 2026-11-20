@@ -16,6 +16,7 @@ import { useCalendarTasks, useDayNotes, useDayOverrides } from '@/api/calendar'
 import { useProjects } from '@/api/projects'
 import { useToday } from '@/api/tasks'
 import { Button } from '@/components/ui/button'
+import { Segmented } from '@/components/ui/segmented'
 import { useUIStore } from '@/store/ui-store'
 import type { Task } from '@/lib/tauri-bindings'
 import { parseDate } from '@/pages/tasks/dates'
@@ -80,8 +81,10 @@ function CalendarBody({
   return (
     <div className="flex h-full">
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex items-center gap-2 px-4 py-3">
-          <h1 className="flex-1 text-xl font-semibold">{title}</h1>
+        <header className="flex items-center gap-2 px-6 pt-5 pb-3">
+          <h1 className="flex-1 text-[22px] font-semibold tracking-tight">
+            {title}
+          </h1>
           <Button
             variant="ghost"
             size="sm"
@@ -112,20 +115,19 @@ function CalendarBody({
           >
             <ChevronRightIcon className="size-4" />
           </Button>
-          {(['month', 'week'] as const).map(m => (
-            <Button
-              key={m}
-              size="sm"
-              variant={m === mode ? 'default' : 'outline'}
-              onClick={() => setMode(m)}
-            >
-              {t(`calendar.mode.${m}`)}
-            </Button>
-          ))}
+          <Segmented
+            value={mode}
+            options={(['month', 'week'] as const).map(m => ({
+              value: m,
+              label: t(`calendar.mode.${m}`),
+            }))}
+            onChange={setMode}
+            label={t('calendar.modeLabel')}
+          />
         </header>
-        <div className="grid grid-cols-7 border-t border-l text-xs text-muted-foreground">
+        <div className="grid grid-cols-7 border-b border-l text-xs text-muted-foreground">
           {WEEKDAYS.map(day => (
-            <div key={day} className="border-r border-b px-2 py-1">
+            <div key={day} className="px-2 py-1.5">
               {t(`calendar.weekday.${day}`)}
             </div>
           ))}

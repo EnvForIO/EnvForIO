@@ -63,7 +63,7 @@ export function ProjectHealthBadge({ projectId }: { projectId: number }) {
       {state !== 'Done' && state !== 'Unestimated' && (
         <span className="text-muted-foreground">
           {left}
-          {need && ` · ${need}`}
+          {need && `, ${need}`}
         </span>
       )}
       {state === 'NoDailyTime' && (
