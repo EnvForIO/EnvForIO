@@ -11,7 +11,7 @@
 
 Do not report security vulnerabilities through public GitHub issues.
 
-**Contact**: EnvForIO on GitHub
+**Contact**: the EnvForIO organisation on GitHub
 
 Include:
 
