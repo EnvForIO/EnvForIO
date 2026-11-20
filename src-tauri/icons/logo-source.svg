@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <title>EnvForIO app icon</title>
+  <defs>
+    <radialGradient id="bg" cx="52%" cy="52%" r="72%">
+      <stop offset="0" stop-color="#203850"/>
+      <stop offset="0.6" stop-color="#1b3047"/>
+      <stop offset="1" stop-color="#132436"/>
+    </radialGradient>
+    <linearGradient id="chev" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ee9e40"/>
+      <stop offset="0.55" stop-color="#e58f33"/>
+      <stop offset="1" stop-color="#cf7a26"/>
+    </linearGradient>
+    <linearGradient id="hex" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6f8f4"/>
+      <stop offset="1" stop-color="#e6ebe6"/>
+    </linearGradient>
+    <filter id="edge" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.2" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow" x="-50%" y="-100%" width="200%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feColorMatrix in="b" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0" result="c"/>
+      <feMerge><feMergeNode in="c"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="grain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7"/>
+      <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.035 0"/>
+    </filter>
+    <clipPath id="tile"><rect x="28" y="28" width="968" height="968" rx="216"/></clipPath>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.04"/>
+    </linearGradient>
+    <filter id="drop" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <!-- A rounded tile with a margin around it, the shape modern app icons take -->
+  <rect x="28" y="28" width="968" height="968" rx="216" fill="#1b3047" filter="url(#drop)"/>
+  <g clip-path="url(#tile)">
+    <g transform="translate(-8 -21) scale(2.6)">
+
+  <!-- ground: the draft's navy, darker at the edges -->
+  <rect width="400" height="400" fill="url(#bg)"/>
+
+  <!-- HUD frame: corner brackets and a measuring rule -->
+  <g stroke="#4fa3e6" stroke-width="1.2" fill="none" opacity="0.45">
+    <path d="M58 104 L58 92 L70 92"/>
+    <path d="M342 104 L342 92 L330 92"/>
+    <path d="M58 296 L58 308 L70 308"/>
+    <path d="M342 296 L342 308 L330 308"/>
+  </g>
+  <g stroke="#4fa3e6" stroke-width="1" opacity="0.3">
+    <path d="M100 318 L300 318"/>
+    <path d="M100 314 L100 322 M150 316 L150 320 M200 314 L200 322 M250 316 L250 320 M300 314 L300 322"/>
+  </g>
+
+  <!-- circuit traces running out of the cursor blocks -->
+  <g stroke="#3c8fd0" stroke-width="1.2" fill="none" opacity="0.55">
+    <path d="M325 251 L346 251 L356 241 L376 241"/>
+    <path d="M296 270 L296 284 L284 296 L240 296"/>
+  </g>
+  <g fill="#5ab4ff" opacity="0.8">
+    <circle cx="376" cy="241" r="2.2"/>
+    <circle cx="240" cy="296" r="2.2"/>
+  </g>
+
+  <!-- small cyan readouts from the draft -->
+  <g fill="#3aa0e0" opacity="0.75" filter="url(#edge)">
+    <rect x="99" y="82" width="14" height="3" rx="1"/>
+    <rect x="97" y="91" width="9" height="3" rx="1"/>
+    <rect x="211" y="137" width="10" height="3" rx="1"/>
+  </g>
+
+  <!-- the chevron: a dark amber plate with a lit edge, like an indicator -->
+  <path d="M77 129 L130 129 L196 197 L131 268 L84 268 L140 199 Z" fill="url(#chev)"/>
+  <path d="M77 129 L130 129 L196 197 L131 268 L84 268 L140 199 Z" fill="none" stroke="#f6b05a" stroke-width="1.2" stroke-linejoin="miter" filter="url(#edge)"/>
+  <path d="M96 137 L126 137 L185 197 L127 260 L102 260 L151 199 Z" fill="none" stroke="#c26f22" stroke-width="0.9" opacity="0.55"/>
+  <path d="M140 199 L196 197" stroke="#e8923a" stroke-width="0.9" opacity="0.5"/>
+
+  <!-- the two cursor blocks: cool white, dimmed, with a blue bloom -->
+  <g filter="url(#glow)" fill="url(#hex)" opacity="0.95">
+    <path d="M208 251 L216 232 L258 232 L266 251 L258 270 L216 270 Z"/>
+    <path d="M270 251 L278 232 L317 232 L325 251 L317 270 L278 270 Z"/>
+  </g>
+
+  <rect width="400" height="400" filter="url(#grain)"/>
+</g>
+  </g>
+  <rect x="29.5" y="29.5" width="965" height="965" rx="214.5" fill="none" stroke="url(#rim)" stroke-width="3"/>
+</svg>
