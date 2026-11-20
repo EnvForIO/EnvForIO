@@ -21,7 +21,7 @@ src/lib/bindings.ts
 
 # Logs
 *.log
-# EnvIO plan, hand-formatted
+# EnvForIO plan, hand-formatted
 docs/PLAN.md
 # Design review snapshots written by the Impeccable skill (git-ignored)
 .impeccable/

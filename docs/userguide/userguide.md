@@ -1,12 +1,12 @@
-# EnvIO User Guide
+# EnvForIO User Guide
 
-EnvIO is a desktop app for researchers. It covers tasks, planning back from deadlines, research ideas and papers, conference deadlines, calendars, a feed reader, and monitoring of your machines and GPU servers. It runs on Windows. Everything is stored locally in `%APPDATA%\io.github.envforio\envio.db`.
+EnvForIO is a desktop app for researchers. It covers tasks, planning back from deadlines, research ideas and papers, conference deadlines, calendars, a feed reader, and monitoring of your machines and GPU servers. It runs on Windows. Everything is stored locally in `%APPDATA%\io.github.envforio\envio.db`.
 
 ## Getting around
 
 The left sidebar has the task lists (My Day, Important, Tasks) and Calendar; Research (with its Overview, Ideas and Library tabs); then Reader, Monitor and Stats. Your projects are listed below them.
 
-Clicking a task opens its details on the right. Closing the window hides EnvIO to the tray; to quit, use the tray menu's **Quit EnvIO**. Preferences → General → **Launch at login** starts EnvIO hidden in the tray when you sign in.
+Clicking a task opens its details on the right. Closing the window hides EnvForIO to the tray; to quit, use the tray menu's **Quit EnvForIO**. Preferences → General → **Launch at login** starts EnvForIO hidden in the tray when you sign in.
 
 | Shortcut     | Action                                                                        |
 | ------------ | ----------------------------------------------------------------------------- |
@@ -36,11 +36,11 @@ Right-clicking empty space does nothing. In text boxes, or on selected text, rig
   - **Time**: the parent's estimate is a budget, like a phase's. Subtasks with an estimate count their own; those without share what is left of the parent's. A subtask with no dates of its own follows the parent's, and is not listed in **To schedule** (its parent is). A parent with no estimate counts its subtasks' total.
 - **Timer**: the play button on a task row starts it (starting another stops the first). Stopping adds the time to the task. **Did part of it** finishes the part you did and moves the rest to the next work day.
 - **Task menu**: right-click a task (in a list, a project or its board) to open it, add it to My Day, flag, pin or finish it, or delete it (with its subtasks).
-- **Undo**: Ctrl+Z, or the Undo button that appears after deleting a task. It keeps the last 50 changes until EnvIO closes.
+- **Undo**: Ctrl+Z, or the Undo button that appears after deleting a task. It keeps the last 50 changes until EnvForIO closes.
 
 ## Todo Duo (mini mode)
 
-The float button in the title bar (or **Mini mode** in the tray menu) shrinks EnvIO into a small sticky: a capsule with today's progress and a pin, and a card under it. Drag either one to move both. The capsule's expand button, or a click on the tray icon, brings the window back.
+The float button in the title bar (or **Mini mode** in the tray menu) shrinks EnvForIO into a small sticky: a capsule with today's progress and a pin, and a card under it. Drag either one to move both. The capsule's expand button, or a click on the tray icon, brings the window back.
 
 The card has two tabs:
 
@@ -66,11 +66,11 @@ Preferences → Appearance sets the sticky's material, font and text size.
   - The safety line plans a phase's tasks between the end of the phase before it and its own end, so experiments are not spread over the writing weeks.
   - A **budget** (e.g. `40h`) is the time you expect the phase to take. Its tasks without an estimate share what the estimated ones leave of it, and a phase with no tasks yet counts its whole budget until it ends. So you can plan before every task is estimated.
 - **Project page**: dates, progress, today's share of the safety line and a health badge. A conference project also shows its round: a countdown to the paper deadline, the abstract and paper deadlines in your local time (the conference's own time zone on hover) and the website. If ccfddl later moves the deadline, the page says so; **Use the new deadline** updates the project (it never changes by itself). The switch at the top right toggles between two views:
-  - **Health**: the worst phase decides it, and the badge says which ("needs 12h a day for phase Method, ending Sun, Nov 22"). **On track**, **Tight** (needs over 80% of your available time), **Behind** (needs more than your available time or more than 24 hours a day, or a phase ended with work left), **Overdue** (past the deadline), **Done**, **Not estimated** (no tasks, or open tasks without estimates or budgets), or **Daily time not set** (EnvIO cannot judge until you set your available time; **Set daily time** opens it).
+  - **Health**: the worst phase decides it, and the badge says which ("needs 12h a day for phase Method, ending Sun, Nov 22"). **On track**, **Tight** (needs over 80% of your available time), **Behind** (needs more than your available time or more than 24 hours a day, or a phase ended with work left), **Overdue** (past the deadline), **Done**, **Not estimated** (no tasks, or open tasks without estimates or budgets), or **Daily time not set** (EnvForIO cannot judge until you set your available time; **Set daily time** opens it).
   - **List**: tasks grouped by module, each with an add row that takes a title and an estimate.
   - **Board**: To do / Doing / Done. Drag cards between the columns. Starting a task's timer moves it to Doing. Moving a card to Done completes it, and moving a card back to To do stops its timer.
 - **Available time**: set per weekday in Preferences → Planning (0 = rest day). On the calendar, right-click a day to change it for that date only.
-- **Safety line**: each morning EnvIO works out how much of each project's estimated work to do today, so that each phase finishes by its end and the rest by the plan date (the deadline minus the finish-early days). It spreads the work over your work days.
+- **Safety line**: each morning EnvForIO works out how much of each project's estimated work to do today, so that each phase finishes by its end and the rest by the plan date (the deadline minus the finish-early days). It spreads the work over your work days.
   - A task's own dates come first: a task with **Do on** today or later is asked for on that day, and a task **Due** before its phase or project ends is planned up to its due date. A **Do on** day that passed with the task unfinished no longer counts.
   - My Day shows the line, your streak, yesterday's shortfall and a 14-day load forecast with each day's hours. When today asks more than your available time (or more than 24 hours), the line turns red and lists the projects and phases causing it.
   - Phases that end on the same day share their days.
@@ -86,7 +86,7 @@ Preferences → Appearance sets the sticky's material, font and text size.
 - **Calendars**: subscribes to read-only calendars from ICS links, such as Outlook / Office 365 or a course timetable.
   - In Outlook, go to Settings → Calendar → Shared calendars → **Publish a calendar**, then copy the ICS link.
   - Events show in their calendar's colour above the tasks; hover for the time and place.
-  - Calendars are downloaded when EnvIO starts and every hour. Each one can be hidden, removed, or refreshed now.
+  - Calendars are downloaded when EnvForIO starts and every hour. Each one can be hidden, removed, or refreshed now.
   - The links stay on your computer.
 
 ## Stats
@@ -127,7 +127,7 @@ One sidebar entry with three tabs: **Overview**, **Ideas** and **Library**.
 
 ## Reader
 
-Paste the address of an RSS or Atom feed, or just a site (for example `quantamagazine.org`), and press Enter. Feeds refresh when EnvIO starts and every three hours.
+Paste the address of an RSS or Atom feed, or just a site (for example `quantamagazine.org`), and press Enter. Feeds refresh when EnvForIO starts and every three hours.
 
 - **Article list**: articles appear newest first with cover images. Show All or Unread, and mark everything read.
 - **Reading an article**: opening an article shows its summary and marks it read. Buttons:

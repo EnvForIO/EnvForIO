@@ -2,7 +2,7 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "envio-web",
+      "name": "envforio-web",
       "runtimeExecutable": "wsl",
       "runtimeArgs": [
         "-d",
@@ -10,7 +10,7 @@
         "--",
         "bash",
         "-ic",
-        "cd ~/EnvIO && npm run dev"
+        "cd ~/EnvForIO && npm run dev"
       ],
       "port": 1420
     }

@@ -1,7 +1,7 @@
 //! Statistics for a week, month or year: tasks done, timer time, completion
 //! rate, active days, a trend, where time went, and the weekly rhythm.
 //!
-//! Days follow EnvIO's day start, so a task finished at 01:00 counts for the
+//! Days follow EnvForIO's day start, so a task finished at 01:00 counts for the
 //! previous day. "Time" is timer time (time entries), credited to the day a
 //! session ended.
 

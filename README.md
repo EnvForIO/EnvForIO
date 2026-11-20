@@ -1,8 +1,8 @@
-# EnvIO
+# EnvForIO
 
 A desktop app for researchers: tasks, deadline planning, research ideas and machine monitoring, in one place. Windows first; macOS later.
 
-Status: phases 0–4 are built. How to use it is in the [user guide](docs/userguide/userguide.md); the design decisions are in [envio-design.md](docs/developer/envio-design.md).
+Status: phases 0–4 are built. How to use it is in the [user guide](docs/userguide/userguide.md); the design decisions are in [envforio-design.md](docs/developer/envforio-design.md).
 
 ## Stack
 

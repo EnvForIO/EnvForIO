@@ -24,7 +24,7 @@ const STAGE_COLOR: Record<TaskStage, string> = {
   Doing: '#0071e3',
   Done: '#34c759',
 }
-const DRAG_TYPE = 'application/x-envio-board-task'
+const DRAG_TYPE = 'application/x-envforio-board-task'
 
 const stageOf = (task: Task): TaskStage =>
   task.doneAt !== null ? 'Done' : task.startedAt !== null ? 'Doing' : 'Todo'

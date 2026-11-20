@@ -1,6 +1,6 @@
 # Phase 2: DayEcho parity
 
-Started 2026-11-19. The checklist is in the product plan (deleted 2026-11-20 when finished; see git history); the safety line rules are in `docs/developer/envio-design.md`. This note records how the phase is built.
+Started 2026-11-19. The checklist is in the product plan (deleted 2026-11-20 when finished; see git history); the safety line rules are in `docs/developer/envforio-design.md`. This note records how the phase is built.
 
 ## Steps
 
@@ -68,7 +68,7 @@ Done together, since available time only matters through the line.
 - Migration `0006_planning.sql`: a `settings` key/value table and `daily_lines`, the first line seen each day per project.
 - `service/settings`: day start (default 07:00), levelling (on) and earliest-first (off), in Preferences > Planning. The day start lives in `domain::day` as an atomic so `today()` needs no database; it is applied at startup and on save.
 - `service/plans/` is split into `work.rs` (projects and estimated minutes: open, and done per day), `today.rs` (today's line plus its snapshot), `history.rs` (check-ins: line vs done per day, streak, yesterday's shortfall) and `forecast.rs` (14-day load, calibration and project health).
-- Check-ins only exist for days EnvIO was opened (that is when the line is stored). Days without a line neither extend nor break the streak.
+- Check-ins only exist for days EnvForIO was opened (that is when the line is stored). Days without a line neither extend nor break the streak.
 - Calibration: actual / estimated time over finished tasks with both; per project from 3 tasks, else overall from 3 tasks, else 1. Health compares the calibrated work needed per day with the average available time (Behind if over, Tight if over 80%); with no time limit set it is always On track. Per-project comparison against the whole day's time is an approximation.
 - UI: the My Day card shows the streak, yesterday's shortfall and a folded 14-day bar chart (red when over the day's time); project pages show a health badge with the calibrated time left and time needed per day.
 

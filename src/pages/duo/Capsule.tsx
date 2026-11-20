@@ -1,5 +1,5 @@
 /**
- * The Todo Duo capsule (EnvIO in mini mode): today's progress, a pin that
+ * The Todo Duo capsule (EnvForIO in mini mode): today's progress, a pin that
  * keeps the sticky on top, and a button back to the main window.
  */
 import { useState } from 'react'

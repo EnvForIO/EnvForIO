@@ -75,7 +75,7 @@ Automatically saves and restores window position, size, and state (maximized, et
 
 ### Context Menus
 
-EnvIO draws its right-click menus itself (`src/components/ui/context-menu.tsx`, Radix) so they match the app; the native Windows menu looked out of place (user, 2026-11-21), and the template's native helper was removed. Wrap the element in `ContextMenu` / `ContextMenuTrigger asChild`, give each item an icon, and mark delete `variant="destructive"`. Use `modal={false}` when an item opens a dialog or an input. The WebView's own browser menu is turned off outside text fields (`src/lib/browser-menu.ts`).
+EnvForIO draws its right-click menus itself (`src/components/ui/context-menu.tsx`, Radix) so they match the app; the native Windows menu looked out of place (user, 2026-11-21), and the template's native helper was removed. Wrap the element in `ContextMenu` / `ContextMenuTrigger asChild`, give each item an icon, and mark delete `variant="destructive"`. Use `modal={false}` when an item opens a dialog or an input. The WebView's own browser menu is turned off outside text fields (`src/lib/browser-menu.ts`).
 
 ```tsx
 <ContextMenu modal={false}>

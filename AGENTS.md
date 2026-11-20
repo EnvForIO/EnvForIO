@@ -2,7 +2,7 @@
 
 ## Overview
 
-EnvIO is a desktop app for researchers: tasks, deadline planning, research ideas and machine monitoring. It is built on the dannysmith/tauri-template starter. Design decisions (libraries, layout, safety line rules) are in `docs/developer/envio-design.md`; each phase has a note in `docs/m*.md`; the user guide is `docs/userguide/userguide.md`.
+EnvForIO is a desktop app for researchers: tasks, deadline planning, research ideas and machine monitoring. It is built on the dannysmith/tauri-template starter. Design decisions (libraries, layout, safety line rules) are in `docs/developer/envforio-design.md`; each phase has a note in `docs/m*.md`; the user guide is `docs/userguide/userguide.md`.
 
 Code style follows `.claude/skills/code-style/SKILL.md` (single files written like karpathy/nanochat, modules split like LokiSharp). Commit messages follow `.claude/skills/git-comment/SKILL.md`.
 

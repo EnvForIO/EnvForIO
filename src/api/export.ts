@@ -16,9 +16,9 @@ export function useExport(scope: ExportScope, enabled: boolean) {
   })
 }
 
-/** A file name from the export title: "2026-11-16 – 2026-11-22" -> "envio-2026-11-16-2026-11-22". */
+/** A file name from the export title: "2026-11-16 – 2026-11-22" -> "envforio-2026-11-16-2026-11-22". */
 const fileName = (title: string, ext: string) =>
-  `envio-${title.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')}.${ext}`
+  `envforio-${title.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')}.${ext}`
 
 async function ask(title: string, ext: string, label: string) {
   return save({

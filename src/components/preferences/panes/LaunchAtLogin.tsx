@@ -1,7 +1,7 @@
 /**
  * "Launch at login" switch. The OS keeps the setting (the Run registry key on
  * Windows), so it is read from and written to the autostart plugin directly,
- * not stored in EnvIO's preferences file.
+ * not stored in EnvForIO's preferences file.
  */
 import { useTranslation } from 'react-i18next'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'

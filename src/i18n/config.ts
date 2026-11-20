@@ -2,7 +2,7 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import en from '../../locales/en.json'
 
-// EnvIO ships English only. To add a language later, add locales/<code>.json
+// EnvForIO ships English only. To add a language later, add locales/<code>.json
 // and register it here; detection and RTL handling below already support it.
 const resources = {
   en: { translation: en },

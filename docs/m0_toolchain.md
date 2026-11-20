@@ -1,6 +1,6 @@
 # Phase 0: toolchain check
 
-Goal: prove that a Windows build can be produced entirely inside WSL, with no toolchain on Windows, and that the window behaviours EnvIO depends on work.
+Goal: prove that a Windows build can be produced entirely inside WSL, with no toolchain on Windows, and that the window behaviours EnvForIO depends on work.
 
 Run on 2026-11-19.
 
@@ -28,7 +28,7 @@ Result:
 
 - `probe.exe`, 4.3 MB, built in about 1 min 40 s on the first run.
 - NSIS installer `envio-probe_0.1.0_x64-setup.exe`, 1.5 MB.
-- The exe ran on Windows 11 with its window titled "EnvIO probe", using about 31 MB of memory at start.
+- The exe ran on Windows 11 with its window titled "EnvForIO probe", using about 31 MB of memory at start.
 
 ## Problems hit
 

@@ -144,7 +144,7 @@ async updateQuickPaneShortcut(shortcut: string | null) : Promise<Result<null, st
 }
 },
 /**
- * Today as EnvIO counts it (the day starts at 07:00), 'YYYY-MM-DD'.
+ * Today as EnvForIO counts it (the day starts at 07:00), 'YYYY-MM-DD'.
  * The UI uses it to show "My Day" and overdue dates without its own day logic.
  */
 async getToday() : Promise<string> {

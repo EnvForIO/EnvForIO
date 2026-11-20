@@ -1,7 +1,7 @@
 //! `AppState`: what every command can reach through `tauri::State`.
 //!
 //! The database connection and the undo stack. SQLite connections are not
-//! `Sync`, so it sits behind a mutex; EnvIO is single-user and its queries
+//! `Sync`, so it sits behind a mutex; EnvForIO is single-user and its queries
 //! are small, so one connection is enough. Lock order: database, then undo.
 
 use std::sync::{Mutex, MutexGuard};
@@ -15,6 +15,7 @@ use crate::errors::{AppError, AppResult};
 use crate::service::settings;
 use crate::service::undo::UndoStack;
 
+// Kept from before the rename to EnvForIO (2026-11-21), so existing data opens.
 const DATABASE_FILE: &str = "envio.db";
 
 pub struct AppState {

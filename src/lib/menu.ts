@@ -14,7 +14,7 @@ import i18n from '@/i18n/config'
 import { useUIStore } from '@/store/ui-store'
 import { logger } from '@/lib/logger'
 
-const APP_NAME = 'EnvIO'
+const APP_NAME = 'EnvForIO'
 
 /**
  * Build and set the application menu with translated labels.

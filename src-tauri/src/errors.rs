@@ -1,4 +1,4 @@
-//! The one error type returned by EnvIO commands.
+//! The one error type returned by EnvForIO commands.
 //!
 //! Tagged with `type` so the frontend can match on the kind of failure
 //! (see the generated `AppError` in `src/lib/bindings.ts`).

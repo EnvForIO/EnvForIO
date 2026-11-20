@@ -1,5 +1,5 @@
 //! Todo Duo: two linked desktop windows, a capsule on top and a todo card below.
-//! They are EnvIO's mini mode: minimizing the main window shrinks it into
+//! They are EnvForIO's mini mode: minimizing the main window shrinks it into
 //! this sticky, and the capsule's expand button brings the window back.
 //!
 //! The card always sits just under the capsule. Dragging the capsule moves the

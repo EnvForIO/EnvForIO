@@ -64,7 +64,7 @@ pub fn run() {
     {
         app_builder = app_builder.plugin(
             tauri_plugin_window_state::Builder::new()
-                // Not VISIBLE: EnvIO always starts with its main window (or in the tray at login).
+                // Not VISIBLE: EnvForIO always starts with its main window (or in the tray at login).
                 .with_state_flags(
                     tauri_plugin_window_state::StateFlags::all()
                         - tauri_plugin_window_state::StateFlags::VISIBLE,
@@ -129,7 +129,7 @@ pub fn run() {
             desktop::monitor::start(app.handle(), machines);
             desktop::refresh::start(app.handle());
 
-            // The tray keeps EnvIO reachable after its window is closed.
+            // The tray keeps EnvForIO reachable after its window is closed.
             #[cfg(desktop)]
             {
                 desktop::tray::create(app.handle())?;

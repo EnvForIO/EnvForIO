@@ -3,7 +3,7 @@
  * dev` opened at localhost:1420), so design checks that drive a headless
  * browser can see real screens. Outside Tauri there is no backend: every
  * command is answered from `fixture.local.json` (answers recorded from a
- * running EnvIO; git-ignored, as it holds the owner's own data), matched
+ * running EnvForIO; git-ignored, as it holds the owner's own data), matched
  * on the command and its arguments, else the command's first answer.
  * Writes answer nothing. Never part of a production build.
  */
@@ -34,6 +34,6 @@ export function installBrowserMock(): void {
   mockWindows('main')
   mockIPC((cmd, args) => answer(cmd, args), { shouldMockEvents: true })
   console.info(
-    `EnvIO browser preview: ${Object.keys(fixture).length} commands answered from fixture.local.json`
+    `EnvForIO browser preview: ${Object.keys(fixture).length} commands answered from fixture.local.json`
   )
 }

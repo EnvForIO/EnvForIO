@@ -1,4 +1,4 @@
-//! The machine EnvIO runs on, read with `sysinfo` (CPU, memory, drives)
+//! The machine EnvForIO runs on, read with `sysinfo` (CPU, memory, drives)
 //! and NVML (NVIDIA cards). Network traffic and the whole process list are
 //! not read (2026-11-19, user decision); only the GPUs' programs are looked
 //! up, for their user and run time.

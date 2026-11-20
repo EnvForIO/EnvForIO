@@ -52,7 +52,7 @@ Step 4 export, 2026-11-19 user decision: JSON only (no SQLite copy, no PDF). The
   - every idea with its notes, steps, links, todos, problems, log, and attached papers (each with its relation and note)
   - the paper library
 
-  EnvIO does not import the file back.
+  EnvForIO does not import the file back.
 
 ## Step 5: light and dark
 

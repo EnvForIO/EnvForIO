@@ -1,5 +1,5 @@
-//! The tray icon. EnvIO keeps running in the tray when its window is closed,
-//! so a left click (or "Show EnvIO") brings the window back and "Quit" exits.
+//! The tray icon. EnvForIO keeps running in the tray when its window is closed,
+//! so a left click (or "Show EnvForIO") brings the window back and "Quit" exits.
 //! "Mini mode" shrinks the window into the Todo Duo sticky.
 //!
 //! NOTE: the menu labels are plain English constants, not i18n strings;
@@ -11,7 +11,7 @@ use tauri::AppHandle;
 
 use super::duo::{enter_mini_mode, leave_mini_mode};
 
-/// Passed by the OS when EnvIO starts at login, so it starts hidden in the tray.
+/// Passed by the OS when EnvForIO starts at login, so it starts hidden in the tray.
 pub const AUTOSTART_ARG: &str = "--autostart";
 
 const SHOW_ID: &str = "show";
@@ -19,13 +19,13 @@ const MINI_ID: &str = "mini";
 const QUIT_ID: &str = "quit";
 
 pub fn create(app: &AppHandle) -> tauri::Result<()> {
-    let show = MenuItem::with_id(app, SHOW_ID, "Show EnvIO", true, None::<&str>)?;
+    let show = MenuItem::with_id(app, SHOW_ID, "Show EnvForIO", true, None::<&str>)?;
     let mini = MenuItem::with_id(app, MINI_ID, "Mini mode", true, None::<&str>)?;
-    let quit = MenuItem::with_id(app, QUIT_ID, "Quit EnvIO", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, QUIT_ID, "Quit EnvForIO", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&show, &mini, &quit])?;
 
     let mut tray = TrayIconBuilder::with_id("main")
-        .tooltip("EnvIO")
+        .tooltip("EnvForIO")
         .menu(&menu)
         .show_menu_on_left_click(false) // left click shows the window; right click opens the menu
         .on_menu_event(|app, event| match event.id.as_ref() {

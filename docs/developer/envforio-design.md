@@ -1,20 +1,20 @@
-# EnvIO design
+# EnvForIO design
 
-The lasting decisions behind EnvIO: technology, the libraries used instead of our own code, how the code is laid out and how a request flows, the development environment, and the safety line rules. Moved here from the product plan when it was finished and deleted (2026-11-20); the phase notes (`docs/m0_toolchain.md` … `docs/m4_custom.md`) record how each feature was built.
+The lasting decisions behind EnvForIO: technology, the libraries used instead of our own code, how the code is laid out and how a request flows, the development environment, and the safety line rules. Moved here from the product plan when it was finished and deleted (2026-11-20); the phase notes (`docs/m0_toolchain.md` … `docs/m4_custom.md`) record how each feature was built.
 
 ## Technical decisions
 
-| Item                   | Decision                                                                                                                                                                                     |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Name                   | EnvIO (`EnvIO` in the UI; `envio` for packages and folders)                                                                                                                                  |
-| Desktop shell          | Tauri 2                                                                                                                                                                                      |
-| Frontend               | React + TypeScript + Tailwind                                                                                                                                                                |
-| Package manager        | npm (decided 2026-11-16; not pnpm)                                                                                                                                                           |
-| Drag and drop / charts | dnd-kit / uPlot or ECharts                                                                                                                                                                   |
-| Backend                | Rust (comes with Tauri)                                                                                                                                                                      |
-| Storage                | Local SQLite only; no accounts, no cloud sync                                                                                                                                                |
-| UI language            | English only (decided 2026-11-19: the template's Arabic and French files were removed). The `i18next` + `react-i18next` setup stays, and every string goes through the translation function. |
-| Docs language          | English (decided 2026-11-19)                                                                                                                                                                 |
+| Item                   | Decision                                                                                                                                                                                                                                                                                                                                             |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name                   | EnvForIO, renamed from EnvIO on 2026-11-21: `EnvForIO` in the UI and for the repository folder, `envforio` for the npm package, the crate and `envforio.exe`. Kept from before so existing data and files still work: the app identifier `io.github.envforio` (its data folder), `envio.db`, and the research archive's `envio-research` format tag |
+| Desktop shell          | Tauri 2                                                                                                                                                                                                                                                                                                                                              |
+| Frontend               | React + TypeScript + Tailwind                                                                                                                                                                                                                                                                                                                        |
+| Package manager        | npm (decided 2026-11-16; not pnpm)                                                                                                                                                                                                                                                                                                                   |
+| Drag and drop / charts | dnd-kit / uPlot or ECharts                                                                                                                                                                                                                                                                                                                           |
+| Backend                | Rust (comes with Tauri)                                                                                                                                                                                                                                                                                                                              |
+| Storage                | Local SQLite only; no accounts, no cloud sync                                                                                                                                                                                                                                                                                                        |
+| UI language            | English only (decided 2026-11-19: the template's Arabic and French files were removed). The `i18next` + `react-i18next` setup stays, and every string goes through the translation function.                                                                                                                                                         |
+| Docs language          | English (decided 2026-11-19)                                                                                                                                                                                                                                                                                                                         |
 
 ## Look: native Windows, with a day strip
 
@@ -33,9 +33,9 @@ Chosen by the user on 2026-11-21 ("B + F": a ledger list with a strip of today's
 
 ## What we do not build ourselves
 
-Rule: the project skeleton and general capabilities come from mature open-source projects; only logic specific to EnvIO is written by us.
+Rule: the project skeleton and general capabilities come from mature open-source projects; only logic specific to EnvForIO is written by us.
 
-**Skeleton**: the community template `dannysmith/tauri-template` (decided 2026-11-19; copied in from commit `8e0db1e` and renamed to EnvIO).
+**Skeleton**: the community template `dannysmith/tauri-template` (decided 2026-11-19; copied in from commit `8e0db1e` and renamed to EnvForIO).
 
 - MIT, single maintainer, 317 stars when checked on 2026-11-16. It fits the main-window shape:
   - Collapsible, resizable left and right sidebars around a main area: the three panes above
@@ -83,7 +83,7 @@ Proposed 2026-11-19. The user likes the modular, interface-first style of HoPGol
 Decided 2026-11-19: **naming follows LokiSharp.** Split by layer first (`api` / `service` / `entity` / `domain` / `providers`), then one file per resource inside each layer, with the same name for a resource in every layer. Rust uses snake_case; collections are plural (`tasks`), a single table is singular (`task`); migrations are numbered with a description. Frontend file names follow the template's conventions.
 
 ```
-envio/
+EnvForIO/
 ├─ AGENTS.md              Project rules, for humans and AI
 ├─ docs/
 │  ├─ m0_toolchain.md  m1_main_window.md  ...   One note per phase, like CatallaX's m1_xxx.md
@@ -152,12 +152,12 @@ Example: ticking a task as done.
 - **Do not build features from later phases** unless explicitly asked.
 - **Same name for a resource in every layer.** To change "tasks", look for the `tasks` / `task` files in each layer.
 - **Only one `index.html`**; remove the template's `quick-pane.html`.
-- **No separate Rust crates or npm packages.** Naming follows `workerd-manager`, but it splits each layer into its own crate; EnvIO uses folders until compile times make splitting worthwhile.
+- **No separate Rust crates or npm packages.** Naming follows `workerd-manager`, but it splits each layer into its own crate; EnvForIO uses folders until compile times make splitting worthwhile.
 
 ## Development environment
 
 - **No Rust, gcc, MSVC or any other compiler toolchain on Windows.** Everything lives in WSL (Ubuntu 24.04).
-- **Code lives in the WSL filesystem**: `~/EnvIO`, reachable from Windows at `\\wsl.localhost\Ubuntu-24.04\home\<you>\EnvIO`. Not on a Windows drive, because WSL access to Windows drives is slow and hurts builds, installs and hot reload.
+- **Code lives in the WSL filesystem**: `~/EnvForIO`, reachable from Windows at `\\wsl.localhost\Ubuntu-24.04\home\<you>\EnvForIO`. Not on a Windows drive, because WSL access to Windows drives is slow and hurts builds, installs and hot reload.
 - Already in WSL (checked 2026-11-15): Node 24, pnpm 11, Rust 1.89 and rustup, build-essential, curl, wget, file, libssl-dev, llvm, pkg-config, git. WSLg and running Windows programs from WSL both work.
 - Installed and re-checked 2026-11-15:
   - Tauri Linux dependencies: `libwebkit2gtk-4.1-dev` (2.52.6), `libxdo-dev`, `libayatana-appindicator3-dev`, `librsvg2-dev`

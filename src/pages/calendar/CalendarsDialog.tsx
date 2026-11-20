@@ -1,7 +1,7 @@
 /**
  * Subscribed calendars: each with its colour, name, when it was last
  * downloaded (or why it failed), a show/hide switch and remove; then a
- * form to subscribe to another ICS link. Read-only: EnvIO never writes
+ * form to subscribe to another ICS link. Read-only: EnvForIO never writes
  * back to them. Links stay on this machine.
  */
 import { useState } from 'react'

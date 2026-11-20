@@ -49,14 +49,17 @@ fn text(value: &str) -> String {
 /// An ICS calendar with one event per dated row: timed when the row has a
 /// start time (floating local time), otherwise all-day. Undated rows are left out.
 pub fn ics(rows: &[ExportRow], stamp: &str) -> String {
-    let mut out = String::from("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//EnvIO//EN\r\n");
+    let mut out = String::from("BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//EnvForIO//EN\r\n");
     for r in rows {
         let Some(date) = r.date.as_deref() else {
             continue;
         };
         let day = date.replace('-', "");
         out.push_str("BEGIN:VEVENT\r\n");
-        out.push_str(&format!("UID:task-{}@envio\r\nDTSTAMP:{stamp}\r\n", r.id));
+        out.push_str(&format!(
+            "UID:task-{}@envforio\r\nDTSTAMP:{stamp}\r\n",
+            r.id
+        ));
         match (&r.start_time, &r.end_time) {
             (Some(start), end) => {
                 out.push_str(&format!("DTSTART:{day}T{}00\r\n", start.replace(':', "")));

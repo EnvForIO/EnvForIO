@@ -1,10 +1,10 @@
 {
-  "name": "envio",
+  "name": "envforio",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "author": "EnvForIO",
-  "description": "EnvIO brings tasks, deadline planning, research ideas and machine monitoring together in one desktop app for researchers.",
+  "description": "EnvForIO brings tasks, deadline planning, research ideas and machine monitoring together in one desktop app for researchers.",
   "copyright": "Copyright © 2026 EnvForIO. All rights reserved.",
   "license": "MIT",
   "overrides": {

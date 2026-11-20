@@ -1,6 +1,6 @@
 /**
  * Quick pane: the small floating window opened by the global shortcut.
- * It is EnvIO's quick capture: whatever is typed becomes a task in My Day.
+ * It is EnvForIO's quick capture: whatever is typed becomes a task in My Day.
  */
 import type { Root } from 'react-dom/client'
 import '@/i18n'

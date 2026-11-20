@@ -19,7 +19,7 @@ Each step ends with a Windows build the user tries before the next one starts.
 
 ## Decisions
 
-- SSH (2026-11-19): the user logs in with a key from Windows. EnvIO runs Windows' own OpenSSH (`ssh.exe`) with the user's `~/.ssh/config`, in batch mode: it never asks for or stores a password. A host that needs one shows an error instead.
+- SSH (2026-11-19): the user logs in with a key from Windows. EnvForIO runs Windows' own OpenSSH (`ssh.exe`) with the user's `~/.ssh/config`, in batch mode: it never asks for or stores a password. A host that needs one shows an error instead.
 - Nothing is installed on a server or in WSL. Readings come from `/proc`, `df`, `ps` and `nvidia-smi`, run through one long-lived `ssh` (or `wsl.exe`) session per watched target.
 - WSL: only distributions that are already running are offered, so watching never starts one.
 - Monitor contents (2026-11-19, after step 1): no network lane and no list of busiest programs, on any machine. Neither is read any more (sysinfo no longer refreshes processes or adapters; the script no longer reads `/proc/net/dev` or `/proc/<pid>/stat`). The Monitor page shows CPU, memory, GPUs and disks.
@@ -106,7 +106,7 @@ Decisions (user, 2026-11-20): days show deadlines and how busy they are; a click
 
 ## Step 8: RSS reader (2026-11-20)
 
-Decisions (user, 2026-11-20): magazines and blogs (RSS 2.0, Atom); the feed's summary is read in EnvIO and the full article in the browser; refreshed on start and every three hours, plus a button.
+Decisions (user, 2026-11-20): magazines and blogs (RSS 2.0, Atom); the feed's summary is read in EnvForIO and the full article in the browser; refreshed on start and every three hours, plus a button.
 
 - `domain/feed.rs` (with `feed-rs`): title, link, author, date, cover image (media thumbnail or content, else the first `<img>`, made absolute) and the summary as plain text (`html_to_text`: scripts, styles and captions dropped, paragraphs kept, entities decoded with `html-escape`). Feed HTML is never rendered. `feed_candidates` lists where a pasted site's feed may be: advertised feeds, then /feed/, /rss, /rss.xml, /atom.xml, /feed.xml, /index.xml, and comment feeds last (Quanta's front page advertises only its comments feed). Checked on Quanta's real feed.
 - Migration `0018_feeds.sql`: `feeds` and `feed_items` (unique per feed and guid; read state kept across downloads; newest 200 per feed kept; `task_id` for "Add to todos").

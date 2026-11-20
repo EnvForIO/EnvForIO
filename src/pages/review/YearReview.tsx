@@ -69,7 +69,7 @@ export function YearReview({ offset, open, onOpenChange }: Props) {
           className="flex flex-col gap-5 rounded-xl bg-primary p-6 text-primary-foreground"
         >
           <div>
-            <p className="text-sm font-medium opacity-80">EnvIO</p>
+            <p className="text-sm font-medium opacity-80">EnvForIO</p>
             <p className="text-3xl font-bold">
               {t('review.headline', { year })}
             </p>

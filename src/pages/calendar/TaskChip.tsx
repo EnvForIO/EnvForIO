@@ -8,7 +8,7 @@ import { formatMinutes } from '@/lib/duration'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/store/ui-store'
 
-export const TASK_DRAG_TYPE = 'application/x-envio-task'
+export const TASK_DRAG_TYPE = 'application/x-envforio-task'
 
 interface Props {
   task: Task

@@ -1,4 +1,4 @@
-# EnvIO's monitor loop, run by `sh -s` on an SSH host or in a WSL
+# EnvForIO's monitor loop, run by `sh -s` on an SSH host or in a WSL
 # distribution: prints the machine's counters once a second until the
 # connection closes. Reads /proc and runs df and nvidia-smi; writes nothing.
 # The format is described in src-tauri/src/domain/linux_monitor/mod.rs.

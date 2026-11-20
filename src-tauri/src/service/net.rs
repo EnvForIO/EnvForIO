@@ -1,4 +1,4 @@
-//! The one HTTP client setup for EnvIO's few web lookups (Crossref, arXiv,
+//! The one HTTP client setup for EnvForIO's few web lookups (Crossref, arXiv,
 //! ccfddl). A generic client name: no user details leave the machine.
 
 use std::time::Duration;
@@ -6,7 +6,7 @@ use std::time::Duration;
 use crate::errors::{AppError, AppResult};
 
 const USER_AGENT: &str = concat!(
-    "EnvIO/",
+    "EnvForIO/",
     env!("CARGO_PKG_VERSION"),
     " (desktop research app)"
 );

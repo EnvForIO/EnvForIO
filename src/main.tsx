@@ -1,5 +1,5 @@
 /**
- * The single entry point for every EnvIO window.
+ * The single entry point for every EnvForIO window.
  *
  * All windows load index.html; Rust opens each one with `?window=<name>`
  * and this file mounts the matching view. Windows are imported lazily so

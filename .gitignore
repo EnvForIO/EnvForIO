@@ -26,7 +26,7 @@ jscpd-report
 *.sln
 *.sw?
 
-# EnvIO
+# EnvForIO
 node_modules/
 dist/
 src-tauri/target/

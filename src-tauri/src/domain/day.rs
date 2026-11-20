@@ -1,6 +1,6 @@
 //! Which calendar day "now" belongs to.
 //!
-//! EnvIO's day starts at a rollover time (07:00 by default, as in DayEcho),
+//! EnvForIO's day starts at a rollover time (07:00 by default, as in DayEcho),
 //! not at midnight: working until 01:30 still counts as the previous day.
 //! The rollover is a setting; it is loaded at startup and kept here so that
 //! `today()` needs no database.
@@ -27,13 +27,13 @@ pub fn day_start() -> NaiveTime {
     NaiveTime::from_hms_opt(m / 60, m % 60, 0).unwrap_or(DEFAULT_DAY_START)
 }
 
-/// The EnvIO day a UTC RFC 3339 timestamp (`done_at` and friends) falls on.
+/// The EnvForIO day a UTC RFC 3339 timestamp (`done_at` and friends) falls on.
 pub fn day_of_timestamp(timestamp: &str) -> Option<NaiveDate> {
     let utc = DateTime::parse_from_rfc3339(timestamp).ok()?;
     Some(day_of(utc.with_timezone(&Local).naive_local(), day_start()))
 }
 
-/// The EnvIO day that a local date-time falls in.
+/// The EnvForIO day that a local date-time falls in.
 pub fn day_of(local: NaiveDateTime, day_start: NaiveTime) -> NaiveDate {
     if local.time() < day_start {
         local.date() - Duration::days(1)
@@ -42,7 +42,7 @@ pub fn day_of(local: NaiveDateTime, day_start: NaiveTime) -> NaiveDate {
     }
 }
 
-/// Today as EnvIO sees it, formatted 'YYYY-MM-DD' like the database stores dates.
+/// Today as EnvForIO sees it, formatted 'YYYY-MM-DD' like the database stores dates.
 pub fn today() -> String {
     day_of(Local::now().naive_local(), day_start()).to_string()
 }

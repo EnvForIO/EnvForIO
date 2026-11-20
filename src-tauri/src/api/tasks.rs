@@ -11,7 +11,7 @@ use crate::service::tasks::items::{self, ItemStatus};
 use crate::service::tasks::mutation::{self, TaskStage, TaskUpdate};
 use crate::service::tasks::query::{self, DayCompletion, TaskView};
 
-/// Today as EnvIO counts it (the day starts at 07:00), 'YYYY-MM-DD'.
+/// Today as EnvForIO counts it (the day starts at 07:00), 'YYYY-MM-DD'.
 /// The UI uses it to show "My Day" and overdue dates without its own day logic.
 #[tauri::command]
 #[specta::specta]

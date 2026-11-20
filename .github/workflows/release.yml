@@ -1,4 +1,4 @@
-name: 'Release EnvIO'
+name: 'Release EnvForIO'
 
 on:
   push:
@@ -64,9 +64,9 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.ref_name || inputs.version }}
-          releaseName: 'EnvIO ${{ github.ref_name || inputs.version }}'
+          releaseName: 'EnvForIO ${{ github.ref_name || inputs.version }}'
           releaseBody: |
-            ## EnvIO ${{ github.ref_name || inputs.version }}
+            ## EnvForIO ${{ github.ref_name || inputs.version }}
 
             ### Installation Instructions
             - **macOS**: Download the `.dmg` file and drag to Applications folder

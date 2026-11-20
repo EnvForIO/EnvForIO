@@ -16,7 +16,7 @@ export const useResearchOverview = () =>
 /** Ask where to save, then write the archive. False when the user cancels. */
 export async function exportResearchJson(today: string) {
   const path = await save({
-    defaultPath: `envio-research-${today}.json`,
+    defaultPath: `envforio-research-${today}.json`,
     filters: [{ name: 'JSON', extensions: ['json'] }],
   })
   if (!path) return false

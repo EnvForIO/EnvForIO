@@ -33,7 +33,7 @@ function useDragOrder<T>(
   enabled: boolean
 ) {
   const reorder = useReorderTasks()
-  const type = `application/x-envio-reorder-${scope}`
+  const type = `application/x-envforio-reorder-${scope}`
   const [dragged, setDragged] = useState<number | null>(null)
   const [target, setTarget] = useState<Target | null>(null)
   // The order just dropped, shown until the list comes back from Rust.

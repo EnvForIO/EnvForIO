@@ -1,6 +1,6 @@
 //! Every idea and paper as one JSON file: each idea with its notes, steps,
 //! links, todos, problems, log and attached papers, then the paper library.
-//! Read-only: EnvIO does not import it back.
+//! Read-only: EnvForIO does not import it back.
 
 use rusqlite::Connection;
 use serde::Serialize;
@@ -12,6 +12,7 @@ use crate::service::ideas::notes::{self, IdeaLog, IdeaProblem, IdeaTodo};
 use crate::service::ideas::query::{self as ideas, IdeaFilter};
 use crate::service::papers::query::{self as papers, PaperFilter};
 
+// Kept from before the rename to EnvForIO, so older archives still read.
 const FORMAT: &str = "envio-research";
 const VERSION: u32 = 1;
 

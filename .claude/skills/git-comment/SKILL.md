@@ -77,7 +77,7 @@ from WSL, and the toolchain must stay off Windows.
 ```
 
 ```
-chore: rename template app to EnvIO
+chore: rename template app to EnvForIO
 ```
 
 Avoid vague subjects such as `update files`, `fix bug` or `changes`.

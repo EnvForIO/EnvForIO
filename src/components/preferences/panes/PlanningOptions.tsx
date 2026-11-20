@@ -1,6 +1,6 @@
 /**
  * Preferences > Planning > Safety line: when a new day starts, and the two
- * levelling switches (see the safety line rules in docs/developer/envio-design.md).
+ * levelling switches (see the safety line rules in docs/developer/envforio-design.md).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'

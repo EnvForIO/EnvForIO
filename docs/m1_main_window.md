@@ -5,7 +5,7 @@ Started 2026-11-19. Checklist and scope are in the product plan (deleted 2026-11
 ## Step 1: adapt the template
 
 - Windows bundle target is NSIS (`src-tauri/tauri.windows.conf.json`), because `cargo-xwin` cannot build MSI.
-- The auto-updater is removed: Rust plugin, npm package, capability, menu item, launch check and config. It needs a GitHub release feed and a signing key, which EnvIO does not have.
+- The auto-updater is removed: Rust plugin, npm package, capability, menu item, launch check and config. It needs a GitHub release feed and a signing key, which EnvForIO does not have.
 - One HTML entry: `quick-pane.html` is gone. Every window loads `index.html?window=<name>` and `src/main.tsx` mounts the matching view from `src/windows/`. The quick pane stays as the future quick-capture window.
 - `App.test.tsx` mocks language detection and the native menu, which need the Tauri runtime.
 
@@ -88,9 +88,9 @@ Conventions:
 
 ## Step 4: tray, autostart, window position
 
-- `src-tauri/src/desktop/tray.rs`: left click shows the window; the menu has "Show EnvIO" and "Quit EnvIO" (English constants in Rust, not i18n strings).
+- `src-tauri/src/desktop/tray.rs`: left click shows the window; the menu has "Show EnvForIO" and "Quit EnvForIO" (English constants in Rust, not i18n strings).
 - Closing the main window hides it to the tray on every desktop platform (the template did this only on macOS). Quit from the tray.
-- "Launch at login" lives in Preferences > General and uses `tauri-plugin-autostart`. The OS stores the setting. A login start passes `--autostart`, and EnvIO then starts hidden in the tray.
+- "Launch at login" lives in Preferences > General and uses `tauri-plugin-autostart`. The OS stores the setting. A login start passes `--autostart`, and EnvForIO then starts hidden in the tray.
 - Window position and size were already remembered by the template's `window-state` plugin; it saves before hiding.
 
 ## Step 5: Todo Duo widgets
@@ -107,4 +107,4 @@ Phase 1 is complete (2026-11-19).
 ## Later changes (2026-11-19, user feedback)
 
 - Sidebars have fixed widths (left 240 px, right 320 px). The details pane is an overlay on the right edge: the window size and the lists underneath stay exactly as they are (the user showed BrunchTea as the reference). Titles and padding were tightened.
-- Todo Duo is EnvIO's floating mode rather than a separate widget. Minimize is a normal minimize. A separate float button in the title bar (and the tray's "Mini mode") hides the main window and shows the sticky at the window's top-right corner; the capsule's expand button, the tray icon and "Show EnvIO" bring the window back. A pin button on the capsule keeps the sticky above other windows.
+- Todo Duo is EnvForIO's floating mode rather than a separate widget. Minimize is a normal minimize. A separate float button in the title bar (and the tray's "Mini mode") hides the main window and shows the sticky at the window's top-right corner; the capsule's expand button, the tray icon and "Show EnvForIO" bring the window back. A pin button on the capsule keeps the sticky above other windows.
