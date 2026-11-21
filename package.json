@@ -5,8 +5,8 @@
   "type": "module",
   "author": "EnvForIO",
   "description": "EnvForIO brings tasks, deadline planning, research ideas and machine monitoring together in one desktop app for researchers.",
-  "copyright": "Copyright © 2026 EnvForIO. All rights reserved.",
-  "license": "MIT",
+  "copyright": "Copyright © 2026 EnvForIO",
+  "license": "GPL-3.0-or-later",
   "overrides": {
     "typescript-eslint": {
       "typescript": "$typescript"

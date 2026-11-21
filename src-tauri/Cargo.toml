@@ -3,6 +3,7 @@ name = "envforio"
 version = "0.1.0"
 description = "EnvForIO brings tasks, deadline planning, research ideas and machine monitoring together in one desktop app for researchers."
 authors = ["EnvForIO"]
+license = "GPL-3.0-or-later"
 edition = "2021"
 rust-version = "1.82"
 
