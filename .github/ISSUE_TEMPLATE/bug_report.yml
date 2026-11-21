@@ -1,0 +1,78 @@
+name: Bug report
+description: Something in EnvForIO does not work as it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Please check the open issues first in case it is already known.
+        For a security problem, do not use this form: see the Security tab instead.
+
+  - type: input
+    id: version
+    attributes:
+      label: EnvForIO version
+      description: The version of the installer you used, or the commit if you built it yourself.
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      description: Settings → System → About, under Windows specifications.
+      placeholder: Windows 11 24H2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where in the app
+      options:
+        - Tasks / My Day
+        - Projects and the safety line
+        - Calendar
+        - Research (ideas, library, conferences)
+        - Reader
+        - Monitor
+        - Stats
+        - Todo Duo or the quick pane
+        - Preferences
+        - Install, start-up or tray
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Click …
+        3. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened instead
+      description: Error messages, screenshots or a short recording help. Remove anything private from them first.
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Does it happen every time? Did it work in an earlier version?

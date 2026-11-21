@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest something EnvForIO should do, or do differently.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do, and what gets in the way today?
+      placeholder: When I plan a paper with two deadlines, …
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you suggest
+      description: How you would like it to work. Sketches or examples from other apps are welcome.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do now instead
+      description: Workarounds or other tools you use for this.
