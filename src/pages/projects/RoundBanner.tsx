@@ -2,8 +2,8 @@
  * On a conference project's page: the round it is for, a countdown to the
  * paper deadline, the abstract and paper deadlines in local time (the
  * conference's own zone on hover), the website, and a notice when ccfddl
- * now gives a different deadline (user decision 2026-11-20: offer the new
- * date, never change the project by itself).
+ * now gives a different deadline. It offers the new date and never changes
+ * the project by itself.
  */
 import { useTranslation } from 'react-i18next'
 import { ExternalLinkIcon } from 'lucide-react'

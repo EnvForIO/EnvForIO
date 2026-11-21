@@ -3,8 +3,7 @@
  * (Unix ms): the rounds still open, the next one, how long is left and
  * how urgent that is. Times arrive in Unix ms and are shown in local time.
  * Used by the new-project dialog's conference picker, a conference
- * project's page and an idea's target venue (there is no Conferences page
- * any more).
+ * project's page and an idea's target venue.
  */
 import type { Conference, Edition, Stage } from '@/lib/tauri-bindings'
 

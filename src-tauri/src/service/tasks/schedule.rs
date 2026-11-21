@@ -25,9 +25,8 @@ pub fn in_range(conn: &Connection, from: &str, to: &str) -> AppResult<Vec<Task>>
 
 /// Open tasks to plan: project tasks first (they feed the safety line).
 /// A task planned for a past day and not finished comes back here rather
-/// than moving to today by itself (user decision 2026-11-20). A subtask
-/// with no dates of its own is planned with its parent, so only the parent
-/// is here (user report 2026-11-21).
+/// than moving to today by itself. A subtask with no dates of its own is
+/// planned with its parent, so only the parent is here.
 pub fn unscheduled(conn: &Connection, today: &str) -> AppResult<Vec<Task>> {
     let sql = format!(
         "SELECT {TASK_COLUMNS} FROM tasks t

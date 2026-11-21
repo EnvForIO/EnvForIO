@@ -2,8 +2,7 @@
  * The middle pane: the selected list's title, an "Add a task" row, open
  * tasks as ledger rows, and a folded "Completed" section. My Day also has
  * today's safety line on top and the strip of today's hours at the right.
- * The Tasks list also has filters (status and project), which took over
- * the Items page and the Planned list.
+ * The Tasks list also has filters (status and project).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'

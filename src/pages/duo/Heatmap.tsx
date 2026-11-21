@@ -12,8 +12,7 @@ const CELL = { week: 28, month: 22, year: 10 } as const // px per square
 
 /**
  * Four steps of the app's ink, like a contribution graph; 0 = has tasks,
- * none done. (Green until 2026-11-21; ink since the Ledger look, so the
- * charts share one colour.)
+ * none done. Ink rather than green, so the charts share one colour.
  */
 function level(done: number, total: number): string {
   const ratio = done / total

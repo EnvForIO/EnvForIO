@@ -1,7 +1,7 @@
 //! An idea's working material: notes (Markdown with LaTeX), todos with due
 //! dates, problems with their solutions, and a dated progress log.
 //!
-//! Todos are ordinary tasks with `idea_id` set (since 2026-11-20), so they
+//! Todos are ordinary tasks with `idea_id` set, so they
 //! show in Planned, My Day, the calendar and the heatmap; an idea linked to
 //! a project files them in that project.
 

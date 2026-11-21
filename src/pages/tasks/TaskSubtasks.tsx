@@ -1,7 +1,7 @@
 /**
  * A task's subtasks in the details pane: tick one, open it (it is a full
  * task with its own dates, estimate and timer), or add one with an
- * optional estimate ("1h30m"). They took over from steps (2026-11-21).
+ * optional estimate ("1h30m").
  * The parent's estimate is a budget: subtasks without one share what the
  * estimated ones leave of it.
  */

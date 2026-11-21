@@ -1,8 +1,7 @@
 /**
  * Turns off the WebView's own right-click menu everywhere. Its page items
  * (Back, Refresh, Save as, Print, More tools) belong to a browser, not a
- * desktop app (user decision 2026-11-20), and its edit items look like
- * Windows, not EnvForIO (2026-11-21). The app's own menus
+ * desktop app, and its edit items look like Windows, not EnvForIO. The app's own menus
  * (`ui/context-menu.tsx`) prevent the default first and are left alone.
  *
  * Where the WebView menu did a job, in a text field or on selected text,

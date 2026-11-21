@@ -1,7 +1,7 @@
 //! Built-in project templates: the modules a new project starts with. A
 //! module with `days_before` is a phase that ends that many days before the
-//! project's deadline (user decision 2026-11-20: a project's time is split
-//! into phases instead of milestone tasks). The new-project dialog shows
+//! project's deadline: a project's time is split into phases instead of
+//! milestone tasks. The new-project dialog shows
 //! the phases with their dates and lets the user change them first.
 //! Module names are English constants; template names are translated in the UI.
 

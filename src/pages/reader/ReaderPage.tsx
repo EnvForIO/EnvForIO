@@ -1,5 +1,5 @@
 /**
- * The RSS reader (phase 4 step 8): feeds on the left (paste a feed or a
+ * The RSS reader: feeds on the left (paste a feed or a
  * site's address to add one; right-click to remove), their items in the
  * middle with cover images, newest first, and the selected item on the
  * right. Opening an item marks it read. Feeds refresh on start and every

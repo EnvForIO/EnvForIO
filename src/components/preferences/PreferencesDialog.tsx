@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Settings, Palette, Zap, CalendarClock } from 'lucide-react'
+import { Settings, Palette, CalendarClock } from 'lucide-react'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -27,7 +27,6 @@ import {
 import { useUIStore, type PreferencePane } from '@/store/ui-store'
 import { GeneralPane } from './panes/GeneralPane'
 import { AppearancePane } from './panes/AppearancePane'
-import { AdvancedPane } from './panes/AdvancedPane'
 import { PlanningPane } from './panes/PlanningPane'
 
 const navigationItems = [
@@ -45,11 +44,6 @@ const navigationItems = [
     id: 'appearance' as const,
     labelKey: 'preferences.appearance',
     icon: Palette,
-  },
-  {
-    id: 'advanced' as const,
-    labelKey: 'preferences.advanced',
-    icon: Zap,
   },
 ] as const
 
@@ -126,7 +120,6 @@ export function PreferencesDialog() {
               {activePane === 'general' && <GeneralPane />}
               {activePane === 'planning' && <PlanningPane />}
               {activePane === 'appearance' && <AppearancePane />}
-              {activePane === 'advanced' && <AdvancedPane />}
             </div>
           </main>
         </SidebarProvider>

@@ -3,8 +3,7 @@
  * block per GPU coloured by its use (heatmap scale) with the number under
  * it, then CPU, memory and the hottest GPU. A machine that cannot be read
  * is greyed out with when it was last seen. Click to open its detail;
- * right-click for a menu (drawn by the app, not the OS's: user decision
- * 2026-11-20) to open it or take it off the overview.
+ * right-click for a menu (drawn by the app, not the OS's) to open it or take it off the overview.
  */
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'

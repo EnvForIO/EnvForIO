@@ -1,5 +1,5 @@
 /**
- * One task in a list, as a ledger row (user choice 2026-11-21): no box,
+ * One task in a list, as a ledger row: no box,
  * a hairline under it, the title with a short meta line, and two aligned
  * columns at the right for the estimate and the date, so a list reads
  * down like a table. The star shows on hover unless the task is starred.
@@ -64,7 +64,7 @@ export function TaskRow({
 
   // The date column: the deadline when there is one, else a day still to
   // come that the task is planned for ("Do on"). Each carries its word, so
-  // the two never look alike (critique 2026-11-21).
+  // the two never look alike.
   const overdue =
     !done && task.dueDate !== null && isOverdue(task.dueDate, today)
   const date =

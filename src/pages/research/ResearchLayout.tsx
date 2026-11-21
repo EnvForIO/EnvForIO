@@ -1,5 +1,5 @@
 /**
- * Research as one page with tabs (user decision 2026-11-20): Overview,
+ * Research as one page with tabs: Overview,
  * Ideas and Library. Each tab is its own page underneath, so jumping to an
  * idea or the library from elsewhere opens the right tab.
  */

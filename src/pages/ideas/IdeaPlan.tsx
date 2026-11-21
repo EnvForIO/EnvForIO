@@ -1,5 +1,5 @@
 /**
- * Where an idea meets the planner (phase 4 step 4): the project it is
+ * Where an idea meets the planner: the project it is
  * worked on in (its todos are that project's tasks, so they count toward
  * the safety line), and, when its venue is a conference on ccfddl's list,
  * that venue's next deadline with "Plan submission", which opens the

@@ -1,7 +1,6 @@
 //! External calendars: read-only ICS subscriptions and the occurrences of
-//! their events (user decisions 2026-11-20: Outlook / Office 365 and
-//! course or seminar feeds; shown on the calendar page; refreshed on
-//! start and every hour). Downloading is in `fetch`, parsing in
+//! their events: Outlook / Office 365 and course or seminar feeds, shown
+//! on the calendar page and refreshed on start and every hour. Downloading is in `fetch`, parsing in
 //! `domain::ics`; this keeps the list and the stored occurrences.
 
 pub mod fetch;

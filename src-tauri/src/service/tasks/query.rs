@@ -26,7 +26,7 @@ const ORDER: &str = "ORDER BY t.is_pinned DESC, (t.done_at IS NOT NULL), t.sort_
 // ---------------------------------------------------------------------------
 // Which day a task is on
 //
-// One rule for every view (user decision 2026-11-20): a task is on a day
+// One rule for every view: a task is on a day
 // when it is planned for that day (`scheduled_date`) or due that day
 // (`due_date`). It can be on two days: planned Monday, due Friday. My Day,
 // the Todo Duo card, the heatmap, the calendar and stats all read it here.
@@ -39,7 +39,7 @@ pub const IN_DAYS: &str = "(t.scheduled_date BETWEEN ?1 AND ?2 OR t.due_date BET
 
 pub fn list(conn: &Connection, view: TaskView, today: &str) -> AppResult<Vec<Task>> {
     // Today also keeps what is overdue and still open, so a missed deadline
-    // cannot slip out of sight (user decision 2026-11-20).
+    // cannot slip out of sight.
     let my_day = format!("({ON_DAY} OR (t.due_date < ?1 AND t.done_at IS NULL))");
     let filter = match view {
         TaskView::MyDay => my_day.as_str(),
@@ -119,8 +119,8 @@ pub fn subtasks(conn: &Connection, parent: i64) -> AppResult<Vec<Task>> {
     Ok(rows.collect::<Result<_, _>>()?)
 }
 
-/// A list with the subtasks of every parent in it (user decision
-/// 2026-11-21: a list that shows a task shows its subtasks under it). A
+/// A list with the subtasks of every parent in it: a list that shows a
+/// task shows its subtasks under it. A
 /// subtask that is in the list on its own, without its parent, stays as
 /// it is; the UI shows it with its parent's title.
 pub fn with_subtasks(conn: &Connection, mut tasks: Vec<Task>) -> AppResult<Vec<Task>> {

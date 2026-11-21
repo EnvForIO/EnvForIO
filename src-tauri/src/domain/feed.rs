@@ -1,5 +1,4 @@
-//! RSS and Atom feeds (phase 4 step 8; magazines and blogs, user decision
-//! 2026-11-20): a feed's items with title, link, author, date, a cover
+//! RSS and Atom feeds (magazines and blogs): a feed's items with title, link, author, date, a cover
 //! image and the summary as plain text. The summary is never shown as
 //! HTML (a feed must not run anything in the app): tags are dropped,
 //! paragraphs kept, entities decoded. Also finds the feed of a web page

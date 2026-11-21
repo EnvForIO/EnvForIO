@@ -2,7 +2,7 @@
 
 /**
  * The right-click menu, drawn by the app so it matches it (the OS's native
- * menu looked out of place, user 2026-11-21): a rounded panel with a soft
+ * menu looks out of place): a rounded panel with a soft
  * shadow, items with an icon, and a red delete. Only the parts the app
  * uses are exported.
  */

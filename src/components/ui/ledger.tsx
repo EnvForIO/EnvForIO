@@ -1,8 +1,7 @@
 /**
  * Overview page parts. The headline numbers are one sentence ("5 tasks
  * done, 2h tracked and active 3 of 7 days"), not a row of big figures over
- * small labels, which the design review of 2026-11-21 found to be the
- * generated default; sections open with their title and space, not a rule.
+ * small labels; sections open with their title and space, not a rule.
  */
 import { Fragment } from 'react'
 import { cn } from '@/lib/utils'

@@ -42,8 +42,7 @@
   }
 
   /* Chrome is not text to copy, but content is: task titles, notes and
-     articles can be selected (review 2026-11-21; the template turned
-     selection off for the whole app). */
+     articles can be selected. */
   button,
   nav,
   [role='button'],
@@ -100,9 +99,8 @@
   }
 }
 
-/* The Monitor page: a light grey canvas with white tiles (user decision
-   2026-11-19), drawn from the Ledger tokens since 2026-11-21 so it shares
-   the app's greys; the green / yellow / red levels stay its own. */
+/* The Monitor page: a light grey canvas with white tiles, drawn from the
+   Ledger tokens so it shares the app's greys; the green / yellow / red levels stay its own. */
 .monitor {
   --m-canvas: var(--sidebar);
   --m-tile: var(--card);

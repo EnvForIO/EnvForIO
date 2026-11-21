@@ -10,7 +10,7 @@ use std::sync::atomic::{AtomicU32, Ordering};
 
 use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 
-/// The default start of a new day: midnight (changed from 07:00 on 2026-11-22).
+/// The default start of a new day: midnight.
 pub const DEFAULT_DAY_START: NaiveTime = NaiveTime::MIN;
 
 /// The current rollover, in minutes after midnight.

@@ -1,6 +1,6 @@
 //! Conference deadlines: ccfddl's list as last downloaded, and the
-//! conference projects made from it. A conference project (user decisions
-//! 2026-11-20) is created from the new-project dialog: its deadline is the
+//! conference projects made from it. A conference project is
+//! created from the new-project dialog: its deadline is the
 //! full-paper deadline's day here, its phases are what the dialog sends,
 //! and an abstract deadline becomes a task due that day.
 

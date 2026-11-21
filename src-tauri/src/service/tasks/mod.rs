@@ -35,7 +35,7 @@ mod tests {
         // Only My Day gives a new task a date.
         assert_eq!((c.scheduled_date, c.due_date), (None, None));
 
-        // Due today puts "submit" in My Day too (since 2026-11-20).
+        // Due today puts "submit" in My Day too.
         assert_eq!(
             titles(&query::list(&conn, TaskView::MyDay, TODAY).unwrap()),
             ["submit", "read paper"]

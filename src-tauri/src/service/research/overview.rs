@@ -184,9 +184,8 @@ fn names(venue: &str, c: &Conference) -> bool {
             || key.rsplit('/').next() == Some(venue.as_str()))
 }
 
-/// The next open round of each unfinished idea's target conference (user
-/// decision 2026-11-20: the idea's venue does what following a conference
-/// did). An edition with a project is left out: the project's own deadline
+/// The next open round of each unfinished idea's target conference: the
+/// idea's venue is how a conference is followed. An edition with a project is left out: the project's own deadline
 /// is already in the list.
 fn conference_deadlines(
     conn: &Connection,

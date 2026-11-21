@@ -4,8 +4,8 @@
  * (a task write) also refreshes which editions have one.
  *
  * ccfddl's list (about 700 KB) is downloaded when the new-project dialog
- * needs it: never downloaded, or older than a week (user decision
- * 2026-11-20). There is no page for it any more.
+ * needs it: never downloaded, or older than a week. It has no page of
+ * its own.
  */
 import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'

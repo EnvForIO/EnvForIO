@@ -1,6 +1,6 @@
 //! Events from an ICS (iCalendar) feed, flattened into one item per
 //! occurrence between two moments. Written for what Outlook / Exchange
-//! and course or seminar feeds send (user decision 2026-11-20):
+//! and course or seminar feeds send:
 //!
 //! - times in UTC ("…Z"), in a zone ("TZID=…"; IANA names, Windows names
 //!   through CLDR's table, or else the feed's own VTIMEZONE as a fixed

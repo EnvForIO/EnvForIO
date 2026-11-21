@@ -1,13 +1,11 @@
 /**
- * Task rows that can be dragged into a new order (user request
- * 2026-11-20), like Microsoft To Do: a line shows where the task will
+ * Task rows that can be dragged into a new order, like Microsoft To Do: a line shows where the task will
  * land, and the new order shows at once while it is saved. Used by the
  * built-in lists (not the date-sorted Tasks filters) and project modules.
  *
  * Subtasks sit under their parent (`nest`), indented; the parent's chevron
  * folds them. A task drags with its subtasks; a subtask drags among its
- * parent's subtasks only (user report 2026-11-21: it carried the whole
- * task with it).
+ * parent's subtasks only, never taking the whole task with it.
  */
 import { useState } from 'react'
 import { useReorderTasks } from '@/api/tasks'

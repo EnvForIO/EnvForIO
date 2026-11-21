@@ -4,9 +4,8 @@
  * through yellow to red like the rest of the Monitor page, and the latest
  * value at the end in its level colour, as the GPU tiles show it.
  *
- * Restyled after "this long bar is too ugly" (user, 2026-11-21): the rows
- * still fill the tile, but each is one continuous strip with hairline
- * seams instead of sixty separately rounded pills. Hovering a cell gives
+ * The rows fill the tile, each one continuous strip with hairline seams
+ * between cells rather than separately rounded pills. Hovering a cell gives
  * its second and value.
  */
 import { useTranslation } from 'react-i18next'
@@ -17,7 +16,7 @@ import { Tile } from '../parts'
 
 const SCALE = Array.from({ length: 24 }, (_, i) => (i * 100) / 23)
 
-/** Seconds a row shows, one cell each: 60 was too dense (user, 2026-11-21). */
+/** Seconds a row shows, one cell each; 60 is too dense. */
 const SHOWN = Math.min(30, HISTORY)
 
 function Row({ label, values }: { label: string; values: number[] }) {

@@ -1,6 +1,5 @@
 /**
- * A task's right-click menu in lists, project modules and the board (user
- * request 2026-11-21: tasks could not be deleted with a right-click):
+ * A task's right-click menu in lists, project modules and the board:
  * open it, My Day, important, pin, done, and delete with Undo.
  */
 import { useTranslation } from 'react-i18next'

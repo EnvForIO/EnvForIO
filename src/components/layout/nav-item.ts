@@ -1,8 +1,7 @@
 /**
  * How a sidebar entry looks: plain text, a faint wash on hover, and the
  * current entry on a neutral grey with a short blue pill at its start, the
- * way Windows 11 marks the current item (review 2026-11-21: the lavender
- * tint read as generated). Shared by the lists, the pages, the projects
+ * way Windows 11 marks the current item. Shared by the lists, the pages, the projects
  * and Reader's feeds so they match.
  */
 import { cn } from '@/lib/utils'

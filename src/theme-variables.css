@@ -10,7 +10,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   /* The system's own face: Segoe UI Variable on Windows 11, with YaHei for
-     Chinese, so EnvForIO reads as a native app (review 2026-11-21). */
+     Chinese, so EnvForIO reads as a native app. */
   --font-sans:
     'Segoe UI Variable Text', 'Segoe UI', 'Microsoft YaHei UI', -apple-system,
     'PingFang SC', sans-serif;
@@ -56,8 +56,7 @@
 }
 
 /*
- * EnvForIO's look (revised 2026-11-21 after a review with five design skills
- * called the Ledger restyle AI-made): Windows 11's own neutrals, its blue
+ * EnvForIO's look: Windows 11's own neutrals, its blue
  * for the one primary action, today and checked boxes, and red only for
  * what is late. Selection is a neutral grey with a blue pill beside it,
  * as Windows marks the current item, never a lavender tint.

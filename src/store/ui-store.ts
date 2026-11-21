@@ -45,7 +45,7 @@ interface UIState {
   openCalendarAt: (date: string) => void
 }
 
-export type PreferencePane = 'general' | 'planning' | 'appearance' | 'advanced'
+export type PreferencePane = 'general' | 'planning' | 'appearance'
 
 /** The full pages the middle pane can show instead of a list or project. */
 export type MainPage =

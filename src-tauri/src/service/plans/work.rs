@@ -2,22 +2,22 @@
 //! deadline or dated phases, and the estimated minutes per project and
 //! phase (left, and done per day).
 //!
-//! Phases (user decision 2026-11-20): a module with an end date is a phase.
+//! Phases: a module with an end date is a phase.
 //! Its work is planned between the previous phase's end and its own, so a
 //! project's time is split instead of spread evenly to the deadline. Work
 //! outside dated phases is planned up to the project's deadline.
 //!
-//! A task's own dates (user report 2026-11-21): a task planned for a day
+//! A task's own dates: a task planned for a day
 //! ("Do on", today or later) is asked for on that day; a task due before
 //! its phase or project ends is planned up to its due date. Either way its
-//! minutes are no longer spread thin up to the deadline.
+//! minutes are not spread thin up to the deadline.
 //!
 //! Budgets: a phase can carry a time budget. Its tasks without an estimate
 //! share what the estimated ones leave of it, so a phase can be planned
 //! before every task is estimated. A budgeted phase with no tasks yet
 //! counts its whole budget until its end date.
 //!
-//! Subtasks (user decision 2026-11-21): a task with subtasks is a budget
+//! Subtasks: a task with subtasks is a budget
 //! for them in the same way; see `planned`.
 
 use std::collections::{BTreeSet, HashMap};
@@ -181,8 +181,8 @@ fn known(task: &TaskRow, subtasks: &[&TaskRow]) -> Option<i64> {
 
 /// The minutes each task counts for in the plan, and the dates that place
 /// them. A task without subtasks counts its estimate (or its share of its
-/// module's budget). A task with subtasks is a budget, like a phase (user
-/// decision 2026-11-21): estimated subtasks count their own estimates,
+/// module's budget). A task with subtasks is a budget, like a phase:
+/// estimated subtasks count their own estimates,
 /// unestimated ones share what that leaves of the parent's, and with none
 /// unestimated the rest stays on the parent. A subtask without dates of its
 /// own is placed by its parent's.
@@ -388,7 +388,7 @@ impl Estimates {
     }
 }
 
-/// One unit's work, split by the tasks' own dates (user report 2026-11-21):
+/// One unit's work, split by the tasks' own dates:
 /// a task planned for a day still to come ("Do on") is asked for on that
 /// day; a task due before the unit's target gets a window ending on its due
 /// date (200 minutes due tomorrow are done by tomorrow, not spread to the
@@ -457,8 +457,8 @@ pub fn units_at(
     let mut previous: Option<(Option<NaiveDate>, NaiveDate)> = None; // (from, end)
     for phase in &p.phases {
         // Phases ending on the same day share a window; starting the second
-        // one the day after the first ended would leave it no days at all
-        // (user report 2026-11-21: 37h piled onto today).
+        // one the day after the first ended would leave it no days at all,
+        // and all its hours would pile onto today.
         if let Some((prev_from, prev_end)) = previous {
             from = if prev_end < phase.end {
                 Some(prev_end + Duration::days(1))

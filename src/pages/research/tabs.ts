@@ -1,6 +1,5 @@
 /**
- * The pages behind the sidebar's one Research entry (user decision
- * 2026-11-20), shown as tabs: the overview, ideas and the paper library.
+ * The pages behind the sidebar's one Research entry, shown as tabs: the overview, ideas and the paper library.
  */
 import type { MainPage } from '@/store/ui-store'
 

@@ -1,4 +1,4 @@
-//! Projects (DayEcho): a deadline, a buffer, modules (phases when they have
+//! Projects: a deadline, a buffer, modules (phases when they have
 //! an end date), and estimated tasks.
 //! Reads are in `query`, writes in `mutation`, starting modules in `templates`.
 

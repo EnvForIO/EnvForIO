@@ -83,7 +83,6 @@ export function SidebarNav() {
       <div className="mx-2.5 my-2 border-t border-sidebar-border" />
       <PageItem page="reader" icon={RssIcon} />
       <PageItem page="monitor" icon={ActivityIcon} />
-      {/* Below Monitor (user request 2026-11-21). */}
       <PageItem page="stats" icon={ChartColumnIcon} />
     </nav>
   )

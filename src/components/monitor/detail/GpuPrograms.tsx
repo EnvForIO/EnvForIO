@@ -1,7 +1,7 @@
 /**
  * The programs on one GPU, at the foot of its tile: user, PID, VRAM and
- * (when the machine tells it) how long it has run, heaviest first. No
- * command (user decision 2026-11-20).
+ * (when the machine tells it) how long it has run, heaviest first. The
+ * command line is not shown.
  *
  * A program with no user is one no source on the machine names: /proc
  * hidden with hidepid and no gpustat cache from root, or a container.

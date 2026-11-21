@@ -1,5 +1,5 @@
 /**
- * The Monitor page, two levels (user decision 2026-11-19): the overview
+ * The Monitor page, two levels: the overview
  * shows a coarse tile per machine the user added; clicking one opens its
  * detail. Apple's clean white look with Datadog / DCGM content (GPU
  * heatmap, per-GPU tiles), coloured by thresholds. Readings flow only

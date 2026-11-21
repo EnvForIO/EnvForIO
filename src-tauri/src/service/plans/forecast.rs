@@ -5,7 +5,7 @@
 //! both. A project uses its own ratio once it has 3 such tasks, otherwise the
 //! overall ratio (again from 3 tasks), otherwise 1.
 //!
-//! Health is judged per phase (user decision 2026-11-20): a project is as
+//! Health is judged per phase: a project is as
 //! bad as its worst phase, so experiments running late show up weeks before
 //! the paper deadline. A phase whose end has passed with work left is
 //! Behind; only the project's own deadline makes it Overdue.
@@ -67,8 +67,8 @@ pub enum Health {
     Overdue, // past the deadline with work left
 }
 
-/// More than this a day cannot be done, whatever time is set (user report
-/// 2026-11-21: "On track" next to a 40-hour day).
+/// More than this a day cannot be done, whatever time is set, so a 40-hour
+/// day is never "On track".
 const DAY_MINUTES: i64 = 24 * 60;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Type)]
@@ -162,7 +162,7 @@ pub fn project_health(conn: &Connection, today: &str) -> AppResult<Vec<ProjectHe
             let units = units_at(p, &estimates, today, false);
             let remaining: i64 = units.iter().map(|(_, u)| u.remaining).sum();
             // The worst part decides; among equally bad ones, the one that
-            // needs the most a day (it used to pick the smallest need).
+            // needs the most a day.
             let worst = units
                 .iter()
                 .filter(|(_, u)| u.remaining > 0)
@@ -386,8 +386,8 @@ mod tests {
 
     #[test]
     fn a_task_due_before_its_project_is_planned_up_to_its_due_date() {
-        // The user's case (2026-11-21): 200 minutes due tomorrow in a
-        // project due in two months were spread so thin today got nothing.
+        // 200 minutes due tomorrow in a project due in two months must not
+        // be spread so thin that today gets nothing.
         let mut conn = open_in_memory();
         let p = project(&mut conn, "2027-01-23");
         let t = projects::add_task(&conn, p, None, "rebuttal", &Some("200m".into())).unwrap();

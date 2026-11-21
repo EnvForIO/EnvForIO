@@ -1,5 +1,5 @@
 //! Downloads ccfddl's combined list (about 700 KB). Only when the user
-//! presses refresh (user decision 2026-11-20); nothing runs on a schedule.
+//! presses refresh; nothing runs on a schedule.
 
 use crate::errors::AppResult;
 use crate::service::net::{client, network};

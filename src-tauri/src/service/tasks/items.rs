@@ -1,5 +1,4 @@
 //! The Tasks page's filters: tasks by status, and optionally by project.
-//! (The page took over the old Items page and the Planned list, 2026-11-20.)
 
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};

@@ -58,8 +58,7 @@ pub fn create(conn: &Connection, title: &str, view: TaskView, today: &str) -> Ap
 }
 
 /// Add a task planned for `date`: the Todo Duo card and the calendar's day
-/// dialog (user decision 2026-11-20: both plan the task, neither sets a due
-/// date).
+/// dialog. Both plan the task; neither sets a due date.
 pub fn create_on_day(conn: &Connection, title: &str, date: &str) -> AppResult<Task> {
     check_date(&Some(date.to_string()))?;
     // My Day is "planned for today", so a task for another day is the same

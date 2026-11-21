@@ -9,17 +9,6 @@
 
 export const commands = {
 /**
- * Simple greeting command for demonstration purposes.
- */
-async greet(name: string) : Promise<Result<string, string>> {
-    try {
-    return { status: "ok", data: await TAURI_INVOKE("greet", { name }) };
-} catch (e) {
-    if(e instanceof Error) throw e;
-    else return { status: "error", error: e  as any };
-}
-},
-/**
  * Loads user preferences from disk.
  * Returns default preferences if the file doesn't exist.
  */
@@ -1371,7 +1360,7 @@ export type ForecastDay = { date: string; minutes: number; capacity: number | nu
 export type GpuInfo = { index: number; name: string; memoryTotal: number | null }
 /**
  * A compute program on a GPU: PID, user, VRAM and run time (the command
- * is not shown, user decision 2026-11-20). The user is empty when no
+ * is not shown). The user is empty when no
  * source on the machine tells it.
  */
 export type GpuProcess = { pid: number; user: string; gpuMemory: number | null; runningSecs: number | null }
@@ -1515,7 +1504,7 @@ export type RoundRef = { key: string; editionId: string; stage: number }
 export type RunningTimer = { taskId: number; title: string; startedAt: string }
 /**
  * One second's readings. Network traffic and the machine's whole process
- * list are not read (2026-11-19, user decision); GPU programs are.
+ * list are not read; GPU programs are.
  */
 export type Sample = { atMs: number; cpu: CpuSample; memory: MemorySample; gpus: GpuSample[]; disk: DiskIoSample; drives: Drive[]; 
 /**

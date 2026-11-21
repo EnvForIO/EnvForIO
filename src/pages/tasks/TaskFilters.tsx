@@ -1,7 +1,6 @@
 /**
  * The Tasks page's filter row: status chips (all / with deadline / done)
- * and a project picker. It replaced the Items page and the Planned list
- * (user decision 2026-11-20): "with deadline" is the old Planned.
+ * and a project picker.
  */
 import { useTranslation } from 'react-i18next'
 import { useProjects } from '@/api/projects'

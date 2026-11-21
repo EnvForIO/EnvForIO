@@ -15,7 +15,7 @@ use crate::errors::{AppError, AppResult};
 use crate::service::settings;
 use crate::service::undo::UndoStack;
 
-// Kept from before the rename to EnvForIO (2026-11-21), so existing data opens.
+// Kept from before the rename to EnvForIO, so existing data opens.
 const DATABASE_FILE: &str = "envio.db";
 
 pub struct AppState {

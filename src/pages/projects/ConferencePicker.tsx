@@ -1,8 +1,7 @@
 /**
  * Picks the conference round a paper is for, from ccfddl's list: type a
  * name, then choose one of its open rounds. The list is downloaded here
- * when it is missing or a week old. It replaced the Conferences page
- * (user decision 2026-11-20).
+ * when it is missing or a week old; there is no separate Conferences page.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'

@@ -1,4 +1,4 @@
-//! Background downloads (user decisions 2026-11-20): subscribed calendars
+//! Background downloads: subscribed calendars
 //! on start and every hour, RSS feeds on start and every three hours. Each
 //! runs on a thread of its own and tells the windows with an event when it
 //! had anything to refresh.

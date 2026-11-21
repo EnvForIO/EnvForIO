@@ -1,5 +1,5 @@
 /**
- * Subtasks in a list (user decision 2026-11-21): each one goes under its
+ * Subtasks in a list: each one goes under its
  * parent when the parent is in the same list, and stands on its own, with
  * its parent's title, when it is not (a subtask planned for today in My
  * Day). Lists keep their own order for the top level.

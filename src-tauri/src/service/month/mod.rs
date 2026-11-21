@@ -1,5 +1,5 @@
-//! What the Todo Duo card's Month tab shows for each day (phase 4 step 7,
-//! user decisions 2026-11-20): deadlines as dots (projects and open tasks
+//! What the Todo Duo card's Month tab shows for each day:
+//! deadlines as dots (projects and open tasks
 //! due; a conference project's deadline and abstract task are among them),
 //! how full the day is (time of the tasks scheduled on it against its
 //! available time), and the list for the day: those deadlines and the

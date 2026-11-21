@@ -40,8 +40,8 @@ export const share = (used: number, total: number) =>
 
 /**
  * Colour follows the value, as Grafana's thresholds do: green while low,
- * yellow from the warning threshold, red from the critical one (user
- * decision 2026-11-19). Apple's system colours, with a darker yellow so
+ * yellow from the warning threshold, red from the critical one.
+ * Apple's system colours, with a darker yellow so
  * it reads as text on white.
  */
 export type Level = 'ok' | 'warn' | 'bad'

@@ -1,6 +1,6 @@
 /**
- * Today's hours as a strip beside My Day ("Planner", user choice
- * 2026-11-21): the day's available time from top to bottom, a block for
+ * Today's hours as a strip beside My Day ("Planner"): the
+ * day's available time from top to bottom, a block for
  * each project's share of today's safety line and for each of today's
  * other tasks with an estimate or a time slot, the free time left, and a
  * red rule where the day runs out when it is over. Whether today fits is

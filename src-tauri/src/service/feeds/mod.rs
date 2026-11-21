@@ -1,4 +1,4 @@
-//! The RSS reader's feeds and items (phase 4 step 8). Each download adds
+//! The RSS reader's feeds and items. Each download adds
 //! new items and updates known ones without touching whether they were
 //! read; a feed keeps its newest `KEEP` items. Parsing is in
 //! `domain::feed`, downloading in `fetch`.

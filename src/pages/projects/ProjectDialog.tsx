@@ -242,7 +242,7 @@ export function ProjectDialog({
           )}
         </div>
         <DialogFooter className="items-center">
-          {/* A disabled button says why (critique 2026-11-21). */}
+          {/* A disabled button says why. */}
           {form.name.trim() === '' && (
             <p className="me-auto text-xs text-muted-foreground">
               {template === 'conference' && !picked && !project

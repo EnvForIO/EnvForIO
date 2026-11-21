@@ -1,6 +1,5 @@
 /**
- * The Duo card's Month tab (phase 4 step 7; moved into Todo Duo at the
- * user's request, 2026-11-20). Each day is shaded by how full it is and
+ * The Duo card's Month tab. Each day is shaded by how full it is and
  * carries a dot per deadline (projects and tasks due).
  * A click picks the day for the whole Duo (the Todo tab then shows it)
  * and lists it below; a double-click opens the main calendar there.

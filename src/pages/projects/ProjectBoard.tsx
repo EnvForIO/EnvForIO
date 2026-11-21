@@ -1,6 +1,5 @@
 /**
- * A project as a board (phase 4 step 5): To do, Doing and Done columns
- * (user decision 2026-11-20). Drag a card to another column to move it;
+ * A project as a board: To do, Doing and Done columns. Drag a card to another column to move it;
  * Doing is set by dragging or by starting the task's timer, Done completes
  * the task. Click a card to open its details; "To do" has an add box.
  */
