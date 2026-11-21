@@ -18,18 +18,19 @@ message: |
 severity: error
 language: Tsx
 rule:
-  pattern: const { $$$PROPS } = useUIStore($$$ARGS)
+  pattern: const { $$$PROPS } = $STORE($$$ARGS)
+constraints:
+  STORE:
+    regex: '^use[A-Z]\w*Store$'
 note: |
   See: docs/developer/state-management.md (Performance Patterns)
 ```
 
-To cover another store, turn `pattern` into `any:` with one `pattern` per store.
-
-Restrict a rule to paths with `files:` (see `architecture/hooks-in-hooks-dir.yml`, which applies to `src/lib/**`), and add `constraints:` to filter a metavariable by regex (that rule matches only names like `^use[A-Z]`).
+The `$STORE` metavariable with a `constraints` regex covers every store named `use…Store`, so a new store needs no rule change. Restrict a rule to paths with `files:` (see `architecture/hooks-in-hooks-dir.yml`, which applies to `src/lib/**`).
 
 ## `language` Picks the Files
 
-`language: Tsx` checks only `.tsx` files and `language: TypeScript` only `.ts` files. The zustand rule is `Tsx`, so it does not see `.ts` hooks; the two architecture rules are `TypeScript`. To cover both, write the rule twice, once per language.
+`language: Tsx` checks only `.tsx` files and `language: TypeScript` only `.ts` files, whatever `sgconfig.yml` says. So every rule here is written twice, once per language, with the twin's id ending in `-ts` or `-tsx` (`no-destructure.yml` and `no-destructure-ts.yml`). Keep the pair identical apart from `id`, `language` and `files`.
 
 ## Pattern Syntax
 

@@ -7,10 +7,11 @@ message: |
 
   The lib/ directory is for pure business logic and utilities.
 severity: error
+# A rule sees only files of its own language: this one checks .ts, and
+# hooks-in-hooks-dir-tsx the .tsx files.
 language: TypeScript
 files:
   - 'src/lib/**/*.ts'
-  - 'src/lib/**/*.tsx'
 rule:
   any:
     # Named function export: export function useFoo() {}

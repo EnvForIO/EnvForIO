@@ -17,11 +17,13 @@
 
 ## ast-grep Rules
 
-| Rule                                  | Enforces                                       |
-| ------------------------------------- | ---------------------------------------------- |
-| `zustand/no-destructure.yml`          | Select from `useUIStore`, don't destructure    |
-| `architecture/hooks-in-hooks-dir.yml` | No `use*` hooks exported from `src/lib/`       |
-| `architecture/no-store-in-lib.yml`    | `src/lib/` reads stores only with `getState()` |
+| Rule                                  | Enforces                                                |
+| ------------------------------------- | ------------------------------------------------------- |
+| `zustand/no-destructure.yml`          | Select from a store (`use…Store`), don't destructure it |
+| `architecture/hooks-in-hooks-dir.yml` | No `use*` hooks exported from `src/lib/`                |
+| `architecture/no-store-in-lib.yml`    | `src/lib/` reads stores only with `getState()`          |
+
+Each rule has a twin for the other file type (`no-destructure-ts.yml`, `hooks-in-hooks-dir-tsx.yml`, `no-store-in-lib-tsx.yml`), because a rule only sees files of its own language.
 
 To add one, see [writing-ast-grep-rules.md](./writing-ast-grep-rules.md).
 

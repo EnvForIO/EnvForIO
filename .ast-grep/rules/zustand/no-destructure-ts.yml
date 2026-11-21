@@ -1,0 +1,21 @@
+id: no-destructure-zustand-ts
+message: |
+  Never destructure from Zustand stores. Use selector syntax instead.
+
+  BAD: const { leftSidebarVisible } = useUIStore()
+  GOOD: const leftSidebarVisible = useUIStore(state => state.leftSidebarVisible)
+
+  For multiple values, use multiple selectors or useShallow.
+severity: error
+# The .ts twin of no-destructure-zustand (which checks .tsx).
+language: TypeScript
+rule:
+  pattern: const { $$$PROPS } = $STORE($$$ARGS)
+constraints:
+  STORE:
+    regex: '^use[A-Z]\w*Store$'
+note: |
+  Destructuring causes render cascades - every store update triggers re-renders
+  even if destructured values haven't changed.
+
+  See: docs/developer/state-management.md (Performance Patterns)

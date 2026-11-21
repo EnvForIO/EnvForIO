@@ -41,7 +41,7 @@ const { leftSidebarVisible } = useUIStore()
 const leftSidebarVisible = useUIStore(state => state.leftSidebarVisible)
 ```
 
-`.ast-grep/rules/zustand/no-destructure.yml` enforces this for `useUIStore` in `.tsx` files (see [writing-ast-grep-rules.md](./writing-ast-grep-rules.md)). If you add a store, add its pattern to that rule.
+`.ast-grep/rules/zustand/no-destructure.yml` and its `.ts` twin enforce this for every store named `use…Store` (see [writing-ast-grep-rules.md](./writing-ast-grep-rules.md)).
 
 ### `getState()` in callbacks
 
@@ -64,6 +64,6 @@ The React Compiler is on (`vite.config.ts`), so don't add `useMemo`, `useCallbac
 
 ## Adding a Store
 
-Create it in `src/store/`. `ui-store.ts` uses the `devtools` middleware. Add the store to the no-destructure rule.
+Create it in `src/store/` and name it `use…Store`, so the lint rules cover it. `ui-store.ts` uses the `devtools` middleware.
 
 Code in `src/lib/` may read stores only through `getState()`, never subscribe (`.ast-grep/rules/architecture/no-store-in-lib.yml`).

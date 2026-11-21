@@ -1,0 +1,23 @@
+id: no-store-subscription-in-lib-tsx
+message: |
+  lib/ modules should use getState() for store access, not subscriptions.
+
+  BAD: const value = useUIStore(state => state.value)
+  GOOD: const value = useUIStore.getState().value
+
+  Store subscriptions create React coupling. lib/ should remain pure.
+severity: error
+# The .tsx twin of no-store-subscription-in-lib (which checks .ts).
+language: Tsx
+files:
+  - 'src/lib/**/*.tsx'
+rule:
+  pattern: $STORE($$$SELECTOR)
+constraints:
+  STORE:
+    regex: '^use[A-Z]\w*Store$'
+note: |
+  lib/ can import stores ONLY for getState() - one-way data access
+  without React coupling.
+
+  See: docs/developer/architecture-guide.md
