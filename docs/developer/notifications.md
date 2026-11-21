@@ -17,4 +17,4 @@ Translate the text (see [i18n-patterns.md](./i18n-patterns.md)). For failures, s
 
 `src/lib/notifications.ts` exports `notify(title, message?, { type, native, duration })` and the shortcuts `notifications.success/error/info/warning`. `CommandContext.showToast` uses it. With `native: true` it calls `commands.sendNativeNotification` (Rust, `src-tauri/src/commands/notifications.rs`, `tauri-plugin-notification`) and falls back to an error toast if that fails.
 
-No feature sends a native notification yet. The permission (`notification:default`) is in `src-tauri/capabilities/default.json`.
+No feature sends a native notification yet. The plugin is called from Rust only, so the webview needs no `notification` permission.

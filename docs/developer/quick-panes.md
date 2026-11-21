@@ -24,7 +24,7 @@ The quick pane is a small floating window for quick capture: the user presses a 
 
 ## Size
 
-`QUICK_PANE_WIDTH` and `QUICK_PANE_HEIGHT` in `quick_pane.rs` are used for positioning. `init_quick_pane_standard` (the Windows/Linux path) passes `500.0, 72.0` directly, so change both together.
+`QUICK_PANE_WIDTH` and `QUICK_PANE_HEIGHT` in `quick_pane.rs` set the pane's size, both when it is created and when it is centred on the screen.
 
 ## macOS
 

@@ -1,13 +1,8 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "project": ["src/**/*.{ts,tsx}"],
-  "ignore": [
-    "src/components/ui/**",
-    "**/index.ts",
-    "src/lib/platform-strings.ts"
-  ],
+  "ignore": ["src/components/ui/**", "**/index.ts"],
   "ignoreDependencies": [
-    "@tauri-apps/*",
     "@radix-ui/*",
     "tailwindcss",
     "tw-animate-css",

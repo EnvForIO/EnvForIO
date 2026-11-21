@@ -4,21 +4,20 @@ Plugins are registered in `src-tauri/src/lib.rs`. Their permissions are in `src-
 
 ## Installed
 
-| Plugin                             | What EnvForIO uses it for                                                                                                 | Used from                                                |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `single-instance`                  | A second launch focuses the existing main window                                                                          | Rust only                                                |
-| `autostart`                        | "Launch at login" (starts in the tray, `AUTOSTART_ARG`)                                                                   | `preferences/panes/LaunchAtLogin.tsx`                    |
-| `window-state`                     | Saves and restores main window size and position (not visibility); `quick-pane`, `duo-capsule`, `duo-card` are denylisted | Rust only                                                |
-| `log`                              | Stdout, log file and webview console targets                                                                              | Rust; see [logging.md](./logging.md)                     |
-| `notification`                     | `commands.sendNativeNotification` (wired up; nothing sends one yet)                                                       | `src/lib/notifications.ts`                               |
-| `dialog`                           | Save dialogs for exports                                                                                                  | `src/api/export.ts`, `src/api/research.ts`               |
-| `clipboard-manager`                | Copy/paste in the app's edit menu, copying a paper's BibTeX                                                               | `components/ui/edit-menu.tsx`, `src/api/papers.ts`       |
-| `opener`                           | Opening links in the browser                                                                                              | `src/lib/updates.ts`, idea/paper/reader pages            |
-| `os`                               | Platform and locale detection                                                                                             | `src/hooks/use-platform.ts`, `src/i18n/language-init.ts` |
-| `global-shortcut`                  | The quick-pane shortcut                                                                                                   | Rust (`commands/quick_pane.rs`)                          |
-| `fs`, `persisted-scope`, `process` | Registered; no frontend code imports them                                                                                 | —                                                        |
+| Plugin              | What EnvForIO uses it for                                                                                                 | Used from                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `single-instance`   | A second launch focuses the existing main window                                                                          | Rust only                                                |
+| `autostart`         | "Launch at login" (starts in the tray, `AUTOSTART_ARG`)                                                                   | `preferences/panes/LaunchAtLogin.tsx`                    |
+| `window-state`      | Saves and restores main window size and position (not visibility); `quick-pane`, `duo-capsule`, `duo-card` are denylisted | Rust only                                                |
+| `log`               | Stdout and log file targets                                                                                               | Rust; see [logging.md](./logging.md)                     |
+| `notification`      | Called from Rust by `send_native_notification` (wired up; nothing sends one yet)                                          | `src/lib/notifications.ts` through that command          |
+| `dialog`            | Save dialogs for exports                                                                                                  | `src/api/export.ts`, `src/api/research.ts`               |
+| `clipboard-manager` | Copy/paste in the app's edit menu, copying a paper's BibTeX                                                               | `components/ui/edit-menu.tsx`, `src/api/papers.ts`       |
+| `opener`            | Opening links in the browser                                                                                              | `src/lib/updates.ts`, idea/paper/reader pages            |
+| `os`                | Platform and locale detection                                                                                             | `src/hooks/use-platform.ts`, `src/i18n/language-init.ts` |
+| `global-shortcut`   | The quick-pane shortcut                                                                                                   | Rust (`commands/quick_pane.rs`)                          |
 
-There is no updater plugin; EnvForIO does not update itself. `tauri-nspanel` is a macOS-only dependency for the quick pane and is not built for Windows releases. The database uses `rusqlite` and web lookups use `reqwest` in Rust, so the `sql` and `http` plugins are not needed.
+Plugins used only from Rust have no frontend package and no permission in the capabilities: a permission is needed only for calls from the webview. Add the npm package and the permission together, when frontend code starts calling the plugin. There is no updater plugin; EnvForIO does not update itself. `tauri-nspanel` is a macOS-only dependency for the quick pane and is not built for Windows releases. The database uses `rusqlite` and web lookups use `reqwest` in Rust, so the `sql` and `http` plugins are not needed.
 
 ## Registration Order
 

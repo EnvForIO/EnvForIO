@@ -29,10 +29,3 @@ In development, `<TitleBar forcePlatform="windows" />` previews another layout.
 
 - **Frontend:** `usePlatform()`, `useIsWindows()`, etc. and `getPlatform()` in `src/hooks/use-platform.ts` (uses `@tauri-apps/plugin-os`). Current users: `TitleBar` and `useSquareCornersEffect`.
 - **Rust:** `#[cfg(target_os = "windows")]`, `#[cfg(desktop)]`. Prefer compile-time checks.
-
-## Unused Helpers
-
-These exist but nothing calls them yet:
-
-- `src/lib/platform-strings.ts`: `getPlatformStrings()` (e.g. "Show in Explorer") and `formatShortcut()`.
-- `normalize_path_for_serialization` in `src-tauri/src/utils/platform.rs`: turns `\` into `/` for paths sent to the frontend.

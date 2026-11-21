@@ -15,7 +15,7 @@ use crate::types::DEFAULT_QUICK_PANE_SHORTCUT;
 /// Window label for the quick pane
 const QUICK_PANE_LABEL: &str = "quick-pane";
 
-/// Quick pane window dimensions
+/// Quick pane window size (logical pixels), used when creating and when centring it.
 const QUICK_PANE_WIDTH: f64 = 500.0;
 const QUICK_PANE_HEIGHT: f64 = 72.0;
 
@@ -73,7 +73,10 @@ fn init_quick_pane_macos(app: &AppHandle) -> Result<(), String> {
     let panel = PanelBuilder::<_, QuickPanePanel>::new(app, QUICK_PANE_LABEL)
         .url(WebviewUrl::App("index.html?window=quick-pane".into()))
         .title("Quick Entry")
-        .size(Size::Logical(LogicalSize::new(500.0, 72.0)))
+        .size(Size::Logical(LogicalSize::new(
+            QUICK_PANE_WIDTH,
+            QUICK_PANE_HEIGHT,
+        )))
         .level(PanelLevel::Status) // Status level to appear above fullscreen apps
         .transparent(true)
         .has_shadow(true)
@@ -114,7 +117,7 @@ fn init_quick_pane_standard(app: &AppHandle) -> Result<(), String> {
         WebviewUrl::App("index.html?window=quick-pane".into()),
     )
     .title("Quick Entry")
-    .inner_size(500.0, 72.0)
+    .inner_size(QUICK_PANE_WIDTH, QUICK_PANE_HEIGHT)
     .always_on_top(true)
     .skip_taskbar(true)
     .decorations(false)

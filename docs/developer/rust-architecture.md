@@ -19,8 +19,7 @@ src-tauri/src/
 ├── desktop/         # Tray, Todo Duo windows, monitor thread, background refresh
 ├── providers/       # Swappable data sources (machine monitor)
 ├── commands/        # Older commands: preferences, quick_pane, recovery, notifications
-├── types.rs         # Preferences types, quick-pane shortcut constant
-└── utils/platform.rs
+└── types.rs         # Preferences types, quick-pane shortcut constant
 ```
 
 Requests flow `api` → `service` → `entity`/`db`, with `domain` called for rules that need no I/O.

@@ -4,11 +4,12 @@
 
 Use the `log` crate (`log::info!`, `log::warn!`, ...). `tauri-plugin-log` is set up in `src-tauri/src/lib.rs`: Debug level in debug builds, Info in release.
 
-| Target          | Platforms                                                       |
-| --------------- | --------------------------------------------------------------- |
-| Stdout          | All                                                             |
-| Webview console | Windows (skipped on Linux, where it deadlocks during `setup()`) |
-| Log file        | `EnvForIO.log` in the app log directory                         |
+| Target   | Platforms                               |
+| -------- | --------------------------------------- |
+| Stdout   | All                                     |
+| Log file | `EnvForIO.log` in the app log directory |
+
+Rust logs do not reach the DevTools console: that would need the plugin's webview target plus `attachConsole()` from `@tauri-apps/plugin-log` in the frontend, which the app does not use.
 
 On Windows the log file is `%LOCALAPPDATA%\io.github.envforio\logs\EnvForIO.log`. It is capped at 1 MB; when full it is rotated and one previous file is kept. It stays on the machine: **Report a problem** (Preferences > General, or the command palette) only names its location in the bug report, and the user decides whether to attach it. **Open log folder** (`open_log_folder`, `src-tauri/src/api/feedback.rs`) shows it.
 

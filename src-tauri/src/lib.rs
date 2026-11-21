@@ -17,7 +17,6 @@ mod errors;
 mod providers;
 mod service;
 mod types;
-mod utils;
 
 use tauri::{Manager, RunEvent, WindowEvent};
 
@@ -75,11 +74,9 @@ pub fn run() {
     }
 
     app_builder = app_builder
-        .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_notification::init())
         .plugin({
-            #[allow(unused_mut)]
-            let mut targets = vec![
+            let targets = vec![
                 // Always log to stdout for development
                 tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout),
                 // A local log file (%LOCALAPPDATA%\io.github.envforio\logs on
@@ -89,12 +86,6 @@ pub fn run() {
                     file_name: Some(domain::feedback::LOG_FILE_NAME.into()),
                 }),
             ];
-            // Log to webview console — excluded on Linux where the WebKitGTK webview
-            // doesn't exist during setup(), causing app.emit() to deadlock on the IPC socket.
-            #[cfg(not(target_os = "linux"))]
-            targets.push(tauri_plugin_log::Target::new(
-                tauri_plugin_log::TargetKind::Webview,
-            ));
             tauri_plugin_log::Builder::new()
                 // Use Debug level in development, Info in production
                 .level(if cfg!(debug_assertions) {
@@ -116,8 +107,6 @@ pub fn run() {
     }
 
     app_builder
-        .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_persisted_scope::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
