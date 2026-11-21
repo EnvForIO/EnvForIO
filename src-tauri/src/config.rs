@@ -34,7 +34,12 @@ impl AppState {
         std::fs::create_dir_all(&dir)
             .map_err(|e| AppError::invalid(format!("cannot create {}: {e}", dir.display())))?;
         let path = dir.join(DATABASE_FILE);
-        log::info!("opening database at {}", path.display());
+        // Without the user's folder: the log may be attached to a public bug report.
+        let home = app.path().home_dir().ok();
+        log::info!(
+            "opening database at {}",
+            crate::domain::feedback::shareable_path(&path, None, home.as_deref())
+        );
         let conn = db::open(&path)?;
         // The saved day start decides what "today" is, so apply it before any command runs.
         settings::apply(&conn)?;

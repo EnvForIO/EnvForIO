@@ -8,6 +8,7 @@ pub mod calendar;
 pub mod calendars;
 pub mod conferences;
 pub mod export;
+pub mod feedback;
 pub mod feeds;
 pub mod ideas;
 pub mod monitor;

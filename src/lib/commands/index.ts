@@ -1,6 +1,7 @@
 // Command system exports
 export * from './registry'
 export * from '../../hooks/use-command-context'
+import { helpCommands } from './help-commands'
 import { navigationCommands } from './navigation-commands'
 import { windowCommands } from './window-commands'
 import { registerCommands } from './registry'
@@ -12,11 +13,11 @@ import { registerCommands } from './registry'
 export function initializeCommandSystem(): void {
   registerCommands(navigationCommands)
   registerCommands(windowCommands)
-  // Future command groups will be registered here
+  registerCommands(helpCommands)
 
   if (import.meta.env.DEV) {
     console.log('Command system initialized')
   }
 }
 
-export { navigationCommands, windowCommands }
+export { helpCommands, navigationCommands, windowCommands }

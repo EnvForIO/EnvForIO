@@ -13,7 +13,7 @@ pub async fn send_native_notification(
     title: String,
     body: Option<String>,
 ) -> Result<(), String> {
-    log::info!("Sending native notification: {title}");
+    log::info!("Sending native notification"); // not its text: logs may be shared
 
     #[cfg(not(mobile))]
     {

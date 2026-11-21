@@ -79,7 +79,11 @@ pub async fn save_emergency_data(
         });
     }
 
-    log::info!("Successfully saved emergency data to {file_path:?}");
+    // File names only: the log may be attached to a public bug report.
+    log::info!(
+        "Successfully saved emergency data to {:?}",
+        file_path.file_name()
+    );
     Ok(())
 }
 
@@ -97,7 +101,7 @@ pub async fn load_emergency_data(app: AppHandle, filename: String) -> Result<Val
     let file_path = recovery_dir.join(format!("{filename}.json"));
 
     if !file_path.exists() {
-        log::info!("Recovery file not found: {file_path:?}");
+        log::info!("Recovery file not found: {:?}", file_path.file_name());
         return Err(RecoveryError::FileNotFound);
     }
 
@@ -191,7 +195,7 @@ pub async fn cleanup_old_recovery_files(app: AppHandle) -> Result<u32, RecoveryE
         if modified_secs < seven_days_ago {
             match std::fs::remove_file(&path) {
                 Ok(_) => {
-                    log::info!("Removed old recovery file: {path:?}");
+                    log::info!("Removed old recovery file: {:?}", path.file_name());
                     removed_count += 1;
                 }
                 Err(e) => {

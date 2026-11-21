@@ -111,6 +111,6 @@ pub async fn save_preferences(app: AppHandle, preferences: AppPreferences) -> Re
         return Err(format!("Failed to finalize preferences file: {rename_err}"));
     }
 
-    log::info!("Successfully saved preferences to {prefs_path:?}");
+    log::info!("Successfully saved preferences"); // no path: logs may be shared
     Ok(())
 }

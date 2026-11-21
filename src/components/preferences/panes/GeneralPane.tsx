@@ -1,6 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
+import { BugIcon, FolderOpenIcon } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { openLogFolder, reportProblem } from '@/lib/feedback'
 import { ShortcutPicker } from '../ShortcutPicker'
 import { SettingsField, SettingsSection } from '../shared/SettingsComponents'
 import { usePreferences, useSavePreferences } from '@/services/preferences'
@@ -98,6 +101,24 @@ export function GeneralPane() {
           description={t('preferences.general.launchAtLoginDescription')}
         >
           <LaunchAtLogin />
+        </SettingsField>
+      </SettingsSection>
+
+      <SettingsSection title={t('preferences.general.help')}>
+        <SettingsField
+          label={t('feedback.title')}
+          description={t('feedback.reportProblemDescription')}
+        >
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => void reportProblem()}>
+              <BugIcon />
+              {t('feedback.reportProblem')}
+            </Button>
+            <Button variant="ghost" onClick={() => void openLogFolder()}>
+              <FolderOpenIcon />
+              {t('feedback.openLogFolder')}
+            </Button>
+          </div>
         </SettingsField>
       </SettingsSection>
     </div>

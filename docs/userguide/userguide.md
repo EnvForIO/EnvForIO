@@ -153,6 +153,9 @@ Paste the address of an RSS or Atom feed, or just a site (for example `quantamag
 
 ## Preferences
 
-- **General**: the quick pane shortcut, launch at login.
+- **General**: the quick pane shortcut, launch at login, and Help:
+  - **Report a problem** opens a bug report on GitHub in your browser, with EnvForIO's version, your Windows version and where the log file is already filled in. Nothing is sent until you submit it yourself; the app has no telemetry.
+  - **Open log folder** shows `%LOCALAPPDATA%\io.github.envforio\logs`. If you attach `EnvForIO.log` to a report, look through it first.
+  - Both are also in the command palette (Ctrl+K).
 - **Appearance**: language; Light, Dark or System theme; Todo Duo style.
 - **Planning**: available time per weekday, day start, levelling, earliest deadline first.

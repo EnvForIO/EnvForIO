@@ -36,9 +36,9 @@ logger.error('Request failed', { error: response.error })
 | --------------- | ------------------------------------------------------------------------- |
 | Stdout          | All                                                                       |
 | Webview console | Windows and macOS (skipped on Linux, where it deadlocks during `setup()`) |
-| Log file        | macOS only (app log directory)                                            |
+| Log file        | All (`EnvForIO.log` in the app log directory)                             |
 
-On Windows, the shipped platform, there is no log file: Rust logs go to stdout and the webview console.
+On Windows the log file is `%LOCALAPPDATA%\io.github.envforio\logs\EnvForIO.log`. It is capped at 1 MB; when full it is rotated and one previous file is kept. It stays on the machine: **Report a problem** (Preferences → General, or the command palette) only names its location in the bug report, and the user decides whether to attach it.
 
 ### TypeScript Frontend
 
@@ -58,7 +58,7 @@ On Windows, the shipped platform, there is no log file: Rust logs go to stdout a
 
 ## Where Logs Appear
 
-- **Rust**: Terminal (stdout) + DevTools console (webview, not on Linux) + log file (macOS only, `~/Library/Logs/<identifier>/`)
+- **Rust**: Terminal (stdout) + DevTools console (webview, not on Linux) + log file (the app log directory; **Open log folder** shows it)
 - **TypeScript**: DevTools console
 
 ## Examples
@@ -68,7 +68,7 @@ On Windows, the shipped platform, there is no log file: Rust logs go to stdout a
 ```rust
 #[tauri::command]
 async fn save_data(data: MyData) -> Result<(), String> {
-    log::info!("Saving data for user: {}", data.user_id);
+    log::info!("Saving data ({} items)", data.items.len());
 
     match save_to_disk(&data).await {
         Ok(_) => {
@@ -116,6 +116,5 @@ See [error-handling.md](./error-handling.md) for patterns on when to log vs show
 
 ## Production Considerations
 
-- Release builds on Windows write no log file; add a `LogDir` target in `lib.rs` if one is needed
-- No sensitive data should be logged (passwords, tokens, etc.)
+- Users may attach the log file to a public GitHub issue, so log nothing private: no passwords or tokens, no task, idea or paper text, no hostnames, and no full paths (they contain the Windows user name). Log a file name, or a path through `domain::feedback::shareable_path`.
 - Frontend logs stay in browser - not sent to backend by default

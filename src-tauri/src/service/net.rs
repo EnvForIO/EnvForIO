@@ -20,6 +20,10 @@ pub fn client() -> AppResult<reqwest::Client> {
 }
 
 pub fn network(e: reqwest::Error) -> AppError {
-    log::warn!("network error: {e}");
-    AppError::network(e.to_string())
+    // Without the URL, here and in the error (which background refreshes log):
+    // a calendar link can carry a private token, and the log may be attached
+    // to a public bug report.
+    let message = e.without_url().to_string();
+    log::warn!("network error: {message}");
+    AppError::network(message)
 }

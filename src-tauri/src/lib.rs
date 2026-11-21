@@ -82,10 +82,11 @@ pub fn run() {
             let mut targets = vec![
                 // Always log to stdout for development
                 tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::Stdout),
-                // Log to system logs on macOS (appears in Console.app)
-                #[cfg(target_os = "macos")]
+                // A local log file (%LOCALAPPDATA%\io.github.envforio\logs on
+                // Windows) that a bug report can point to. It never leaves the
+                // machine unless the user attaches it.
                 tauri_plugin_log::Target::new(tauri_plugin_log::TargetKind::LogDir {
-                    file_name: None,
+                    file_name: Some(domain::feedback::LOG_FILE_NAME.into()),
                 }),
             ];
             // Log to webview console — excluded on Linux where the WebKitGTK webview
@@ -102,6 +103,9 @@ pub fn run() {
                     log::LevelFilter::Info
                 })
                 .targets(targets)
+                // Keep the file small: one previous file is kept when it fills.
+                .max_file_size(1_000_000)
+                .rotation_strategy(tauri_plugin_log::RotationStrategy::KeepOne)
                 .build()
         });
 

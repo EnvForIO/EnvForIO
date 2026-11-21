@@ -1206,6 +1206,29 @@ async closeMiniMode() : Promise<void> {
     await TAURI_INVOKE("close_mini_mode");
 },
 /**
+ * Open a new GitHub issue on the bug-report form, with the app version,
+ * the system and the log file's location filled in.
+ */
+async reportProblem() : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("report_problem") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
+ * Show the folder with EnvForIO's log file.
+ */
+async openLogFolder() : Promise<Result<null, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("open_log_folder") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
  * Open the main window's calendar at a day (double-click in the Duo card's month).
  */
 async openCalendarDay(date: string) : Promise<void> {

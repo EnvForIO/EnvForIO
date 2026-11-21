@@ -4,6 +4,7 @@ pub mod conference;
 pub mod day;
 pub mod duration;
 pub mod feed;
+pub mod feedback;
 pub mod ics;
 pub mod linux_monitor;
 pub mod monitor;
