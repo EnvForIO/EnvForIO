@@ -11,6 +11,8 @@
     "core:window:allow-set-effects",
     "core:event:default",
     "core:event:allow-emit",
-    "core:menu:default"
+    "core:menu:default",
+    "clipboard-manager:allow-read-text",
+    "clipboard-manager:allow-write-text"
   ]
 }

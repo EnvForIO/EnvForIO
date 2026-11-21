@@ -5,8 +5,14 @@
 import type { Root } from 'react-dom/client'
 import '@/i18n'
 import QuickPaneApp from '@/components/quick-pane/QuickPaneApp'
+import { EditMenu } from '@/components/ui/edit-menu'
 import '@/quick-pane.css'
 
 export function renderQuickPane(root: Root): void {
-  root.render(<QuickPaneApp />)
+  root.render(
+    <>
+      <QuickPaneApp />
+      <EditMenu />
+    </>
+  )
 }
