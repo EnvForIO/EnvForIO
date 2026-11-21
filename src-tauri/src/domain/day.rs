@@ -1,7 +1,8 @@
 //! Which calendar day "now" belongs to.
 //!
-//! EnvForIO's day starts at a rollover time (07:00 by default, as in DayEcho),
-//! not at midnight: working until 01:30 still counts as the previous day.
+//! A new day starts at midnight by default, like the calendar. People who
+//! work late can move the rollover (Preferences → Planning → Day start, e.g.
+//! 04:00), and then working until 01:30 still counts as the previous day.
 //! The rollover is a setting; it is loaded at startup and kept here so that
 //! `today()` needs no database.
 
@@ -9,14 +10,11 @@ use std::sync::atomic::{AtomicU32, Ordering};
 
 use chrono::{DateTime, Duration, Local, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 
-/// The default start of a new day.
-pub const DEFAULT_DAY_START: NaiveTime = match NaiveTime::from_hms_opt(7, 0, 0) {
-    Some(t) => t,
-    None => panic!("07:00 is a valid time"),
-};
+/// The default start of a new day: midnight (changed from 07:00 on 2026-11-22).
+pub const DEFAULT_DAY_START: NaiveTime = NaiveTime::MIN;
 
 /// The current rollover, in minutes after midnight.
-static DAY_START_MINUTES: AtomicU32 = AtomicU32::new(7 * 60);
+static DAY_START_MINUTES: AtomicU32 = AtomicU32::new(0);
 
 pub fn set_day_start(time: NaiveTime) {
     DAY_START_MINUTES.store(time.hour() * 60 + time.minute(), Ordering::Relaxed);
@@ -60,14 +58,30 @@ mod tests {
         NaiveDateTime::parse_from_str(&format!("{date} {time}"), "%Y-%m-%d %H:%M").unwrap()
     }
 
+    fn seven() -> NaiveTime {
+        NaiveTime::from_hms_opt(7, 0, 0).unwrap()
+    }
+
     #[test]
-    fn before_the_rollover_is_still_yesterday() {
+    fn by_default_the_day_changes_at_midnight() {
         assert_eq!(
-            day_of(at("2026-11-20", "01:30"), DEFAULT_DAY_START).to_string(),
+            day_of(at("2026-11-22", "00:00"), DEFAULT_DAY_START).to_string(),
+            "2026-11-22"
+        );
+        assert_eq!(
+            day_of(at("2026-11-21", "23:59"), DEFAULT_DAY_START).to_string(),
+            "2026-11-21"
+        );
+    }
+
+    #[test]
+    fn before_a_later_rollover_is_still_yesterday() {
+        assert_eq!(
+            day_of(at("2026-11-20", "01:30"), seven()).to_string(),
             "2026-11-19"
         );
         assert_eq!(
-            day_of(at("2026-11-20", "06:59"), DEFAULT_DAY_START).to_string(),
+            day_of(at("2026-11-20", "06:59"), seven()).to_string(),
             "2026-11-19"
         );
     }
@@ -75,11 +89,11 @@ mod tests {
     #[test]
     fn from_the_rollover_on_it_is_today() {
         assert_eq!(
-            day_of(at("2026-11-20", "07:00"), DEFAULT_DAY_START).to_string(),
+            day_of(at("2026-11-20", "07:00"), seven()).to_string(),
             "2026-11-20"
         );
         assert_eq!(
-            day_of(at("2026-11-20", "23:59"), DEFAULT_DAY_START).to_string(),
+            day_of(at("2026-11-20", "23:59"), seven()).to_string(),
             "2026-11-20"
         );
     }
@@ -87,7 +101,7 @@ mod tests {
     #[test]
     fn rollover_crosses_month_and_year() {
         assert_eq!(
-            day_of(at("2027-01-01", "03:00"), DEFAULT_DAY_START).to_string(),
+            day_of(at("2027-01-01", "03:00"), seven()).to_string(),
             "2026-12-31"
         );
     }

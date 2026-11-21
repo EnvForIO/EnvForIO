@@ -332,7 +332,7 @@
   "plans.neededPerDay": "needs {{minutes}} a day",
   "preferences.planning.safetyLine": "Safety line",
   "preferences.planning.dayStart": "New day starts at",
-  "preferences.planning.dayStartDescription": "Work before this time still counts for the previous day.",
+  "preferences.planning.dayStartDescription": "Midnight by default. If you often work past midnight, set it later (04:00, say): work before this time then counts for the previous day.",
   "preferences.planning.level": "Level work across projects",
   "preferences.planning.levelDescription": "Spread work in 15-minute chunks onto the lightest days instead of splitting each project evenly.",
   "preferences.planning.earliestFirst": "Earliest deadline first",

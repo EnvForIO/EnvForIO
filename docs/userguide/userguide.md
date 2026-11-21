@@ -75,7 +75,7 @@ Preferences → Appearance sets the sticky's material, font and text size.
   - My Day shows the line, your streak, yesterday's shortfall and a 14-day load forecast with each day's hours. When today asks more than your available time (or more than 24 hours), the line turns red and lists the projects and phases causing it.
   - Phases that end on the same day share their days.
   - Estimates are adjusted by how long tasks really take once you have timed a few.
-  - Preferences → Planning sets the day start (default 07:00), levelling, and "earliest deadline first".
+  - Preferences → Planning sets the day start, levelling, and "earliest deadline first". A new day starts at midnight; if you often work past midnight, set the day start later (04:00, say) and that late work counts for the day before.
 
 ## Calendar
 

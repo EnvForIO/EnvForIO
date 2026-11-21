@@ -21,7 +21,7 @@ pub struct PlanningSettings {
 impl Default for PlanningSettings {
     fn default() -> Self {
         Self {
-            day_start: "07:00".into(),
+            day_start: "00:00".into(), // midnight; see domain::day
             level: true,
             earliest_first: false,
         }

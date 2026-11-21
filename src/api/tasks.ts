@@ -47,12 +47,14 @@ export function useTaskSync(): void {
   }, [queryClient])
 }
 
-/** Today as Rust counts it (the day starts at 07:00), 'YYYY-MM-DD'. */
+/** Today as Rust counts it (from the day start, midnight by default), 'YYYY-MM-DD'. */
 export function useToday(): string | undefined {
   return useQuery({
     queryKey: taskKeys.today,
     queryFn: () => commands.getToday(),
-    staleTime: 60_000, // re-ask every minute so the 07:00 rollover is picked up
+    // Re-ask every minute, so an app left open picks up the new day.
+    staleTime: 60_000,
+    refetchInterval: 60_000,
   }).data
 }
 
