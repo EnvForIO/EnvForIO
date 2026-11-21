@@ -17,24 +17,14 @@ The quick pane system demonstrates:
 
 Each Tauri window runs a completely separate JavaScript context. They cannot share React state directly.
 
+There is one HTML entry point. Rust opens the quick pane at `index.html?window=quick-pane`, and `src/main.tsx` lazily mounts the matching view:
+
 ```
-index.html          → src/main.tsx          → Main React app
-quick-pane.html     → src/quick-pane-main.tsx → Quick pane React app
+index.html                    → src/main.tsx → src/windows/main        → Main React app
+index.html?window=quick-pane  → src/main.tsx → src/windows/quick-pane  → Quick pane React app
 ```
 
-**Vite configuration** builds both entry points:
-
-```typescript
-// vite.config.ts
-build: {
-  rollupOptions: {
-    input: {
-      main: resolve(__dirname, 'index.html'),
-      'quick-pane': resolve(__dirname, 'quick-pane.html'),
-    },
-  },
-}
-```
+No extra Vite configuration is needed; the lazy `import()` in `src/main.tsx` keeps each window's code in its own chunk.
 
 ### Window Creation Pattern
 
@@ -172,7 +162,7 @@ export default function QuickPaneApp() {
 
 ### Changing Window Size
 
-Update the constants in `src-tauri/src/lib.rs`:
+Update the constants in `src-tauri/src/commands/quick_pane.rs`:
 
 ```rust
 const QUICK_PANE_WIDTH: f64 = 500.0;

@@ -9,52 +9,66 @@ src-tauri/src/
 ├── main.rs          # Entry point (just calls lib::run())
 ├── lib.rs           # App setup, plugins, startup logic
 ├── bindings.rs      # tauri-specta command registration
-├── types.rs         # Shared types, constants, validation
-├── commands/        # Command handlers by domain
-│   ├── mod.rs       # Re-exports all command modules
-│   ├── preferences.rs
-│   ├── notifications.rs
-│   ├── quick_pane.rs
-│   └── recovery.rs
-└── utils/           # Utility modules
-    ├── mod.rs
+├── config.rs        # AppState: database connection + undo stack
+├── errors.rs        # AppError / AppResult, the one command error type
+├── api/             # Tauri commands, one file per resource (thin)
+├── service/         # Business logic, one folder per resource; the only layer that writes SQL
+├── entity/          # Row types per table and how to read them
+├── domain/          # Pure computation: no database, no Tauri
+├── db/              # Opening SQLite and running migrations
+├── desktop/         # Tray, Todo Duo windows, monitor thread, background refresh
+├── providers/       # Swappable data sources (machine monitor)
+├── commands/        # Template commands not yet moved to api/
+│                    # (preferences, quick_pane, recovery, notifications)
+├── types.rs         # Preferences types, quick-pane shortcut constant
+└── utils/
     └── platform.rs  # Platform-specific helpers
 ```
 
+Requests flow `api` → `service` → `entity`/`db`, with `domain` called for rules that need no I/O.
+
 ## Adding New Commands
 
-### 1. Create or update a command module
+### 1. Put the logic in `service/`
 
 ```rust
-// src-tauri/src/commands/my_feature.rs
-use tauri::AppHandle;
+// src-tauri/src/service/widgets/mod.rs
+use rusqlite::Connection;
+use crate::errors::AppResult;
 
-/// Brief description of what this command does.
-#[tauri::command]
-#[specta::specta]
-pub fn my_command(app: AppHandle, input: String) -> Result<String, String> {
-    // Implementation
-    Ok(format!("Processed: {input}"))
+pub fn rename(conn: &Connection, id: i64, name: &str) -> AppResult<Widget> {
+    let name = crate::service::validate::clean_name(name)?;
+    // SQL with bound parameters, errors convert into AppError via `?`
+    ...
 }
 ```
 
-### 2. Export from commands/mod.rs
+### 2. Add a thin command in `api/`
 
 ```rust
-pub mod my_feature;
+// src-tauri/src/api/widgets.rs
+use tauri::State;
+use crate::config::AppState;
+use crate::errors::AppResult;
+
+#[tauri::command]
+#[specta::specta]
+pub fn rename_widget(state: State<'_, AppState>, id: i64, name: String) -> AppResult<Widget> {
+    crate::service::widgets::rename(&state.db(), id, &name)
+}
 ```
+
+Declare the module in `api/mod.rs` (`pub mod widgets;`).
 
 ### 3. Register in bindings.rs
 
 ```rust
-pub fn generate_bindings() -> Builder<tauri::Wry> {
-    use crate::commands::{my_feature, /* ... */};
+use crate::api::{widgets, /* ... */};
 
-    Builder::<tauri::Wry>::new().commands(collect_commands![
-        my_feature::my_command,
-        // ... other commands
-    ])
-}
+Builder::<tauri::Wry>::new().commands(collect_commands![
+    widgets::rename_widget,
+    // ... other commands
+])
 ```
 
 ### 4. Regenerate TypeScript bindings
@@ -65,9 +79,9 @@ npm run rust:bindings
 
 ## Type Patterns
 
-### Shared Types (types.rs)
+### Row and Request Types
 
-Types shared between commands go in `types.rs`:
+Row types live in `entity/<table>.rs`; request/filter types live next to the service that uses them (e.g. `service::ideas::query::IdeaFilter`):
 
 ```rust
 use serde::{Deserialize, Serialize};
@@ -83,38 +97,21 @@ pub struct MyData {
 
 ### Error Types
 
-Use typed enums for errors the frontend needs to handle:
-
-```rust
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
-#[serde(tag = "type")]
-pub enum MyError {
-    NotFound,
-    ValidationError { message: String },
-    IoError { message: String },
-}
-```
+Commands in `api/` return `AppResult<T>` (`Result<T, AppError>`, from `errors.rs`). `AppError` has four variants: `NotFound { what, id }`, `Invalid { message }`, `Network { message }`, `Database { message }`. `rusqlite::Error` converts into `Database` with `?`. Use the constructors `AppError::invalid(..)`, `AppError::not_found(..)`, `AppError::network(..)`.
 
 The `#[serde(tag = "type")]` makes errors easy to match in TypeScript:
 
 ```typescript
-if (error.type === 'ValidationError') {
+if (error.type === 'Invalid') {
   console.log(error.message)
 }
 ```
 
+The template commands in `commands/` still return `Result<T, String>`.
+
 ### Validation Functions
 
-Keep validation in `types.rs` for reuse:
-
-```rust
-pub fn validate_input(input: &str) -> Result<(), String> {
-    if input.is_empty() {
-        return Err("Input cannot be empty".to_string());
-    }
-    Ok(())
-}
-```
+Shared input checks live in `service/validate.rs` (`clean_name`, `check_date`, `estimate_minutes`) and return `AppError::Invalid`.
 
 ## Platform-Specific Code
 
@@ -154,19 +151,19 @@ app_builder = app_builder
 
 ## Conventions
 
-| Pattern           | Example                                                       |
-| ----------------- | ------------------------------------------------------------- |
-| Command naming    | `snake_case` (`load_preferences`, not `loadPreferences`)      |
-| Error returns     | `Result<T, String>` for simple errors, typed enum for complex |
-| Logging           | Use `log::info!`, `log::debug!`, etc.                         |
-| String formatting | `format!("{variable}")` not `format!("{}", variable)`         |
-| App handle        | Pass `AppHandle` not `Window` when possible                   |
+| Pattern           | Example                                                  |
+| ----------------- | -------------------------------------------------------- |
+| Command naming    | `snake_case` (`load_preferences`, not `loadPreferences`) |
+| Error returns     | `AppResult<T>` (`errors.rs`) for every new command       |
+| Logging           | Use `log::info!`, `log::debug!`, etc.                    |
+| String formatting | `format!("{variable}")` not `format!("{}", variable)`    |
+| App handle        | Pass `AppHandle` not `Window` when possible              |
 
 ## Expanding This Architecture
 
 When adding new features:
 
-1. **New command domain?** Create new file in `commands/`
-2. **New shared types?** Add to `types.rs`
+1. **New resource?** Add `api/<name>.rs` and a `service/<name>/` folder
+2. **New table?** Add a numbered migration in `src-tauri/migrations/`, list it in `db/mod.rs`, and add `entity/<name>.rs`
 3. **Platform-specific utils?** Add to `utils/platform.rs`
 4. **New plugin?** Register in `lib.rs` setup

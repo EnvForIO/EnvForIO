@@ -104,7 +104,7 @@ Detects duplicated code blocks. Not in `check:all` - use periodically.
 npm run jscpd
 ```
 
-Use the `/cleanup` command for guided analysis and cleanup of both knip and jscpd findings.
+Use the `cleanup` skill (`.claude/skills/cleanup/`, run as `/cleanup` in Claude Code) for guided analysis and cleanup of both knip and jscpd findings.
 
 ## CI Integration
 

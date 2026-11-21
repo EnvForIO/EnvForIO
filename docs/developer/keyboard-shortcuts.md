@@ -4,21 +4,33 @@ Centralized keyboard shortcut management using native DOM event listeners.
 
 ## Current Shortcuts
 
-| Shortcut             | Mac   | Windows/Linux | Action                |
-| -------------------- | ----- | ------------- | --------------------- |
-| Open Preferences     | Cmd+, | Ctrl+,        | Opens settings dialog |
-| Command Palette      | Cmd+K | Ctrl+K        | Opens command search  |
-| Toggle Left Sidebar  | Cmd+1 | Ctrl+1        | Show/hide left panel  |
-| Toggle Right Sidebar | Cmd+2 | Ctrl+2        | Show/hide right panel |
+| Shortcut             | Mac         | Windows/Linux | Action                            |
+| -------------------- | ----------- | ------------- | --------------------------------- |
+| Open Preferences     | Cmd+,       | Ctrl+,        | Opens settings dialog             |
+| Command Palette      | Cmd+K       | Ctrl+K        | Opens command search              |
+| Toggle Left Sidebar  | Cmd+1       | Ctrl+1        | Show/hide left panel              |
+| Toggle Right Sidebar | Cmd+2       | Ctrl+2        | Show/hide right panel             |
+| Undo task change     | Cmd+Z       | Ctrl+Z        | Undoes the last task change       |
+| Quick pane (global)  | Cmd+Shift+. | Ctrl+Shift+.  | Shows the quick pane from any app |
 
 ## Architecture
 
-All shortcuts are handled in `src/hooks/useMainWindowEventListeners.ts`:
+| Shortcut               | Handled in                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------------- |
+| Cmd/Ctrl + `,` `1` `2` | `src/hooks/use-keyboard-shortcuts.ts`, called from `useMainWindowEventListeners.ts` |
+| Cmd/Ctrl + K           | `src/components/command-palette/CommandPalette.tsx`                                 |
+| Cmd/Ctrl + Z           | `src/hooks/use-undo-shortcut.ts`, called from `MainWindow.tsx`                      |
+| Quick pane             | Rust global shortcut in `src-tauri/src/commands/quick_pane.rs`                      |
+
+Ctrl+Z is skipped while focus is in an input, textarea or contenteditable, so typing keeps its normal undo.
+
+The quick-pane shortcut is system-wide, registered in Rust with `tauri-plugin-global-shortcut`. The default is `CommandOrControl+Shift+.` (`DEFAULT_QUICK_PANE_SHORTCUT` in `src-tauri/src/types.rs`); users change it in Preferences > General. See [quick-panes.md](./quick-panes.md).
+
+The in-window shortcuts use plain `keydown` listeners:
 
 ```typescript
-export function useMainWindowEventListeners() {
-  const commandContext = useCommandContext()
-
+// src/hooks/use-keyboard-shortcuts.ts
+export function useKeyboardShortcuts(commandContext: CommandContext) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey) {
@@ -52,7 +64,7 @@ export function useMainWindowEventListeners() {
 ### 1. Add to event handler
 
 ```typescript
-// src/hooks/useMainWindowEventListeners.ts
+// src/hooks/use-keyboard-shortcuts.ts
 case '3': {
   e.preventDefault()
   commandContext.myNewAction()
@@ -105,7 +117,6 @@ Native DOM event listeners are used instead of libraries like `react-hotkeys-hoo
 | Panel toggles   | Cmd/Ctrl + 1,2,3... |
 | File operations | Cmd/Ctrl + N,O,S    |
 | Undo            | Cmd/Ctrl + Z        |
-| Redo            | Cmd/Ctrl + Shift+Z  |
 
 ## Troubleshooting
 

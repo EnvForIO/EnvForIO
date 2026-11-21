@@ -19,7 +19,7 @@ notifications.warning('Warning', 'Please check your input')
 notifications.info('Info', 'Here is some information')
 
 // Native system notification
-notify('Update Available', 'Click to install', { native: true })
+notify('Export finished', 'Saved to Documents', { native: true })
 ```
 
 ### Available Functions
@@ -79,17 +79,6 @@ function SaveButton() {
 }
 ```
 
-### Command Palette Integration
-
-The notification system includes test commands accessible via the command palette (Cmd+K):
-
-- **Test Success Toast** - Show success toast
-- **Test Error Toast** - Show error toast
-- **Test Info Toast** - Show info toast
-- **Test Warning Toast** - Show warning toast
-- **Test Native Success Notification** - Show native notification
-- **Test Native Info Notification** - Show native notification with details
-
 ### Advanced Usage
 
 ```typescript
@@ -144,7 +133,6 @@ Native notifications require the `notification:default` permission in `src-tauri
 2. **Keep messages concise**: Short titles and clear messages work best
 3. **Use appropriate types**: Match notification type to the action result
 4. **Handle errors**: The system includes automatic fallback handling
-5. **Test both modes**: Use the command palette test commands to verify functionality
 
 ## Troubleshooting
 
@@ -160,11 +148,3 @@ Native notifications require the `notification:default` permission in `src-tauri
 1. **Check Toaster component**: Ensure `<Toaster />` is rendered in MainWindow
 2. **Check theme**: Toasts should adapt to current theme automatically
 3. **Check positioning**: Default position is bottom-right
-
-### Command Palette Tests
-
-Use the built-in test commands to verify both toast and native notifications are working correctly:
-
-1. Open command palette (Cmd+K)
-2. Search for "notification" or "toast"
-3. Run test commands to verify functionality

@@ -34,32 +34,30 @@ import { vi } from 'vitest'
 
 // Mock Tauri event APIs
 vi.mock('@tauri-apps/api/event', () => ({
+  emit: vi.fn().mockResolvedValue(undefined),
   listen: vi.fn().mockResolvedValue(() => {}),
 }))
 
-vi.mock('@tauri-apps/plugin-updater', () => ({
-  check: vi.fn().mockResolvedValue(null),
+vi.mock('@tauri-apps/plugin-autostart', () => ({
+  isEnabled: vi.fn().mockResolvedValue(false),
+  enable: vi.fn().mockResolvedValue(undefined),
+  disable: vi.fn().mockResolvedValue(undefined),
 }))
 
 // Mock typed Tauri bindings (tauri-specta generated)
 vi.mock('@/lib/tauri-bindings', () => ({
   commands: {
-    greet: vi.fn().mockResolvedValue('Hello, test!'),
     loadPreferences: vi
       .fn()
       .mockResolvedValue({ status: 'ok', data: { theme: 'system' } }),
-    savePreferences: vi.fn().mockResolvedValue({ status: 'ok', data: null }),
-    sendNativeNotification: vi
-      .fn()
-      .mockResolvedValue({ status: 'ok', data: null }),
-    saveEmergencyData: vi.fn().mockResolvedValue({ status: 'ok', data: null }),
-    loadEmergencyData: vi.fn().mockResolvedValue({ status: 'ok', data: null }),
-    cleanupOldRecoveryFiles: vi
-      .fn()
-      .mockResolvedValue({ status: 'ok', data: 0 }),
+    listTasks: vi.fn().mockResolvedValue({ status: 'ok', data: [] }),
+    // ... see setup.ts for the full list
   },
+  unwrapResult: vi.fn(/* returns data, throws on error */),
 }))
 ```
+
+`setup.ts` also mocks `window.matchMedia`.
 
 ### Testing with Mocked Commands
 
@@ -81,44 +79,13 @@ test('loads preferences', async () => {
 
 ### Test Wrapper for Providers
 
-Components using TanStack Query need a provider wrapper:
+`src/test/test-utils.tsx` re-exports `@testing-library/react` with a `render` that wraps the component in a fresh `QueryClient` (retries off), the i18n provider and a mock theme provider:
 
 ```typescript
-// src/test/utils.ts
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { ReactNode } from 'react'
-
-export function createTestQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false },
-      mutations: { retry: false },
-    },
-  })
-}
-
-export function TestProviders({ children }: { children: ReactNode }) {
-  const queryClient = createTestQueryClient()
-  return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  )
-}
-```
-
-Usage:
-
-```typescript
-import { render } from '@testing-library/react'
-import { TestProviders } from '@/test/utils'
+import { render, screen } from '@/test/test-utils'
 
 test('component with query', () => {
-  render(
-    <TestProviders>
-      <MyComponent />
-    </TestProviders>
-  )
+  render(<MyComponent />)
 })
 ```
 
@@ -158,36 +125,11 @@ mod tests {
 }
 ```
 
-### Async Tests
+Rust tests live in `src-tauri/src/domain/` (pure functions) and `src-tauri/src/service/` (against an in-memory database). There are no Rust dev-dependencies (no `tokio` test runtime, no `tempfile`); keep logic that needs testing out of async and file-system code.
 
-```rust
-#[tokio::test]
-async fn test_async_operation() {
-    let result = some_async_fn().await;
-    assert!(result.is_ok());
-}
-```
+### Database Tests
 
-### File Operation Tests
-
-Use `tempfile` for tests that need file system access:
-
-```rust
-use tempfile::TempDir;
-
-#[test]
-fn test_file_operations() {
-    let temp_dir = TempDir::new().unwrap();
-    let file_path = temp_dir.path().join("test.json");
-
-    // Test write
-    std::fs::write(&file_path, "{}").unwrap();
-
-    // Test read
-    let content = std::fs::read_to_string(&file_path).unwrap();
-    assert_eq!(content, "{}");
-}
-```
+`db::open_in_memory()` (in `src-tauri/src/db/mod.rs`, `#[cfg(test)]`) gives an in-memory SQLite connection with every migration applied. Service tests use it.
 
 ## Adding New Command Mocks
 
@@ -209,4 +151,4 @@ vi.mock('@/lib/tauri-bindings', () => ({
 | Mock Tauri commands in setup.ts       | Call real Tauri APIs in tests |
 | Use `vi.mocked()` for type-safe mocks | Use untyped mock assertions   |
 | Test user-visible behavior            | Test implementation details   |
-| Use `tempfile` for Rust file tests    | Write to real file system     |
+| Use `db::open_in_memory()` in Rust    | Write to real file system     |

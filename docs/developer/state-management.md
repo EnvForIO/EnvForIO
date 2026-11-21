@@ -126,13 +126,11 @@ const currentFileName = useEditorStore(state => state.currentFile?.name)
 
 ### CSS Visibility vs Conditional Rendering
 
-For stateful UI components (like `react-resizable-panels`), use CSS visibility:
+`MainWindow.tsx` renders the sidebars conditionally (`{leftSidebarVisible && <LeftSideBar />}`). The main window uses fixed-width flex sidebars, not `react-resizable-panels`, and their content keeps its state in Zustand or TanStack Query, so unmounting loses nothing.
+
+If a panel ever holds state that must survive hiding (e.g. a `ResizablePanel` size, scroll position, unsaved form input), hide it with CSS instead:
 
 ```typescript
-// ❌ BAD: Conditional rendering breaks stateful components
-{sidebarVisible ? <ResizablePanel /> : null}
-
-// ✅ GOOD: CSS visibility preserves component tree
 <ResizablePanel className={sidebarVisible ? '' : 'hidden'} />
 ```
 

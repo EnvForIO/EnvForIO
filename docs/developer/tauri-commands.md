@@ -100,13 +100,15 @@ const handleSave = async () => {
 
 ### 1. Define the Rust command
 
+Commands go in `src-tauri/src/api/<resource>.rs` and stay thin; the work happens in `src-tauri/src/service/`. See [rust-architecture.md](./rust-architecture.md).
+
 ```rust
-// src-tauri/src/lib.rs
+// src-tauri/src/api/widgets.rs
 
 #[tauri::command]
 #[specta::specta]  // Add this attribute
-pub async fn my_new_command(arg: String) -> Result<MyType, String> {
-    // implementation
+pub fn my_new_command(state: State<'_, AppState>, arg: String) -> AppResult<MyType> {
+    crate::service::widgets::do_it(&state.db(), &arg)
 }
 ```
 
@@ -127,9 +129,11 @@ pub struct MyType {
 // src-tauri/src/bindings.rs
 
 pub fn generate_bindings() -> Builder<tauri::Wry> {
+    use crate::api::{widgets, /* ... */};
+
     Builder::<tauri::Wry>::new().commands(collect_commands![
         // ... existing commands
-        crate::my_new_command,  // Add here
+        widgets::my_new_command,  // Add here
     ])
 }
 ```
@@ -154,20 +158,22 @@ const result = await commands.myNewCommand('arg')
 
 Always commit:
 
-- Rust changes (`src-tauri/src/lib.rs`, `src-tauri/src/bindings.rs`)
+- Rust changes (`src-tauri/src/api/*.rs`, `src-tauri/src/bindings.rs`)
 - Generated TypeScript (`src/lib/bindings.ts`)
 
 ## File Structure
 
 ```
 src-tauri/src/
-├── lib.rs              # Commands with #[specta::specta]
-├── bindings.rs         # Command registration + export test
-└── Cargo.toml          # specta, tauri-specta dependencies
+├── api/                # Commands with #[specta::specta], one file per resource
+├── commands/           # Template commands (preferences, quick pane, recovery, notifications)
+└── bindings.rs         # Command registration + export test
 
 src/lib/
 ├── bindings.ts         # Generated (DO NOT EDIT)
 └── tauri-bindings.ts   # Re-exports with project conventions
+
+src/api/                # TanStack Query hooks that call the commands
 ```
 
 ## Known Limitations
@@ -221,15 +227,7 @@ vi.mock('@/lib/tauri-bindings', () => ({
 
 ## Available Commands
 
-| Command                   | Parameters                            | Returns                          | Description         |
-| ------------------------- | ------------------------------------- | -------------------------------- | ------------------- |
-| `greet`                   | `name: string`                        | `string`                         | Simple greeting     |
-| `loadPreferences`         | none                                  | `Result<AppPreferences, string>` | Load preferences    |
-| `savePreferences`         | `preferences: AppPreferences`         | `Result<null, string>`           | Save preferences    |
-| `sendNativeNotification`  | `title: string, body: string \| null` | `Result<null, string>`           | System notification |
-| `saveEmergencyData`       | `filename: string, data: JsonValue`   | `Result<null, string>`           | Save recovery data  |
-| `loadEmergencyData`       | `filename: string`                    | `Result<JsonValue, string>`      | Load recovery data  |
-| `cleanupOldRecoveryFiles` | none                                  | `Result<number, string>`         | Cleanup old files   |
+The full list is the `collect_commands!` call in `src-tauri/src/bindings.rs`. The app's commands live in `src-tauri/src/api/*.rs` (one file per resource: tasks, projects, plans, ideas, papers, ...) and return `AppResult<T>`; the template commands in `src-tauri/src/commands/` return `Result<T, String>`. The generated `src/lib/bindings.ts` shows every command's TypeScript signature.
 
 ## Dependencies
 

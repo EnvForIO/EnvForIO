@@ -328,21 +328,15 @@ export function LeftSideBar({ children, className }: SideBarProps) {
 
 ### Visibility with CSS
 
-For panels that toggle visibility, prefer CSS over conditional rendering:
+The main window's sidebars are fixed-width and rendered conditionally in `MainWindow.tsx` (`{leftSidebarVisible && <LeftSideBar />}`); their data lives in Zustand and TanStack Query, so nothing is lost when they unmount.
+
+Hide with CSS instead only when a panel holds local state that must survive (scroll position, unsaved input, a `ResizablePanel` size):
 
 ```tsx
-// Good: Preserves component state
-;<ResizablePanel className={cn(!visible && 'hidden')}>
+<ResizablePanel className={cn(!visible && 'hidden')}>
   <SideBar />
 </ResizablePanel>
-
-// Avoid: Loses component state on hide/show
-{
-  visible && <SideBar />
-}
 ```
-
-This preserves scroll position, form state, and resize dimensions.
 
 ## Best Practices
 

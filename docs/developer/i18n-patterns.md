@@ -10,14 +10,13 @@ This app uses [react-i18next](https://react.i18next.com/) for internationalizati
 - **JSON translation files**: Simple, portable format stored in `/locales/`
 - **JavaScript-based native menus**: Menus are built from JavaScript (not Rust) to use the same translation system
 - **RTL support**: CSS uses logical properties for automatic RTL layout
+- **English only**: EnvForIO ships `en.json` only. The RTL and language-detection code is in place but unused until a second language is added.
 
 ## Architecture
 
 ```
 /locales/
-├── en.json              # English (default)
-├── ar.json              # Arabic (RTL example)
-└── [lang].json          # Additional languages
+└── en.json              # English (the only shipped language)
 
 /src/i18n/
 ├── config.ts            # i18next configuration
@@ -58,9 +57,7 @@ function MyComponent() {
 }
 ```
 
-### Step 3: Add to Other Languages
-
-Add the same keys to all other language files (e.g., `/locales/ar.json`).
+If other languages have been added, add the same keys to their files too.
 
 ## Key Naming Conventions
 
@@ -137,23 +134,19 @@ Update `/src/i18n/config.ts`:
 
 ```typescript
 import en from '../../locales/en.json'
-import ar from '../../locales/ar.json'
 import es from '../../locales/es.json' // NEW
 
 const resources = {
   en: { translation: en },
-  ar: { translation: ar },
   es: { translation: es }, // NEW
 }
 ```
 
+The Preferences language list (`availableLanguages`) and system-locale detection pick it up from `resources` automatically.
+
 ### Step 3: Add RTL Support (if applicable)
 
-If the language is RTL, add it to the `rtlLanguages` array:
-
-```typescript
-const rtlLanguages = ['ar', 'he', 'fa', 'ur'] // Add your RTL language
-```
+`rtlLanguages` in `config.ts` already lists `ar`, `he`, `fa` and `ur`. Add the code there if the new language is RTL and not listed.
 
 ## RTL Language Support
 
@@ -299,14 +292,9 @@ const text = t('menu.about', { appName: 'My App' })
 
 // Or use i18n directly
 const currentLanguage = i18n.language
-await i18n.changeLanguage('ar')
+await i18n.changeLanguage('en')
 ```
 
 ## Testing with RTL
 
-To test RTL layout:
-
-1. Open Preferences > Appearance
-2. Change language to Arabic (ar)
-3. Verify layout mirrors correctly
-4. Check all text alignment uses logical properties
+No RTL language ships, so RTL layout can't be checked from Preferences. To check it, temporarily add an RTL locale (e.g. `ar`) to `resources`, switch to it in Preferences > Appearance, and verify the layout mirrors and text alignment uses logical properties.

@@ -10,7 +10,6 @@ Code style follows `.claude/skills/code-style/SKILL.md` (single files written li
 
 ### New Sessions
 
-- Read @docs/tasks.md for task management
 - Review `docs/developer/architecture-guide.md` for high-level patterns
 - Check `docs/developer/README.md` for the full documentation index
 - Check git status and project structure

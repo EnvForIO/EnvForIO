@@ -1,69 +1,20 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+## Supported versions
 
-| Version | Supported |
-| ------- | --------- |
-| Latest  | ✅        |
-| < 1.0   | ❌        |
+Only the latest release gets security fixes.
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
-Do not report security vulnerabilities through public GitHub issues.
+Please do not report security problems in public issues. Use GitHub's private vulnerability reporting instead: on the repository's **Security** tab, choose **Report a vulnerability**. Only the maintainers see the report.
 
-**Contact**: the EnvForIO organisation on GitHub
+Include what you found, how to reproduce it, and what an attacker could do with it. We aim to reply within a week, agree on a fix and a timeline with you, and credit you in the release notes unless you would rather not be named.
 
-Include:
+## What EnvForIO touches
 
-- Description of the vulnerability
-- Steps to reproduce
-- Potential impact
-- Suggested fixes (if any)
+Useful context when looking for problems:
 
-### Response Timeline
-
-- **Initial Response**: Within 48 hours
-- **Assessment**: Within 7 days
-- **Fix**: Timeline depends on severity
-- **Disclosure**: After fix is available
-
-## Security Measures
-
-This app uses Tauri's security model:
-
-- **Permissions**: Minimal system permissions via `capabilities/`
-- **IPC**: Type-safe commands via tauri-specta
-- **File Access**: Scoped to app directories by default
-- **CSP**: Configured in `index.html`
-
-## For Developers
-
-### File Operations
-
-```rust
-// ✅ Validate paths - prevent traversal attacks
-if filename.contains("..") {
-    return Err("Invalid filename".into());
-}
-
-// ❌ Never trust raw user input for paths
-std::fs::write(user_input, data)
-```
-
-### Secrets
-
-- Never commit secrets to version control
-- Use `.env.local` (gitignored) for local secrets
-- Use GitHub Secrets for CI/CD
-
-### Dependency Audits
-
-```bash
-npm audit
-cargo audit
-```
-
-## Resources
-
-- [Tauri Security Guide](https://tauri.app/security/)
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- **Local data**: everything is stored in a SQLite database in `%APPDATA%\io.github.envforio`. There is no telemetry and no server run by the project.
+- **Network**: the app fetches feeds you subscribe to, calendar (ICS) links you add, and the ccfddl conference list. Feed and calendar content is shown as text, never inserted as HTML.
+- **Remote machines**: the Monitor connects to servers you add through your system's `ssh` in batch mode, with your own SSH configuration and keys; it never asks for or stores a password.
+- **Tauri**: each window gets only the permissions listed in `src-tauri/capabilities/`, and the content security policy is set in `src-tauri/tauri.conf.json`.

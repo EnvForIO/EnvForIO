@@ -4,31 +4,28 @@ Patterns for saving and loading data to disk.
 
 ## Choosing a Storage Method
 
-| Need               | Solution           | When to Use                                                           |
-| ------------------ | ------------------ | --------------------------------------------------------------------- |
-| App preferences    | Preferences System | Strongly-typed settings (theme, shortcuts)                            |
-| Emergency recovery | Recovery System    | Crash recovery, backup before risky operations                        |
-| Relational data    | SQLite             | User data requiring queries, relationships                            |
-| External API data  | TanStack Query     | Remote data with caching (see [external-apis.md](./external-apis.md)) |
+| Need               | Solution            | When to Use                                                      |
+| ------------------ | ------------------- | ---------------------------------------------------------------- |
+| App data           | SQLite (`envio.db`) | Tasks, projects, plans, ideas, papers, machines, feeds, settings |
+| UI preferences     | Preferences System  | Theme, language, quick-pane shortcut                             |
+| Emergency recovery | Recovery System     | Crash recovery, backup before risky operations                   |
+| External API data  | Fetched in Rust     | See [external-apis.md](./external-apis.md)                       |
 
-```
-Need to persist data?
-├─ App settings? → Preferences (Rust struct + TanStack Query)
-├─ User data with queries/relationships? → SQLite (see below)
-├─ Remote API data? → external-apis.md
-└─ Emergency/crash recovery? → Recovery System
-```
-
-All data goes through Rust for type safety and security. Use TanStack Query on the frontend for loading states and cache invalidation.
+SQLite is the main store. All data goes through Rust; the frontend uses TanStack Query (hooks in `src/api/`) for loading states and cache invalidation.
 
 ## File Locations
 
+The app data directory is named after the app identifier `io.github.envforio`:
+
 ```
-~/Library/Application Support/com.myapp.app/  (macOS)
-├── preferences.json                          # App preferences
-└── recovery/                                 # Emergency data
+%APPDATA%\io.github.envforio\       (Windows)
+├── envio.db                        # SQLite database (plus envio.db-wal / -shm)
+├── preferences.json                # UI preferences
+└── recovery/                       # Emergency data
     └── *.json
 ```
+
+The database file keeps its old name `envio.db` so data from before the rename to EnvForIO still opens.
 
 ## Atomic Write Pattern (Critical)
 
@@ -168,114 +165,36 @@ if filename.contains("..") || filename.contains("/") || filename.contains("\\") 
 
 Use Tauri's `app_data_dir()` for safe storage locations - never write to arbitrary paths.
 
-## SQLite Database (When Needed)
+## SQLite Database
 
-> **Note:** SQLite is not installed in this app. Add it when your app needs relational data with queries.
-
-### When to Use SQLite
-
-| Use Case                         | Recommendation     |
-| -------------------------------- | ------------------ |
-| Simple key-value settings        | Preferences System |
-| User data with relationships     | SQLite             |
-| Data requiring complex queries   | SQLite             |
-| Large datasets (1000+ records)   | SQLite             |
-| Data needing atomic transactions | SQLite             |
-
-### Approach Options
-
-| Approach   | Use When                                              |
-| ---------- | ----------------------------------------------------- |
-| `rusqlite` | Simpler setup, synchronous queries, smaller apps      |
-| `sqlx`     | Async queries, compile-time SQL checking, larger apps |
-
-Both integrate with Tauri commands and tauri-specta for type safety.
-
-### Setup (rusqlite)
-
-```bash
-cd src-tauri && cargo add rusqlite --features bundled
-```
-
-### Architecture Pattern
-
-Tauri commands wrap database operations, TanStack Query provides frontend caching.
+App data lives in one SQLite file, `envio.db`, opened with `rusqlite` (bundled SQLite).
 
 ```
-React Component → TanStack Query → Tauri Command (rusqlite) → SQLite
+React Component → TanStack Query (src/api/) → Tauri Command (src-tauri/src/api/) → service → SQLite
 ```
+
+### Opening
+
+`AppState::open` (`src-tauri/src/config.rs`) runs in `setup()` before any window can call a command. It creates the app data directory, calls `db::open` (`src-tauri/src/db/mod.rs`), which turns on WAL and foreign keys and runs pending migrations, then puts the connection behind a `Mutex` in `AppState`, managed as Tauri state. EnvForIO is single-user, so one connection is enough.
+
+Commands reach it through `state.db()`:
 
 ```rust
-use rusqlite::{Connection, params};
-use std::sync::Mutex;
-use tauri::State;
-
-// Database connection managed as Tauri state
-pub struct DbConnection(pub Mutex<Connection>);
-
 #[tauri::command]
 #[specta::specta]
-pub fn get_items(db: State<DbConnection>) -> Result<Vec<Item>, String> {
-    let conn = db.0.lock().map_err(|e| e.to_string())?;
-    let mut stmt = conn
-        .prepare("SELECT id, name, created_at FROM items ORDER BY created_at DESC")
-        .map_err(|e| e.to_string())?;
-
-    let items = stmt
-        .query_map([], |row| {
-            Ok(Item {
-                id: row.get(0)?,
-                name: row.get(1)?,
-                created_at: row.get(2)?,
-            })
-        })
-        .map_err(|e| e.to_string())?
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(|e| e.to_string())?;
-
-    Ok(items)
+pub fn list_ideas(state: State<'_, AppState>, filter: IdeaFilter) -> AppResult<Vec<Idea>> {
+    query::list(&state.db(), &filter)
 }
 ```
 
-Initialize in `src-tauri/src/lib.rs`:
+SQL lives only in `src-tauri/src/service/`; row types and their readers live in `src-tauri/src/entity/`. `rusqlite::Error` converts into `AppError::Database` with `?`.
 
-```rust
-let db_path = app.path().app_data_dir()?.join("app.db");
-let conn = Connection::open(&db_path)?;
+### Migrations
 
-// Run migrations
-conn.execute(
-    "CREATE TABLE IF NOT EXISTS items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )",
-    [],
-)?;
+- Migrations are numbered files in `src-tauri/migrations/` (`0001_initial_schema.sql`, ...), compiled in with `include_str!` and listed in order in the `MIGRATIONS` array in `src-tauri/src/db/mod.rs`.
+- `PRAGMA user_version` records how many have run; each pending one runs once, in its own transaction.
+- To change the schema, add the next numbered file and append it to `MIGRATIONS`. Never edit a migration that has shipped.
 
-app.manage(DbConnection(Mutex::new(conn)));
-```
+### Tests
 
-```typescript
-// Frontend: TanStack Query for caching and loading states
-export function useItems() {
-  return useQuery({
-    queryKey: ['items'],
-    queryFn: async () => unwrapResult(await commands.getItems()),
-  })
-}
-
-export function useAddItem() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (item: CreateItem) => commands.addItem(item),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['items'] }),
-  })
-}
-```
-
-### Migration Rules
-
-- Run migrations at app startup before managing database state
-- Use `IF NOT EXISTS` / `IF EXISTS` for idempotent migrations
-- For complex apps, consider a version table to track applied migrations
+`db::open_in_memory()` (test-only) returns an in-memory database with the full schema, for service tests.

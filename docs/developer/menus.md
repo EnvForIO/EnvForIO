@@ -16,8 +16,6 @@ This app builds menus from **JavaScript** using Tauri's JS Menu API (`@tauri-app
 App Name
 ├── About App Name
 ├── ────────────────────
-├── Check for Updates...
-├── ────────────────────
 ├── Preferences...           (Cmd+,)
 ├── ────────────────────
 ├── Hide App Name            (Cmd+H)

@@ -16,56 +16,40 @@ type Result<T, E> = { status: 'ok'; data: T } | { status: 'error'; error: E }
 
 ## Rust Error Types
 
-### Simple Commands
+### AppError (all app commands)
 
-For commands with one failure mode, use `String` errors:
-
-```rust
-#[tauri::command]
-#[specta::specta]
-pub async fn simple_operation() -> Result<Data, String> {
-    do_work().map_err(|e| format!("Operation failed: {e}"))
-}
-```
-
-### Production Commands
-
-For commands with multiple failure modes, use structured error enums:
+Every command in `src-tauri/src/api/` returns `AppResult<T>`, which is `Result<T, AppError>` from `src-tauri/src/errors.rs`:
 
 ```rust
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[derive(Debug, Clone, Serialize, Type)]
 #[serde(tag = "type")]  // Creates TypeScript discriminated union
-pub enum MyError {
-    NotFound,
-    ValidationError { message: String },
-    IoError { message: String },
-}
-
-impl std::fmt::Display for MyError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            MyError::NotFound => write!(f, "Not found"),
-            MyError::ValidationError { message } => write!(f, "{message}"),
-            MyError::IoError { message } => write!(f, "IO error: {message}"),
-        }
-    }
-}
-
-#[tauri::command]
-#[specta::specta]
-pub async fn production_operation() -> Result<Data, MyError> {
-    // ...
+pub enum AppError {
+    NotFound { what: String, id: i64 },
+    Invalid { message: String },
+    Network { message: String },
+    Database { message: String },
 }
 ```
 
-TypeScript receives:
+- `rusqlite::Error` converts into `AppError::Database` with `?` (and is logged).
+- Build the others with `AppError::invalid(..)`, `AppError::not_found("task", id)`, `AppError::network(..)`.
+- `Display` gives a short English message for logs.
+
+Don't add a new error enum per feature; add a variant here only if the UI needs to react to a new kind of failure.
+
+TypeScript receives (in `src/lib/bindings.ts`):
 
 ```typescript
-type MyError =
-  | { type: 'NotFound' }
-  | { type: 'ValidationError'; message: string }
-  | { type: 'IoError'; message: string }
+type AppError =
+  | { type: 'NotFound'; what: string; id: number }
+  | { type: 'Invalid'; message: string }
+  | { type: 'Network'; message: string }
+  | { type: 'Database'; message: string }
 ```
+
+### Template Commands
+
+The commands in `src-tauri/src/commands/` (preferences, quick pane, recovery, notifications) come from the template and still return `Result<T, String>`.
 
 ## TypeScript Error Handling
 
@@ -162,29 +146,9 @@ Default retry settings in `query-client.ts`:
 | Queries    | 1       | Transient failures may recover       |
 | Mutations  | 1       | Avoid duplicate writes on slow saves |
 
-## Global Error Toasts
+## Where Errors Surface
 
-Avoid per-query error toasts (causes duplicates). Use global handling:
-
-```typescript
-// ✅ GOOD: Centralized in query-client.ts
-const queryClient = new QueryClient({
-  queryCache: new QueryCache({
-    onError: (error, query) => {
-      if (query.meta?.errorToast !== false) {
-        toast.error('Something went wrong')
-      }
-    },
-  }),
-})
-
-// Opt out for specific queries
-useQuery({
-  queryKey: ['optional-feature'],
-  queryFn: loadOptional,
-  meta: { errorToast: false },
-})
-```
+There is no global error toast: `src/lib/query-client.ts` only sets retry and cache defaults. The hooks in `src/api/` call `unwrapResult`, so a failed command becomes a query or mutation error, and the component that triggered it decides what to show (usually a toast in the mutation's `onError`).
 
 ## React Error Boundaries
 
@@ -229,10 +193,10 @@ const handleChange = async (newValue: string) => {
 
 | Scenario               | Rust Error Type | TypeScript Pattern   | User Feedback    |
 | ---------------------- | --------------- | -------------------- | ---------------- |
-| Simple command         | `String`        | if/else + toast      | Toast on error   |
-| Multiple failure modes | Structured enum | Match on `.type`     | Context-specific |
-| Data fetching          | Either          | `unwrapResult`       | Query error UI   |
+| Event handler          | `AppError`      | if/else + toast      | Toast on error   |
+| Specific failure kinds | `AppError`      | Match on `.type`     | Context-specific |
+| Data fetching          | `AppError`      | `unwrapResult`       | Query error UI   |
 | Optional feature       | Either          | Graceful degradation | Silent fallback  |
-| Critical operation     | Structured enum | Explicit + rollback  | Toast + recovery |
+| Critical operation     | `AppError`      | Explicit + rollback  | Toast + recovery |
 
 See also: [tauri-commands.md](./tauri-commands.md) for Result type patterns, [logging.md](./logging.md) for logging best practices.

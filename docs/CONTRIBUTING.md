@@ -1,88 +1,55 @@
-# Contributing Guidelines
+# Contributing to EnvForIO
 
-Thank you for your interest in contributing!
+Thanks for helping. Bug reports, ideas and pull requests are all welcome; for anything larger than a small fix, open an issue first so we can agree on the approach before you spend time on it.
 
-## Quick Start
+## Set up
 
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18+)
-- [Rust](https://rustup.rs/) (latest stable)
-- Familiarity with React, TypeScript, and Rust
-
-### Setup
+You need [Node.js](https://nodejs.org/) 20 or later, [Rust](https://rustup.rs/) stable, and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) for your system.
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
-cd YOUR_REPO
+git clone <this repository>
+cd EnvForIO
 npm install
-npm run dev
-npm run check:all
+npm run tauri:dev     # run the app
+npm run check:all     # the full quality gate
 ```
 
-## How to Contribute
-
-### Issues
-
-- **Bug Reports**: Use the bug report template
-- **Feature Requests**: Use the feature request template
-- **Security Issues**: See [SECURITY.md](SECURITY.md)
-
-### Pull Requests
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make changes following the guidelines below
-4. Ensure checks pass: `npm run check:all`
-5. Commit using conventional commits
-6. Push and open a Pull Request
-
-## Code Guidelines
-
-### TypeScript/React
-
-- Use TypeScript for all new code
-- Follow existing component patterns
-- See `docs/developer/` for architecture patterns
-
-### Rust
-
-- Use `cargo fmt` and `cargo clippy`
-- Use `Result<T, String>` for Tauri commands
-- See `docs/developer/rust-architecture.md`
-
-## Quality Gates
-
-All PRs must pass:
-
-- TypeScript type checking
-- ESLint and Prettier
-- Rust formatting and clippy
-- Tests
-
-Run locally: `npm run check:all`
-
-## Commit Messages
-
-Use [Conventional Commits](https://www.conventionalcommits.org/):
+EnvForIO ships for **Windows**. You can develop on Windows directly (Rust with the MSVC toolchain, the Microsoft C++ Build Tools; WebView2 comes with Windows 11), or, as the maintainers do, keep every toolchain in WSL and cross-compile the Windows build with `cargo-xwin`:
 
 ```bash
-feat: add user authentication
-fix(ui): resolve sidebar toggle issue
-docs: update installation instructions
-refactor(store): simplify state management
-test: add preferences tests
+npm run tauri build -- --runner cargo-xwin --target x86_64-pc-windows-msvc --no-bundle
 ```
 
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+[`docs/m0_toolchain.md`](m0_toolchain.md) records that setup and the problems met along the way. On Linux, `npm run tauri:dev` opens the app too, but only Windows is tested.
 
-## Code Review
+## Where things are
 
-- Keep PRs focused and reasonably sized
-- Write clear PR descriptions
-- Respond to feedback promptly
-- Update documentation as needed
+- `src-tauri/src/`: all business logic and the SQLite database, in Rust.
+- `src/`: the React frontend, which only displays and calls Rust commands.
+- `locales/en.json`: every string the user sees.
+- `docs/developer/envforio-design.md`: the lasting decisions; read it before a larger change. The rest of `docs/developer/` covers individual patterns.
+- `docs/userguide/userguide.md`: the user guide; update it when behaviour changes.
 
-## Legal
+## Rules of thumb
 
-By contributing, you agree that your contributions will be licensed under the same license as the project.
+- **Rust commands**: after adding or changing a `#[tauri::command]`, run `npm run rust:bindings` to regenerate `src/lib/bindings.ts`, and commit it.
+- **Database**: schema changes are new numbered files in `src-tauri/migrations/`, listed in `src-tauri/src/db/mod.rs`. Never edit a migration that has shipped.
+- **Text**: put user-facing strings in `locales/en.json`, not in components.
+- **Tests**: Rust logic gets tests next to the code; frontend helpers get Vitest tests.
+- **npm only**: the project uses npm, not pnpm or yarn.
+
+## Before a pull request
+
+1. `npm run check:all` passes: type check, ESLint, ast-grep, Prettier, rustfmt, Clippy, Vitest and `cargo test`. CI runs the same, plus Clippy on Windows.
+2. Commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `docs:`, `refactor:`, `test:`, `chore:`, `ci:`), with a body that says why.
+3. The pull request says what changed and how you checked it; screenshots help for UI changes.
+
+Keep pull requests focused: one change each.
+
+## Security issues
+
+Do not open a public issue; see [SECURITY.md](SECURITY.md).
+
+## Licence
+
+EnvForIO is licensed under the [GNU General Public License v3.0 or later](../LICENSE). By contributing, you agree that your contributions are licensed under the same terms.

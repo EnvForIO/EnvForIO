@@ -10,6 +10,7 @@ Guide to all Tauri plugins installed in this app, plus built-in features and gui
 | ------------------- | --------------------------------------- | --------------------------------- |
 | **single-instance** | Prevents multiple app instances         | None (Rust-only)                  |
 | **window-state**    | Saves/restores window position and size | `@tauri-apps/plugin-window-state` |
+| **log**             | Rust and frontend logging               | `@tauri-apps/plugin-log`          |
 
 ### File System & Storage
 
@@ -29,7 +30,9 @@ Guide to all Tauri plugins installed in this app, plus built-in features and gui
 | **process**           | Exit/restart app                  | `@tauri-apps/plugin-process`           |
 | **os**                | OS information                    | `@tauri-apps/plugin-os`                |
 | **global-shortcut**   | System-wide keyboard shortcuts    | None (configured in Rust)              |
-| **updater**           | In-app updates                    | `@tauri-apps/plugin-updater`           |
+| **autostart**         | "Launch at login" preference      | `@tauri-apps/plugin-autostart`         |
+
+There is no updater plugin; EnvForIO does not update itself.
 
 ### Platform-Specific
 
@@ -67,9 +70,9 @@ Automatically saves and restores window position, size, and state (maximized, et
 
 **How it works**:
 
-- Window state is saved when the app closes
-- State is restored when the app opens
-- Only applies to windows listed in capabilities (main window only, not quick-panes)
+- Window state is saved when the app closes (and when the main window is hidden to the tray)
+- State is restored when the app opens; visibility is not restored
+- `quick-pane`, `duo-capsule` and `duo-card` are on the denylist in `lib.rs`
 
 **No frontend code needed** - works automatically.
 
@@ -171,13 +174,13 @@ await openPath('/path/to/document.pdf')
 
 ### System Tray
 
-Built into Tauri v2 via the `tray-icon` feature. See [Tauri docs](https://v2.tauri.app/learn/system-tray/).
+Built into Tauri v2 via the `tray-icon` feature. EnvForIO's tray is created in `src-tauri/src/desktop/tray.rs`: left click or "Show EnvForIO" brings the main window back, "Mini mode" opens the Todo Duo windows, and "Quit" exits. Closing the main window hides it to the tray. Tray labels are plain English constants, since the tray is built before the frontend's translations load.
 
 ### App Menus
 
 The Menu API is built into `@tauri-apps/api/menu`. This app uses it for:
 
-- Application menu (File, Edit, View, etc.)
+- Application menu: the app menu (About, Preferences, Hide, Quit) and View (sidebar toggles), built in `src/lib/menu.ts`
 - Context menus are app-drawn (`src/components/ui/context-menu.tsx`), not native
 
 ## Plugins to Consider Adding
@@ -187,11 +190,10 @@ These plugins aren't included by default but are commonly needed:
 | Plugin         | When to Add                                                 |
 | -------------- | ----------------------------------------------------------- |
 | **shell**      | Need to spawn child processes or run terminal commands      |
-| **http**       | Making API calls that need to bypass CORS                   |
-| **autostart**  | Utility apps that should launch at system startup           |
 | **deep-link**  | Custom URL schemes (myapp://path)                           |
-| **sql**        | Local SQLite database for structured data                   |
 | **positioner** | Tray apps or floating windows that need precise positioning |
+
+Not needed here: **sql** (the database uses `rusqlite` in Rust, see [data-persistence.md](./data-persistence.md)) and **http** (web lookups use `reqwest` in Rust, see [external-apis.md](./external-apis.md)).
 
 ## Adding a New Plugin
 
@@ -214,9 +216,9 @@ These plugins aren't included by default but are commonly needed:
 The order plugins are registered matters:
 
 1. **single-instance** - Must be first
-2. **window-state** - Before other windowing plugins
-3. **updater** - Desktop only
-4. All other plugins in any order
+2. **autostart**, **window-state** - Desktop only, before other windowing plugins
+3. All other plugins in any order
+4. **global-shortcut** - Registered inside `setup()`, after the database and tray are ready
 
 ## References
 

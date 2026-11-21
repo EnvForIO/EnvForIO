@@ -14,4 +14,4 @@ note: |
   Destructuring causes render cascades - every store update triggers re-renders
   even if destructured values haven't changed.
 
-  See: docs/developer/architecture-guide.md (Performance Patterns)
+  See: docs/developer/state-management.md (Performance Patterns)

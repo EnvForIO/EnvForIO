@@ -1,6 +1,6 @@
 # Cross-Platform Development
 
-This app supports macOS, Windows, and Linux. This guide covers platform-specific patterns, utilities, and configuration.
+EnvForIO is released for Windows. The code base (from the template) still has macOS and Linux paths, and CI runs checks on Linux. This guide covers platform-specific patterns, utilities, and configuration.
 
 ## Overview
 
@@ -12,7 +12,7 @@ This app supports macOS, Windows, and Linux. This guide covers platform-specific
 
 **Design decisions:**
 
-- macOS is the primary development target
+- EnvForIO ships for Windows only; the macOS and Linux code paths from the template are kept but not released
 - No Windows code signing (configure your own certificates)
 - Linux uses native decorations for desktop environment compatibility
 - Keyboard shortcuts use `mod+` prefix (Cmd on macOS, Ctrl elsewhere)
@@ -243,12 +243,18 @@ src-tauri/
     "windows": [
       {
         "decorations": false,
-        "transparent": false
+        "transparent": true,
+        "shadow": true
       }
     ]
+  },
+  "bundle": {
+    "targets": ["nsis"]
   }
 }
 ```
+
+(Trimmed; the real file repeats the full window definition.)
 
 **Linux** (`tauri.linux.conf.json`):
 
@@ -289,15 +295,15 @@ npm run build
 
 ### CI/CD Builds
 
-The GitHub Actions release workflow builds for all platforms:
+Only Windows is released:
 
-| Platform | Runner           | Output      |
-| -------- | ---------------- | ----------- |
-| macOS    | `macos-latest`   | `.dmg`      |
-| Windows  | `windows-latest` | `.msi`      |
-| Linux    | `ubuntu-22.04`   | `.AppImage` |
+| Workflow      | Runner           | What it does                                                         |
+| ------------- | ---------------- | -------------------------------------------------------------------- |
+| `release.yml` | `windows-latest` | Builds the NSIS installer (`.exe`) and `.msi` (`--bundles msi,nsis`) |
+| `ci.yml`      | `ubuntu-24.04`   | Runs `npm run check:all`                                             |
+| `ci.yml`      | `windows-latest` | Runs Clippy                                                          |
 
-See `.github/workflows/release.yml` for the full configuration.
+See `.github/workflows/` for the full configuration.
 
 ### Linux Dependencies
 

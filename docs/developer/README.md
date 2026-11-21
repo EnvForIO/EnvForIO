@@ -25,19 +25,19 @@ Technical documentation for building and extending this app. These docs describe
 
 ## UI & UX
 
-| Document                                   | Description                                 |
-| ------------------------------------------ | ------------------------------------------- |
-| [UI Patterns](./ui-patterns.md)            | CSS architecture, shadcn/ui components      |
-| [Internationalization](./i18n-patterns.md) | Translation system, RTL support             |
-| [Notifications](./notifications.md)        | Toast and native notifications              |
-| [Cross-Platform](./cross-platform.md)      | Platform detection, OS-specific adaptations |
+| Document                                   | Description                                  |
+| ------------------------------------------ | -------------------------------------------- |
+| [UI Patterns](./ui-patterns.md)            | CSS architecture, shadcn/ui components       |
+| [Internationalization](./i18n-patterns.md) | Translation system (English only; RTL ready) |
+| [Notifications](./notifications.md)        | Toast and native notifications               |
+| [Cross-Platform](./cross-platform.md)      | Platform detection, OS-specific adaptations  |
 
 ## Data & Storage
 
-| Document                                  | Description                                  |
-| ----------------------------------------- | -------------------------------------------- |
-| [Data Persistence](./data-persistence.md) | File storage patterns, atomic writes, SQLite |
-| [External APIs](./external-apis.md)       | HTTP API calls, authentication, caching      |
+| Document                                  | Description                              |
+| ----------------------------------------- | ---------------------------------------- |
+| [Data Persistence](./data-persistence.md) | SQLite database, migrations, preferences |
+| [External APIs](./external-apis.md)       | HTTP lookups from Rust, errors, caching  |
 
 ## Quality & Tooling
 
@@ -52,9 +52,9 @@ Technical documentation for building and extending this app. These docs describe
 
 ## Release & Distribution
 
-| Document                  | Description                            |
-| ------------------------- | -------------------------------------- |
-| [Releases](./releases.md) | Release process, signing, auto-updates |
+| Document                  | Description                                |
+| ------------------------- | ------------------------------------------ |
+| [Releases](./releases.md) | CI, Windows release build (no auto-update) |
 
 ---
 

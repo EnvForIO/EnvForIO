@@ -139,14 +139,7 @@ const handleKeyDown = (e: KeyboardEvent) => {
 
 ### Native Menus
 
-Menu events trigger commands through Tauri events:
-
-```typescript
-// React side - in useMainWindowEventListeners
-listen('menu-preferences', () => {
-  commandContext.openPreferences()
-})
-```
+Menus are built in JavaScript (`src/lib/menu.ts`), and each item calls its handler directly through the `action` option (e.g. `useUIStore.getState().setPreferencesOpen(true)`). No Tauri event is involved. See [menus.md](./menus.md).
 
 ## Adding New Commands
 
@@ -221,8 +214,8 @@ Organize commands into logical groups (used in command palette headings):
 
 - **navigation**: Sidebar toggles, view switching
 - **settings**: Preferences, configuration
-- **notifications**: Notification actions
-- **window**: Window management (minimize, close, etc.)
+- **window**: Label for window management; the commands in `window-commands.ts` set no group yet, so they show under **other**
+- **other**: Fallback for commands without a group
 
 Group labels are translated via `commands.group.{groupName}` keys.
 
