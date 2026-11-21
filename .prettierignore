@@ -23,5 +23,7 @@ src/lib/bindings.ts
 *.log
 # EnvForIO plan, hand-formatted
 docs/PLAN.md
+# Other checkouts of this repo (git worktrees made by agent sessions)
+.claude/worktrees/
 # Design review snapshots written by the Impeccable skill (git-ignored)
 .impeccable/
