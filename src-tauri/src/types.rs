@@ -36,6 +36,10 @@ pub struct AppPreferences {
     /// Look of the Todo Duo widgets. Missing in files saved before it existed.
     #[serde(default)]
     pub duo_style: DuoStyle,
+    /// Ask GitHub for a newer release at startup. Off unless the user turns it on:
+    /// EnvForIO makes no network request on its own account by default.
+    #[serde(default)]
+    pub check_for_updates: bool,
 }
 
 // ============================================================================
@@ -84,6 +88,7 @@ impl Default for AppPreferences {
             quick_pane_shortcut: None, // None means use default
             language: None,            // None means use system locale
             duo_style: DuoStyle::default(),
+            check_for_updates: false,
         }
     }
 }

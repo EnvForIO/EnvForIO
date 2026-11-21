@@ -19,4 +19,5 @@ pub mod stats;
 pub mod tasks;
 pub mod timer;
 pub mod undo;
+pub mod updates;
 pub mod validate;

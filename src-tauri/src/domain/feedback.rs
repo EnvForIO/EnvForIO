@@ -6,7 +6,7 @@
 use std::path::Path;
 
 /// New issues on the project's repository.
-pub const NEW_ISSUE_URL: &str = "https://github.com/EnvForIO/EnvForIO/issues/new";
+pub const NEW_ISSUE_URL: &str = concat!("https://github.com/", github_repo!(), "/issues/new");
 
 /// The log file's name, without `.log` (the log plugin adds it).
 pub const LOG_FILE_NAME: &str = "EnvForIO";

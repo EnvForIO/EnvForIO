@@ -24,7 +24,7 @@ EnvForIO is built and tested on Windows 11; Windows 10 should work but is not te
 - `EnvForIO_<version>_x64-setup.exe` installs for your account, without administrator rights.
 - `EnvForIO_<version>_x64_en-US.msi` installs for every user on the machine.
 
-The installers are not code-signed yet, so Windows SmartScreen may warn the first time: choose **More info**, then **Run anyway**. There is no auto-update yet; install a newer release over the old one, and your data (in `%APPDATA%\io.github.envforio`) is kept.
+The installers are not code-signed yet, so Windows SmartScreen may warn the first time: choose **More info**, then **Run anyway**. EnvForIO does not update itself: **Check for updates** (Preferences → General) tells you when a newer release is out and links to it, and you install it over the old one. Your data (in `%APPDATA%\io.github.envforio`) is kept.
 
 ## Build from source
 

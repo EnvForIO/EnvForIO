@@ -36,6 +36,16 @@ git push origin main --tags
 
 Pushing the tag starts the workflow. It stops if the tag does not match the version in `tauri.conf.json`. When it finishes, open the draft under Releases, check the installers and the notes, and publish it. The workflow can also be started from the Actions tab with a tag name.
 
+## How users hear about a release
+
+**Check for updates** (Preferences → General, the command palette, and an opt-in check at start-up) reads GitHub's latest-release record (`/repos/EnvForIO/EnvForIO/releases/latest`) and compares its tag with the running version (`domain/updates.rs`). So:
+
+- A release is seen only once it is **published**: drafts are invisible, and so are releases marked as pre-release.
+- The tag must be a version (`v0.2.0`); anything else is ignored.
+- The app only links to the release page; users install it themselves.
+
+The repository name is set once, in the `github_repo!` macro in `src-tauri/src/domain/mod.rs` (bug reports use it too).
+
 ## Versions
 
 Semantic versioning; the three files above must hold the same version, and the tag is that version with a `v` in front.
@@ -43,5 +53,5 @@ Semantic versioning; the three files above must hold the same version, and the t
 ## Not done yet
 
 - **Code signing**: the installers are unsigned, so SmartScreen warns on first run. Signing needs a code-signing certificate stored as repository secrets.
-- **Auto-update**: there is no updater. Adding one means `tauri-plugin-updater`, a signing key pair (`tauri signer generate`), the public key and an endpoint in `tauri.conf.json`, `createUpdaterArtifacts: true`, and `uploadUpdaterJson: true` in the release workflow.
+- **Auto-update**: the app tells users about a release but does not install it. Installing in the app means `tauri-plugin-updater`, a signing key pair (`tauri signer generate`), the public key and an endpoint in `tauri.conf.json`, `createUpdaterArtifacts: true`, and `uploadUpdaterJson: true` in the release workflow.
 - **macOS and Linux builds**: the app runs on Windows; other platforms are not built or tested.

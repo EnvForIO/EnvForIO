@@ -147,6 +147,7 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         windows::close_mini_mode,
         feedback::report_problem,
         feedback::open_log_folder,
+        feedback::check_for_updates,
         windows::open_calendar_day,
         calendar::month_marks,
     ])

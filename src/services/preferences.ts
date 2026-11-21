@@ -48,6 +48,7 @@ export function usePreferences() {
             font: 'system',
             text_size: 'medium',
           },
+          check_for_updates: false,
         }
       }
 

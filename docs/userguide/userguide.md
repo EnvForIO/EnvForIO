@@ -154,8 +154,9 @@ Paste the address of an RSS or Atom feed, or just a site (for example `quantamag
 ## Preferences
 
 - **General**: the quick pane shortcut, launch at login, and Help:
+  - **Check for updates** asks GitHub whether a newer EnvForIO is published and, if so, offers its download page. **Also check when EnvForIO starts** (off by default) does the same quietly at start-up and only speaks up when there is a new version. EnvForIO never downloads or installs anything itself: run the new installer over the old version, and your data is kept.
   - **Report a problem** opens a bug report on GitHub in your browser, with EnvForIO's version, your Windows version and where the log file is already filled in. Nothing is sent until you submit it yourself; the app has no telemetry.
   - **Open log folder** shows `%LOCALAPPDATA%\io.github.envforio\logs`. If you attach `EnvForIO.log` to a report, look through it first.
-  - Both are also in the command palette (Ctrl+K).
+  - All three are also in the command palette (Ctrl+K).
 - **Appearance**: language; Light, Dark or System theme; Todo Duo style.
 - **Planning**: available time per weekday, day start, levelling, earliest deadline first.

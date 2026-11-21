@@ -1,8 +1,18 @@
-import { BugIcon, FolderOpenIcon } from 'lucide-react'
+import { BugIcon, DownloadIcon, FolderOpenIcon } from 'lucide-react'
 import type { AppCommand } from './types'
 import { openLogFolder, reportProblem } from '@/lib/feedback'
+import { checkForUpdates } from '@/lib/updates'
 
 export const helpCommands: AppCommand[] = [
+  {
+    id: 'help-check-for-updates',
+    labelKey: 'commands.checkForUpdates.label',
+    descriptionKey: 'commands.checkForUpdates.description',
+    icon: DownloadIcon,
+    group: 'help',
+    keywords: ['update', 'version', 'release', 'new'],
+    execute: () => checkForUpdates(),
+  },
   {
     id: 'help-report-problem',
     labelKey: 'commands.reportProblem.label',

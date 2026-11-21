@@ -1229,6 +1229,17 @@ async openLogFolder() : Promise<Result<null, AppError>> {
 }
 },
 /**
+ * Is a newer EnvForIO published? Only tells; the user downloads it.
+ */
+async checkForUpdates() : Promise<Result<UpdateCheck, AppError>> {
+    try {
+    return { status: "ok", data: await TAURI_INVOKE("check_for_updates") };
+} catch (e) {
+    if(e instanceof Error) throw e;
+    else return { status: "error", error: e  as any };
+}
+},
+/**
  * Open the main window's calendar at a day (double-click in the Duo card's month).
  */
 async openCalendarDay(date: string) : Promise<void> {
@@ -1292,7 +1303,12 @@ language: string | null;
 /**
  * Look of the Todo Duo widgets. Missing in files saved before it existed.
  */
-duo_style?: DuoStyle }
+duo_style?: DuoStyle; 
+/**
+ * Ask GitHub for a newer release at startup. Off unless the user turns it on:
+ * EnvForIO makes no network request on its own account by default.
+ */
+check_for_updates?: boolean }
 export type Bucket = { key: string; done: number; minutes: number }
 export type Calendar = { id: number; name: string; url: string; color: string; isVisible: boolean; fetchedAt: string | null; error: string | null; eventCount: number }
 export type CalendarEvent = { id: number; calendarId: number; color: string; title: string; location: string; startMs: number; endMs: number; allDay: boolean }
@@ -1543,6 +1559,23 @@ export type TaskUpdate = { title: string; note: string; isImportant: boolean; is
 export type TaskView = "MyDay" | "Important" | "Tasks"
 export type TemplatePhase = { name: string; daysBefore: number | null }
 export type TodayLine = { date: string; minutes: number; doneMinutes: number; capacity: number | null; projects: ProjectLine[] }
+export type UpdateCheck = { 
+/**
+ * The running version, e.g. "0.1.0".
+ */
+current: string; 
+/**
+ * The latest release's version without the "v", or None if nothing is published yet.
+ */
+latest: string | null; 
+/**
+ * True when `latest` is newer than `current`.
+ */
+newer: boolean; 
+/**
+ * The page to download from: the release, or the releases list.
+ */
+url: string }
 /**
  * Minutes per weekday, Monday first; None = no limit.
  */

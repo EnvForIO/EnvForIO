@@ -10,6 +10,7 @@ import { usePreferences, useSavePreferences } from '@/services/preferences'
 import { commands } from '@/lib/tauri-bindings'
 import { logger } from '@/lib/logger'
 import { LaunchAtLogin } from './LaunchAtLogin'
+import { UpdateSettings } from './UpdateSettings'
 
 export function GeneralPane() {
   const { t } = useTranslation()
@@ -105,6 +106,12 @@ export function GeneralPane() {
       </SettingsSection>
 
       <SettingsSection title={t('preferences.general.help')}>
+        <SettingsField
+          label={t('updates.title')}
+          description={t('updates.description')}
+        >
+          <UpdateSettings />
+        </SettingsField>
         <SettingsField
           label={t('feedback.title')}
           description={t('feedback.reportProblemDescription')}

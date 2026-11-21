@@ -68,7 +68,7 @@ jobs:
 
             The installers are not code-signed yet, so Windows SmartScreen may warn the first time. Choose **More info**, then **Run anyway**.
 
-            EnvForIO does not update itself yet: download the next release when it comes out. Your data stays in `%APPDATA%\io.github.envforio`.
+            EnvForIO does not update itself: **Check for updates** (Preferences → General) tells you when a newer release is out. Run the new installer over the old version; your data stays in `%APPDATA%\io.github.envforio`.
 
             **Changes**: https://github.com/${{ github.repository }}/commits/${{ env.TAG }}
           releaseDraft: true

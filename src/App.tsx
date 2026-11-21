@@ -5,6 +5,7 @@ import { initializeLanguage } from './i18n/language-init'
 import { logger } from './lib/logger'
 import { cleanupOldFiles } from './lib/recovery'
 import { commands } from './lib/tauri-bindings'
+import { checkForUpdates } from './lib/updates'
 import './App.css'
 import { MainWindow } from './components/layout/MainWindow'
 import { ThemeProvider } from './components/ThemeProvider'
@@ -32,6 +33,11 @@ function App() {
 
         // Initialize language (will use system locale if no preference)
         await initializeLanguage(savedLanguage)
+
+        // Opt-in: one quiet look at GitHub's latest release, after start-up settles.
+        if (result.status === 'ok' && result.data.check_for_updates) {
+          setTimeout(() => void checkForUpdates({ quiet: true }), 5_000)
+        }
 
         // Build the application menu with the initialized language
         await buildAppMenu()

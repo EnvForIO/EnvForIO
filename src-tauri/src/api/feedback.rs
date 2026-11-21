@@ -1,5 +1,8 @@
-//! Feedback commands: open a prefilled bug report, open the log folder.
-//! No telemetry: these only open the user's browser or file manager.
+//! Help commands: open a prefilled bug report, open the log folder, check
+//! for a newer release. No telemetry: the first two only open the user's
+//! browser or file manager, and the update check is one anonymous request
+//! for GitHub's public release list, made only when the user asks or has
+//! turned on the startup check.
 
 use std::path::PathBuf;
 
@@ -7,7 +10,16 @@ use tauri::{AppHandle, Manager};
 use tauri_plugin_opener::OpenerExt;
 
 use crate::domain::feedback;
+use crate::domain::updates::UpdateCheck;
 use crate::errors::{AppError, AppResult};
+use crate::service::updates;
+
+/// Is a newer EnvForIO published? Only tells; the user downloads it.
+#[tauri::command]
+#[specta::specta]
+pub async fn check_for_updates(app: AppHandle) -> AppResult<UpdateCheck> {
+    updates::check(&app.package_info().version.to_string()).await
+}
 
 fn log_dir(app: &AppHandle) -> AppResult<PathBuf> {
     app.path()
