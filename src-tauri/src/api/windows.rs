@@ -25,6 +25,13 @@ pub fn leave_mini_mode(app: AppHandle) {
     duo::leave_mini_mode(&app);
 }
 
+/// Close the sticky to the tray (the capsule's close button).
+#[tauri::command]
+#[specta::specta]
+pub fn close_mini_mode(app: AppHandle) {
+    duo::hide_both(&app);
+}
+
 /// Open the main window's calendar at a day (double-click in the Duo card's month).
 #[tauri::command]
 #[specta::specta]

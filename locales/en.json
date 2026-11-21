@@ -254,6 +254,7 @@
   "calendar.save": "Save",
   "tasks.nothingSelected": "Select a task to see its details.",
   "duo.openEnvio": "Open the EnvForIO window",
+  "duo.close": "Close to the tray",
   "titlebar.float": "Float as a sticky (Todo Duo)",
   "duo.pin": "Keep on top",
   "duo.unpin": "Stop keeping on top",

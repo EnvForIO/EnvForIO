@@ -21,12 +21,29 @@ const GAP: f64 = 8.0; // logical pixels between capsule and card
 const SLACK: i32 = 1; // physical pixels of rounding we ignore
 
 pub fn create<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
-    let capsule = build(app, CAPSULE, 320.0, 56.0)?;
-    let card = build(app, CARD, 320.0, 440.0)?; // room for the Month tab
+    // The capsule stands for the app on the taskbar while the main window is
+    // hidden; the card stays off it so the pair shows as one button.
+    let capsule = build(app, CAPSULE, 320.0, 56.0, false)?;
+    let card = build(app, CARD, 320.0, 440.0, true)?; // room for the Month tab
 
     let card_for_capsule = card.clone();
     capsule.on_window_event(move |event| match event {
-        WindowEvent::Moved(_) | WindowEvent::Resized(_) => follow_capsule(&card_for_capsule),
+        WindowEvent::Moved(_) => follow_capsule(&card_for_capsule),
+        WindowEvent::Resized(_) => {
+            // Minimizing from the taskbar arrives as a resize: the card goes
+            // and comes back with the capsule.
+            let capsule = card_for_capsule.app_handle().get_webview_window(CAPSULE);
+            match capsule.map(|c| (c.is_minimized(), c.is_visible())) {
+                Some((Ok(true), _)) => {
+                    let _ = card_for_capsule.hide();
+                }
+                Some((Ok(false), Ok(true))) => {
+                    let _ = card_for_capsule.show();
+                    follow_capsule(&card_for_capsule);
+                }
+                _ => {}
+            }
+        }
         WindowEvent::CloseRequested { api, .. } => {
             // Alt+F4 hides the pair instead of destroying one half of it.
             api.prevent_close();
@@ -54,19 +71,20 @@ fn build<R: Runtime>(
     label: &str,
     width: f64,
     height: f64,
+    skip_taskbar: bool,
 ) -> tauri::Result<WebviewWindow<R>> {
     WebviewWindowBuilder::new(
         app,
         label,
         WebviewUrl::App(format!("index.html?window={label}").into()),
     )
-    .title("Todo Duo")
+    .title("EnvForIO")
     .inner_size(width, height)
     .min_inner_size(240.0, 48.0)
     .decorations(false)
     .transparent(true)
     .shadow(false)
-    .skip_taskbar(true)
+    .skip_taskbar(skip_taskbar)
     .resizable(true)
     .visible(false) // shown by the float button; not tracked by the window-state plugin
     .build()
@@ -128,7 +146,9 @@ fn both<R: Runtime>(app: &AppHandle<R>) -> Vec<WebviewWindow<R>> {
         .collect()
 }
 
-fn hide_both<R: Runtime>(app: &AppHandle<R>) {
+/// Close the sticky to the tray, like closing the main window: the app keeps
+/// running and the tray brings it back.
+pub fn hide_both<R: Runtime>(app: &AppHandle<R>) {
     for window in both(app) {
         let _ = window.hide();
     }

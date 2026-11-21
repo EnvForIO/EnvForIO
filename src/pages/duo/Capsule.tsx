@@ -1,10 +1,11 @@
 /**
  * The Todo Duo capsule (EnvForIO in mini mode): today's progress, a pin that
- * keeps the sticky on top, and a button back to the main window.
+ * keeps the sticky on top, a button back to the main window, and close (to the
+ * tray, like the main window's close).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Maximize2Icon, PinIcon } from 'lucide-react'
+import { Maximize2Icon, PinIcon, XIcon } from 'lucide-react'
 import { useDayTasks, useToday } from '@/api/tasks'
 import { commands } from '@/lib/tauri-bindings'
 import { cn } from '@/lib/utils'
@@ -52,6 +53,14 @@ export function Capsule() {
         title={t('duo.openEnvio')}
       >
         <Maximize2Icon className="size-3.5" />
+      </button>
+      <button
+        type="button"
+        onClick={() => void commands.closeMiniMode()}
+        aria-label={t('duo.close')}
+        title={t('duo.close')}
+      >
+        <XIcon className="size-3.5" />
       </button>
     </div>
   )

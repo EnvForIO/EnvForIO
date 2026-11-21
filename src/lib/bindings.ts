@@ -1200,6 +1200,12 @@ async leaveMiniMode() : Promise<void> {
     await TAURI_INVOKE("leave_mini_mode");
 },
 /**
+ * Close the sticky to the tray (the capsule's close button).
+ */
+async closeMiniMode() : Promise<void> {
+    await TAURI_INVOKE("close_mini_mode");
+},
+/**
  * Open the main window's calendar at a day (double-click in the Duo card's month).
  */
 async openCalendarDay(date: string) : Promise<void> {
