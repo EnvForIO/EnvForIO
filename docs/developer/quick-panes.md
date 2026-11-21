@@ -1,227 +1,31 @@
-# Quick Panes
+# Quick Pane
 
-Quick panes are small floating windows that appear via global keyboard shortcut, even when the main application is not focused. This pattern is common for quick entry, command palettes, and similar quick-access features.
+The quick pane is a small floating window for quick capture: the user presses a global shortcut from any app, types a task, and it lands in My Day.
 
-## Overview
+## Pieces
 
-The quick pane system demonstrates:
+| Piece                   | Where                                                                                                   |
+| ----------------------- | ------------------------------------------------------------------------------------------------------- |
+| Window creation         | `init_quick_pane` in `src-tauri/src/commands/quick_pane.rs`, called from `setup()` in `lib.rs`          |
+| Show / dismiss / toggle | `show_quick_pane`, `dismiss_quick_pane`, `toggle_quick_pane` commands (same file)                       |
+| Global shortcut         | `register_quick_pane_shortcut`, `update_quick_pane_shortcut` (same file)                                |
+| Default shortcut        | `DEFAULT_QUICK_PANE_SHORTCUT` = `CommandOrControl+Shift+.` in `src-tauri/src/types.rs`                  |
+| View                    | `src/windows/quick-pane` → `src/components/quick-pane/QuickPaneApp.tsx`, styles in `src/quick-pane.css` |
+| Permissions             | `src-tauri/capabilities/quick-pane.json`                                                                |
 
-- **Global shortcuts** - Trigger from any app with `Cmd+Shift+.` (macOS) or `Ctrl+Shift+.` (Windows/Linux)
-- **Multi-window architecture** - Separate React contexts for main window and pane
-- **Cross-window communication** - Tauri events for decoupled messaging
-- **Platform-specific behavior** - Native NSPanel on macOS for fullscreen overlay
+## How It Works
 
-## Architecture
+- The window is created once at startup, hidden, as an always-on-top, undecorated, transparent window loading `index.html?window=quick-pane`. Showing it later reuses that window.
+- `show_quick_pane` centres it on the monitor that holds the mouse cursor.
+- It hides on Escape (with `preventDefault()`, which stops the system beep) and when it loses focus.
+- On submit it calls `commands.createTask(text, 'MyDay')`, then emits `tasks-changed`; `useTaskSync` (`src/api/tasks.ts`) in the main window refetches. The main window needs no listener of its own.
+- It listens for `theme-changed` from `ThemeProvider` and also re-applies the theme on focus, which catches changes made while it was hidden.
+- Users change the shortcut in Preferences > General (`commands.updateQuickPaneShortcut(shortcut)`, `null` resets it).
 
-### Multi-Window Setup
+## Size
 
-Each Tauri window runs a completely separate JavaScript context. They cannot share React state directly.
+`QUICK_PANE_WIDTH` and `QUICK_PANE_HEIGHT` in `quick_pane.rs` are used for positioning. `init_quick_pane_standard` (the Windows/Linux path) passes `500.0, 72.0` directly, so change both together.
 
-There is one HTML entry point. Rust opens the quick pane at `index.html?window=quick-pane`, and `src/main.tsx` lazily mounts the matching view:
+## macOS
 
-```
-index.html                    → src/main.tsx → src/windows/main        → Main React app
-index.html?window=quick-pane  → src/main.tsx → src/windows/quick-pane  → Quick pane React app
-```
-
-No extra Vite configuration is needed; the lazy `import()` in `src/main.tsx` keeps each window's code in its own chunk.
-
-### Window Creation Pattern
-
-The quick pane is created once at app startup (hidden) and then shown/hidden via commands. This is faster than recreating the window each time and required on macOS because NSPanel must be created on the main thread.
-
-```rust
-// In setup() closure - runs on main thread
-init_quick_pane(app.handle())?;
-
-// Later, from any command
-toggle_quick_pane(app_handle);  // Shows/hides the existing window
-```
-
-### Cross-Window Communication
-
-Windows communicate via Tauri events (not shared state). The quick pane does its own work, then tells the other windows that data changed:
-
-```typescript
-// Quick pane: create the task in My Day, then announce the change
-const result = await commands.createTask(text.trim(), 'MyDay')
-if (result.status === 'ok') await emit(TASKS_CHANGED)
-
-// Main window: useTaskSync (src/api/tasks) refetches on TASKS_CHANGED
-```
-
-The main window needs no listener of its own for the quick pane. The Todo Duo windows use the same event.
-
-### Theme Synchronization
-
-Since windows don't share React context, theme must be synchronized manually:
-
-```typescript
-// Main window: emit when theme changes
-emit('theme-changed', { theme })
-
-// Quick pane: listen and apply
-listen('theme-changed', () => applyTheme())
-
-// Also re-apply on focus gain (catches changes while hidden)
-onFocusChanged(({ payload: focused }) => {
-  if (focused) applyTheme()
-})
-```
-
-## Platform Behavior
-
-| Platform      | Panel Type    | Fullscreen Overlay | Dismiss Behavior            |
-| ------------- | ------------- | ------------------ | --------------------------- |
-| macOS         | NSPanel       | Yes                | Click-outside, Escape, blur |
-| Windows       | Always-on-top | No                 | Escape, blur                |
-| Linux X11     | Always-on-top | No                 | Escape, blur                |
-| Linux Wayland | Not supported | -                  | -                           |
-
-### macOS NSPanel
-
-On macOS, the quick pane uses `tauri-nspanel` for native panel behavior:
-
-- Appears above fullscreen apps
-- Proper focus handling without activating the main app
-- Native panel dismissal on focus loss
-
-**Critical configuration for fullscreen overlay:**
-
-```rust
-// These settings are required for proper fullscreen behavior.
-// See src-tauri/src/commands/quick_pane.rs for the complete builder chain
-// which also includes .url(), .title(), .size(), .transparent(), .has_shadow(),
-// .with_window() configuration, and .build().
-
-PanelBuilder::<_, QuickPanePanel>::new(app, label)
-    .level(PanelLevel::Status)  // High z-order for fullscreen
-    .style_mask(StyleMask::empty().nonactivating_panel())  // Required!
-    .collection_behavior(
-        CollectionBehavior::new()
-            .full_screen_auxiliary()
-            .can_join_all_spaces(),
-    )
-    // ... additional builder calls required ...
-    .build()
-```
-
-The `nonactivating_panel()` style mask is critical for fullscreen overlay visibility.
-
-### Space-Switching Prevention
-
-When hiding the panel on macOS, we must resign key window status first to prevent macOS from activating the main window (which causes space switching):
-
-```rust
-panel.resign_key_window();  // Resign BEFORE hiding
-panel.hide();
-```
-
-## Customization
-
-### Changing the Shortcut
-
-The default shortcut is `CommandOrControl+Shift+.`. Users can customize it in Preferences > General.
-
-Programmatically:
-
-```typescript
-await commands.updateQuickPaneShortcut('CommandOrControl+Alt+Space')
-// Or reset to default
-await commands.updateQuickPaneShortcut(null)
-```
-
-### Customizing the Pane Content
-
-Edit `src/components/quick-pane/QuickPaneApp.tsx`:
-
-```typescript
-export default function QuickPaneApp() {
-  const [text, setText] = useState('')
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (text.trim()) {
-      // Quick capture: "14:00-15:00 meeting" keeps its time
-      const result = await commands.createTask(text.trim(), 'MyDay')
-      if (result.status === 'ok') {
-        await emit(TASKS_CHANGED)
-        setText('')
-      }
-    }
-    await commands.dismissQuickPane()
-  }
-
-  return (
-    <form onSubmit={handleSubmit}>
-      {/* Your custom UI */}
-    </form>
-  )
-}
-```
-
-### Changing Window Size
-
-Update the constants in `src-tauri/src/commands/quick_pane.rs`:
-
-```rust
-const QUICK_PANE_WIDTH: f64 = 500.0;
-const QUICK_PANE_HEIGHT: f64 = 72.0;
-```
-
-Also update the window creation in `init_quick_pane_macos` and `init_quick_pane_standard`.
-
-## Implementation Notes
-
-### Threading (macOS)
-
-NSPanel creation MUST happen on the main thread. The Tauri async runtime uses a tokio thread pool, not the main thread.
-
-```rust
-// Bad: async command runs on tokio thread pool
-#[tauri::command]
-async fn create_panel(app: AppHandle) {
-    PanelBuilder::new(...).build()?;  // May crash!
-}
-
-// Good: create in setup() which runs on main thread
-.setup(|app| {
-    init_quick_pane(app.handle())?;
-    Ok(())
-})
-```
-
-### Escape Key Sound
-
-Prevent the system alert sound on Escape by calling `preventDefault()`:
-
-```typescript
-const handleKeyDown = async (e: KeyboardEvent) => {
-  if (e.key === 'Escape') {
-    e.preventDefault() // Prevents "boop" sound
-    await commands.dismissQuickPane()
-  }
-}
-```
-
-### Window Positioning
-
-The quick pane automatically centers on the monitor containing the mouse cursor. This is handled in the Rust `show_quick_pane` and `toggle_quick_pane` commands.
-
-## Dependencies
-
-```toml
-# Cargo.toml
-
-# Global shortcuts
-tauri-plugin-global-shortcut = "2"
-
-# macOS NSPanel (conditional)
-[target.'cfg(target_os = "macos")'.dependencies]
-tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", branch = "v2.1" }
-```
-
-## Limitations
-
-- **Linux Wayland**: Global shortcuts are not supported
-- **Visual blur**: Native frosted glass blur is not available due to conflicts between `window-vibrancy` and `tauri-nspanel`. The current implementation uses CSS `backdrop-blur` with semi-transparent backgrounds.
+A separate `init_quick_pane_macos` path builds the pane as an NSPanel with `tauri-nspanel` (so it can float over fullscreen apps). It is not built or tested; Windows releases use `init_quick_pane_standard`.

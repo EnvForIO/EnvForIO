@@ -20,7 +20,7 @@ EnvForIO ships for **Windows**. You can develop on Windows directly (Rust with t
 npm run tauri build -- --runner cargo-xwin --target x86_64-pc-windows-msvc --no-bundle
 ```
 
-[`docs/m0_toolchain.md`](m0_toolchain.md) records that setup and the problems met along the way. On Linux, `npm run tauri:dev` opens the app too, but only Windows is tested.
+For that setup you need, inside WSL: the Tauri Linux dependencies, `nsis`, `lld`, `clang`, the Rust target `x86_64-pc-windows-msvc` and `cargo-xwin` (if `cargo-xwin` is not found, `~/.cargo/bin` is not on your PATH). Copy the exe from `src-tauri/target/x86_64-pc-windows-msvc/release/` to Windows to run it. `lld-link: Cannot use debug info … [LNK4099]` warnings are harmless. The [design notes](developer/envforio-design.md#development-environment) say more. On Linux, `npm run tauri:dev` opens the app too, but only Windows is tested.
 
 ## Where things are
 

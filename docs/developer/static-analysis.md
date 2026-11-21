@@ -1,123 +1,34 @@
 # Static Analysis
 
-All static analysis tools configured in this app and how to use them.
+`npm run check:all` must pass before a commit; CI runs it on Linux (`.github/workflows/ci.yml`). `npm run fix:all` fixes what can be fixed automatically (ESLint, Prettier, cargo fmt, Clippy).
 
-## Quick Reference
+| Tool       | Checks                              | Command                  | In `check:all` | Config                             |
+| ---------- | ----------------------------------- | ------------------------ | -------------- | ---------------------------------- |
+| TypeScript | Types                               | `npm run typecheck`      | Yes            | `tsconfig.json`                    |
+| ESLint     | TS/React rules, React Compiler rule | `npm run lint`           | Yes            | `eslint.config.js`                 |
+| ast-grep   | Architecture rules                  | `npm run ast:lint`       | Yes            | `sgconfig.yml`, `.ast-grep/rules/` |
+| Prettier   | Formatting                          | `npm run format:check`   | Yes            | `prettier.config.js`               |
+| cargo fmt  | Rust formatting                     | `npm run rust:fmt:check` | Yes            |                                    |
+| Clippy     | Rust lints (`-D warnings`)          | `npm run rust:clippy`    | Yes            |                                    |
+| Vitest     | Frontend tests                      | `npm run test:run`       | Yes            | `vitest.config.ts`                 |
+| cargo test | Rust tests                          | `npm run rust:test`      | Yes            |                                    |
+| knip       | Unused files, exports, dependencies | `npm run knip`           | No             | `knip.json`                        |
+| jscpd      | Duplicated code                     | `npm run jscpd`          | No             | `.jscpd.json`                      |
 
-| Tool           | Purpose                  | Command                  | In check:all |
-| -------------- | ------------------------ | ------------------------ | ------------ |
-| TypeScript     | Type checking            | `npm run typecheck`      | Yes          |
-| ESLint         | Syntax, style, TS rules  | `npm run lint`           | Yes          |
-| Prettier       | Code formatting          | `npm run format:check`   | Yes          |
-| ast-grep       | Architecture patterns    | `npm run ast:lint`       | Yes          |
-| React Compiler | Automatic memoization    | Build-time               | Yes          |
-| cargo fmt      | Rust formatting          | `npm run rust:fmt:check` | Yes          |
-| clippy         | Rust linting             | `npm run rust:clippy`    | Yes          |
-| Vitest         | Frontend tests           | `npm run test:run`       | Yes          |
-| cargo test     | Rust tests               | `npm run rust:test`      | Yes          |
-| knip           | Unused code detection    | `npm run knip`           | No           |
-| jscpd          | Duplicate code detection | `npm run jscpd`          | No           |
+## ast-grep Rules
 
-## Running All Checks
+| Rule                                  | Enforces                                       |
+| ------------------------------------- | ---------------------------------------------- |
+| `zustand/no-destructure.yml`          | Select from `useUIStore`, don't destructure    |
+| `architecture/hooks-in-hooks-dir.yml` | No `use*` hooks exported from `src/lib/`       |
+| `architecture/no-store-in-lib.yml`    | `src/lib/` reads stores only with `getState()` |
 
-```bash
-npm run check:all    # Must pass before commits
-npm run fix:all      # Auto-fix what can be fixed
-```
+To add one, see [writing-ast-grep-rules.md](./writing-ast-grep-rules.md).
 
-## Tool Details
+## React Compiler
 
-### ESLint
+The compiler runs at build time (`vite.config.ts`) and memoizes for you, so don't add `useMemo`, `useCallback` or `React.memo` by hand. ESLint's `react-compiler/react-compiler` rule reports code it cannot compile.
 
-Handles syntax, style, and TypeScript-specific rules.
+## knip and jscpd
 
-```bash
-npm run lint        # Check for issues
-npm run lint:fix    # Auto-fix issues
-```
-
-Configuration in `eslint.config.js`.
-
-### Prettier
-
-Consistent code formatting.
-
-```bash
-npm run format:check   # Check formatting
-npm run format         # Fix formatting
-```
-
-Configuration in `prettier.config.js`.
-
-### ast-grep
-
-Enforces architectural patterns ESLint can't detect. Catches violations like Zustand destructuring and hooks in wrong directories.
-
-```bash
-npm run ast:lint    # Scan for violations
-npm run ast:fix     # Auto-fix where possible
-```
-
-**Key rules:**
-
-- No Zustand destructuring (causes render cascades)
-- Hooks must be in `hooks/` directory
-- No store subscriptions in `lib/`
-
-See [writing-ast-grep-rules.md](./writing-ast-grep-rules.md) for creating new rules.
-
-### React Compiler
-
-Handles memoization automatically at build time. You do **not** need to manually add:
-
-- `useMemo` for computed values
-- `useCallback` for function references
-- `React.memo` for components
-
-The compiler analyzes code and adds memoization where beneficial.
-
-**Note:** The `getState()` pattern is still critical - it avoids store subscriptions, not memoization. See [state-management.md](./state-management.md).
-
-### Rust Tooling
-
-```bash
-npm run rust:fmt:check   # Check formatting
-npm run rust:fmt         # Fix formatting
-npm run rust:clippy      # Lint with clippy
-npm run rust:clippy:fix  # Auto-fix clippy warnings
-npm run rust:test        # Run Rust tests
-```
-
-### knip (Periodic Cleanup)
-
-Detects unused exports, dependencies, and files. Not in `check:all` - use periodically.
-
-```bash
-npm run knip
-```
-
-### jscpd (Periodic Cleanup)
-
-Detects duplicated code blocks. Not in `check:all` - use periodically.
-
-```bash
-npm run jscpd
-```
-
-Use the `cleanup` skill (`.claude/skills/cleanup/`, run as `/cleanup` in Claude Code) for guided analysis and cleanup of both knip and jscpd findings.
-
-## CI Integration
-
-`check:all` runs in CI. Ensure it passes locally before pushing:
-
-```bash
-npm run check:all
-```
-
-## Adding New Rules
-
-**ESLint:** Add rules to `eslint.config.js`
-
-**ast-grep:** Create YAML files in `.ast-grep/rules/`. See [writing-ast-grep-rules.md](./writing-ast-grep-rules.md).
-
-**Prettier:** Modify `prettier.config.js`
+Run them now and then, not on every commit. The `cleanup` skill (`.claude/skills/cleanup/`, `/cleanup` in Claude Code) walks through their findings.

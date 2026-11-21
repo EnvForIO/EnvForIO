@@ -1,173 +1,69 @@
 # State Management
 
-Three-layer "onion" architecture for state management.
+Three layers, from widest to narrowest:
 
-## The Three Layers
+| Layer          | Use for                                                                            | Where                                                 |
+| -------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| TanStack Query | Anything from Rust: app data, preferences                                          | `src/api/*.ts`, `src/services/preferences.ts`         |
+| Zustand        | Shared UI state that is not saved: sidebars, selection, open dialogs, current page | `src/store/ui-store.ts`, `src/store/monitor-store.ts` |
+| `useState`     | State one component owns                                                           | The component                                         |
 
-```
-┌─────────────────────────────────────┐
-│           useState                  │  ← Component UI State
-│  ┌─────────────────────────────────┐│
-│  │          Zustand                ││  ← Global UI State
-│  │  ┌─────────────────────────────┐││
-│  │  │      TanStack Query         │││  ← Persistent Data
-│  │  └─────────────────────────────┘││
-│  └─────────────────────────────────┘│
-└─────────────────────────────────────┘
-```
+Decision: needed by more than one component? If not, `useState`. Does it come from or go to Rust? Then TanStack Query. Otherwise Zustand.
 
-### Layer 1: TanStack Query (Persistent Data)
+## TanStack Query
 
-Use for data that:
-
-- Comes from Tauri backend (file system, external APIs)
-- Benefits from caching and automatic refetching
-- Has loading, error, and success states
+Every Tauri command is called from a hook in `src/api/<resource>.ts`, never directly from a component. Each file defines its query keys and wraps commands with `unwrapResult`:
 
 ```typescript
-const { data, isLoading, error } = useQuery({
-  queryKey: ['user', userId],
-  queryFn: () => commands.getUser({ userId }),
-  enabled: !!userId,
-})
+// src/api/ideas.ts
+export const useIdeas = (filter: IdeaFilter) =>
+  useQuery({
+    queryKey: ideaKeys.list(filter),
+    queryFn: async () => unwrapResult(await commands.listIdeas(filter)),
+  })
 ```
 
-See [error-handling.md](./error-handling.md) for retry configuration and error display patterns.
+Writes use `useInvalidatingMutation` (`src/api/mutation.ts`), which refetches the given keys when the mutation settles. Tasks and ideas have their own mutation helpers that also emit `tasks-changed` so other windows refetch. Defaults (no refetch on focus, one retry, 5-minute stale time) are in `src/lib/query-client.ts`.
 
-### Layer 2: Zustand (Global UI State)
+## Zustand
 
-Use for transient global state:
+`useUIStore` holds sidebar visibility, the selected view/project/task/page, command palette and preferences state. `useMonitorStore` holds the last minute of machine samples pushed from Rust.
 
-- Panel visibility, layout state
-- Command palette open/closed
-- UI modes and navigation
+## Performance Patterns
+
+### Select, don't destructure
 
 ```typescript
-import { create } from 'zustand'
-import { devtools } from 'zustand/middleware'
+// ❌ BAD: subscribes to the whole store
+const { leftSidebarVisible } = useUIStore()
 
-interface UIState {
-  sidebarVisible: boolean
-  toggleSidebar: () => void
-}
-
-export const useUIStore = create<UIState>()(
-  devtools(
-    set => ({
-      sidebarVisible: true,
-      toggleSidebar: () =>
-        set(state => ({ sidebarVisible: !state.sidebarVisible })),
-    }),
-    { name: 'ui-store' }
-  )
-)
+// ✅ GOOD: re-renders only when this value changes
+const leftSidebarVisible = useUIStore(state => state.leftSidebarVisible)
 ```
 
-### Layer 3: useState (Component State)
+`.ast-grep/rules/zustand/no-destructure.yml` enforces this for `useUIStore` in `.tsx` files (see [writing-ast-grep-rules.md](./writing-ast-grep-rules.md)). If you add a store, add its pattern to that rule.
 
-Use for state that:
+### `getState()` in callbacks
 
-- Only affects UI presentation
-- Is derived from props or global state
-- Is tightly coupled to component lifecycle
+In event handlers, commands and async code, read the store with `getState()` instead of subscribing:
 
 ```typescript
-const [isDropdownOpen, setIsDropdownOpen] = useState(false)
-const [windowWidth, setWindowWidth] = useState(window.innerWidth)
+// src/lib/commands/navigation-commands.ts
+execute: () => {
+  useUIStore.getState().setLeftSidebarVisible(true)
+},
 ```
 
-## Performance Patterns (Critical)
+### React Compiler
 
-### The `getState()` Pattern
+The React Compiler is on (`vite.config.ts`), so don't add `useMemo`, `useCallback` or `React.memo` by hand. It does not replace the selector and `getState()` rules above.
 
-**Problem**: Subscribing to store data in callbacks causes render cascades.
+## Sidebars
 
-**Solution**: Use `getState()` for callbacks that need current state.
+`MainWindow.tsx` renders the sidebars conditionally (`{leftSidebarVisible && <LeftSideBar />}`). Their content keeps its state in Zustand or TanStack Query, so unmounting loses nothing. If a panel ever holds state that must survive hiding (scroll position, unsaved input), hide it with CSS instead.
 
-```typescript
-// ❌ BAD: Causes render cascade on every store change
-const { currentFile, isDirty, saveFile } = useEditorStore()
+## Adding a Store
 
-const handleSave = useCallback(() => {
-  if (currentFile && isDirty) {
-    void saveFile()
-  }
-}, [currentFile, isDirty, saveFile]) // Re-creates on every change!
+Create it in `src/store/`. `ui-store.ts` uses the `devtools` middleware. Add the store to the no-destructure rule.
 
-// ✅ GOOD: No cascade, stable callback
-const handleSave = useCallback(() => {
-  const { currentFile, isDirty, saveFile } = useEditorStore.getState()
-  if (currentFile && isDirty) {
-    void saveFile()
-  }
-}, []) // Stable dependency array
-```
-
-**When to use `getState()`:**
-
-- In `useCallback` dependencies when you need current state but don't want re-renders
-- In event handlers for accessing latest state without subscriptions
-- In `useEffect` with empty deps when you need current state on mount only
-- In async operations when state might change during execution
-
-### Store Subscription Optimization
-
-```typescript
-// ❌ BAD: Object destructuring subscribes to entire store
-const { currentFile } = useEditorStore()
-
-// ✅ GOOD: Selector only re-renders when this specific value changes
-const currentFile = useEditorStore(state => state.currentFile)
-
-// ✅ GOOD: Derived selector for minimal re-renders
-const hasCurrentFile = useEditorStore(state => !!state.currentFile)
-const currentFileName = useEditorStore(state => state.currentFile?.name)
-```
-
-### CSS Visibility vs Conditional Rendering
-
-`MainWindow.tsx` renders the sidebars conditionally (`{leftSidebarVisible && <LeftSideBar />}`). The main window uses fixed-width flex sidebars, not `react-resizable-panels`, and their content keeps its state in Zustand or TanStack Query, so unmounting loses nothing.
-
-If a panel ever holds state that must survive hiding (e.g. a `ResizablePanel` size, scroll position, unsaved form input), hide it with CSS instead:
-
-```typescript
-<ResizablePanel className={sidebarVisible ? '' : 'hidden'} />
-```
-
-### React Compiler (Automatic Memoization)
-
-This app uses React Compiler which automatically handles memoization. You do **not** need to manually add:
-
-- `useMemo` for computed values
-- `useCallback` for function references
-- `React.memo` for components
-
-**Note:** The `getState()` pattern is still critical - it avoids store subscriptions, not memoization.
-
-## Store Boundaries
-
-**UIStore** - Use for:
-
-- Panel visibility
-- Layout state
-- Command palette state
-- UI modes and navigation
-
-**Feature-specific stores** - Use for:
-
-- Domain-specific state (e.g., `useDocumentStore`)
-- Feature flags and configuration
-- Temporary workflow state
-
-## Adding a New Store
-
-1. Create store file in `src/store/`
-2. Follow the pattern with `devtools` middleware
-3. Add no-destructure rule to `.ast-grep/rules/zustand/no-destructure.yml`
-
-```yaml
-rule:
-  any:
-    - pattern: const { $$$PROPS } = useUIStore($$$ARGS)
-    - pattern: const { $$$PROPS } = useNewStore($$$ARGS) # Add new store
-```
+Code in `src/lib/` may read stores only through `getState()`, never subscribe (`.ast-grep/rules/architecture/no-store-in-lib.yml`).

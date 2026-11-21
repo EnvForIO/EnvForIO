@@ -1,52 +1,26 @@
 # External APIs
 
-Patterns for calling external HTTP APIs from Tauri applications.
+EnvForIO makes a few unauthenticated web lookups, all from Rust with `reqwest`. The frontend never calls the network itself.
 
-EnvForIO makes a few unauthenticated web lookups from Rust: paper metadata (Crossref, arXiv), conference deadlines (ccfddl), subscribed calendars (ICS) and RSS feeds. The fetch code is in `src-tauri/src/service/*/fetch.rs`.
+| Lookup                                      | Code                                         |
+| ------------------------------------------- | -------------------------------------------- |
+| Paper metadata (Crossref, arXiv)            | `src-tauri/src/service/papers/fetch.rs`      |
+| Conference deadlines (ccfddl)               | `src-tauri/src/service/conferences/fetch.rs` |
+| Subscribed calendars (ICS)                  | `src-tauri/src/service/calendars/fetch.rs`   |
+| RSS/Atom feeds                              | `src-tauri/src/service/feeds/fetch.rs`       |
+| Latest GitHub release (opt-in update check) | `src-tauri/src/service/updates.rs`           |
 
-## Rust vs Frontend: When to Use Which
+`reqwest` uses `native-tls` (SChannel on Windows, so no C crypto library is needed) and `system-proxy` (the OS proxy settings).
 
-**Default recommendation: Use Rust backend (reqwest)**
+## Shared Client
 
-| Approach         | Pros                                              | Cons                            |
-| ---------------- | ------------------------------------------------- | ------------------------------- |
-| Rust (reqwest)   | CORS bypass, results saved to SQLite, type safety | More code per endpoint          |
-| Frontend (fetch) | Less boilerplate, familiar API                    | CORS restrictions, exposed keys |
+Use `src-tauri/src/service/net.rs`; don't build a client yourself.
 
-All of EnvForIO's lookups go through Rust.
-
-## Setup
-
-`reqwest` is already a dependency in `src-tauri/Cargo.toml`:
-
-```toml
-reqwest = { version = "0.13", default-features = false, features = ["native-tls", "json", "system-proxy"] }
-```
-
-`native-tls` uses SChannel on Windows, so no C crypto library is needed. `system-proxy` picks up the OS proxy settings.
-
-### Shared Client
-
-Use `src-tauri/src/service/net.rs` instead of building a client yourself:
-
-- `net::client()` returns a `reqwest::Client` with a generic `EnvForIO/<version>` user agent (no user details) and a 40-second timeout.
-- `net::network` maps a `reqwest::Error` to `AppError::Network` and logs it.
-
-## Architecture Pattern
-
-Follow the same pattern as local data: Tauri commands wrap API calls, TanStack Query provides caching.
-
-```
-React Component → TanStack Query → Tauri Command (reqwest) → External API
-```
-
-### Rust Fetch
+- `net::client()`: a `reqwest::Client` with a generic `EnvForIO/<version> (desktop research app)` user agent (no user details) and a 40-second timeout.
+- `net::network`: maps a `reqwest::Error` to `AppError::Network` and logs it without the URL (a calendar link can carry a private token, and logs may be attached to bug reports).
 
 ```rust
 // src-tauri/src/service/conferences/fetch.rs
-use crate::errors::AppResult;
-use crate::service::net::{client, network};
-
 pub async fn download() -> AppResult<String> {
     client()?
         .get(URL)
@@ -61,79 +35,13 @@ pub async fn download() -> AppResult<String> {
 }
 ```
 
-The command in `src-tauri/src/api/` is `async` and returns `AppResult<T>`. Don't hold `state.db()` across an `.await`; read what you need, fetch, then lock again to write (see `add_paper` in `src-tauri/src/api/papers.rs`).
+## Rules
 
-### React Hooks
+- The command in `src-tauri/src/api/` is `async` and returns `AppResult<T>`.
+- Don't hold `state.db()` across an `.await`: read what you need, fetch, then lock again to write. See `add_paper` in `src-tauri/src/api/papers.rs`.
+- Save fetched data to SQLite, so the app keeps working offline with what it last downloaded.
+- In the UI, a failed lookup is an error with `type === 'Network'`. See [error-handling.md](./error-handling.md).
 
-```typescript
-// src/api/users.ts
-export const userQueryKeys = {
-  all: ['users'] as const,
-  user: (id: number) => [...userQueryKeys.all, id] as const,
-}
+## Background Refresh
 
-export function useUser(userId: number) {
-  return useQuery({
-    queryKey: userQueryKeys.user(userId),
-    queryFn: async () => unwrapResult(await commands.fetchUser(userId)),
-    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-  })
-}
-
-export function useUpdateUser() {
-  const queryClient = useQueryClient()
-
-  return useMutation({
-    mutationFn: async ({
-      userId,
-      data,
-    }: {
-      userId: number
-      data: Partial<User>
-    }) => {
-      return unwrapResult(await commands.updateUser(userId, data))
-    },
-    onSuccess: (_, { userId }) => {
-      queryClient.invalidateQueries({ queryKey: userQueryKeys.user(userId) })
-    },
-  })
-}
-```
-
-## Error Handling
-
-Network failures come back as `AppError::Network { message }`; match on `error.type === 'Network'` in the UI to show an "offline or server error" message. See [error-handling.md](./error-handling.md).
-
-## Offline Handling
-
-Fetched data is saved to SQLite, so the app keeps working offline with what it last downloaded. The general shape:
-
-```rust
-#[tauri::command]
-#[specta::specta]
-pub async fn fetch_with_cache(app: tauri::AppHandle, id: u32) -> AppResult<Data> {
-    // Try network first
-    match fetch_from_api(id).await {
-        Ok(data) => {
-            cache_to_db(&app, &data)?;  // Cache for offline
-            Ok(data)
-        }
-        Err(_) => {
-            // Fallback to cache on network error
-            load_from_cache(&app, id)
-        }
-    }
-}
-```
-
-See [data-persistence.md](./data-persistence.md) for the SQLite setup.
-
-## Quick Reference
-
-| Task            | Pattern                                    |
-| --------------- | ------------------------------------------ |
-| Basic API call  | `net::client()` in a `service/*/fetch.rs`  |
-| Caching         | TanStack Query (frontend) and SQLite       |
-| Type safety     | tauri-specta (same as local commands)      |
-| Error handling  | `AppError::Network` via `net::network`     |
-| Offline support | Save to SQLite, show what was last fetched |
+`src-tauri/src/desktop/refresh.rs` refreshes calendars every hour and feeds every 3 hours on a background thread, then emits `calendars-changed` / `feeds-changed`. Pages refetch with `useInvalidateOn(event, queryKey)` (`src/hooks/useInvalidateOn.ts`).

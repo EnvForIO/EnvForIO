@@ -81,7 +81,7 @@ A reader should be able to open one file, read it from top to bottom once, and u
 
 ## Tests
 
-- Tests live next to the code for Rust (`#[cfg(test)] mod tests` at the bottom of the file) and in `*.test.ts` files beside the source for TypeScript, as the template already does.
+- Tests live next to the code for Rust (`#[cfg(test)] mod tests` at the bottom of the file) and in `*.test.ts` files beside the source for TypeScript.
 - Pure logic in `domain/` always gets tests; they double as worked examples of the rules.
 
 ## When reviewing

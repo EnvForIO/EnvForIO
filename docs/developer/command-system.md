@@ -1,230 +1,51 @@
 # Command System
 
-The command system provides a unified way to register and execute actions throughout the app, enabling consistent behavior across keyboard shortcuts, menus, and the command palette.
+Commands are plain objects registered once and run from the command palette (Ctrl+K). Code is in `src/lib/commands/`.
 
-## Quick Start
+| File                               | Contents                                                    |
+| ---------------------------------- | ----------------------------------------------------------- |
+| `types.ts`                         | `AppCommand`, `CommandContext`                              |
+| `registry.ts`                      | `registerCommands`, `getAllCommands`, `executeCommand`      |
+| `index.ts`                         | `initializeCommandSystem()`, called once from `src/App.tsx` |
+| `navigation-commands.ts`           | Sidebars, preferences                                       |
+| `window-commands.ts`               | Close, minimize, maximize, fullscreen                       |
+| `help-commands.ts`                 | Check for updates, report a problem, open log folder        |
+| `src/hooks/use-command-context.ts` | The `CommandContext` object                                 |
 
-### Defining Commands
+`CommandContext` has two actions: `openPreferences()` and `showToast(message, type?)`. Commands read and change other state with `useUIStore.getState()`.
 
-```typescript
-// src/lib/commands/my-feature-commands.ts
-import { SomeIcon } from 'lucide-react'
-import type { AppCommand } from './types'
-
-export const myFeatureCommands: AppCommand[] = [
-  {
-    id: 'my-action',
-    labelKey: 'commands.myAction.label',
-    descriptionKey: 'commands.myAction.description',
-    icon: SomeIcon,
-    group: 'my-feature',
-    shortcut: '⌘+M',
-    keywords: ['my', 'action', 'feature'],
-
-    execute: context => {
-      context.showToast('Action executed!')
-    },
-
-    isAvailable: () => true,
-  },
-]
-```
-
-### Registering Commands
+## Example
 
 ```typescript
-// src/lib/commands/index.ts
-import { myFeatureCommands } from './my-feature-commands'
-import { registerCommands } from './registry'
-
-export function initializeCommandSystem(): void {
-  registerCommands(myFeatureCommands)
-  // Register other command groups...
-}
-```
-
-## Architecture
-
-### Command Structure
-
-```typescript
-interface AppCommand {
-  id: string
-  labelKey: string // Translation key (e.g., 'commands.myAction.label')
-  descriptionKey?: string // Translation key for description
-  icon?: LucideIcon
-  group?: string // Grouping for command palette
-  keywords?: string[] // Additional search terms
-  shortcut?: string // Display shortcut (e.g., '⌘+1')
-  execute: (context: CommandContext) => void | Promise<void>
-  isAvailable?: (context: CommandContext) => boolean
-}
-```
-
-### Command Context
-
-The context provides actions commands need without tight coupling:
-
-```typescript
-interface CommandContext {
-  openPreferences: () => void
-  showToast: (message: string, type?: 'success' | 'error' | 'info') => void
-}
-```
-
-### Registry Pattern
-
-Commands are stored in a central registry:
-
-```typescript
-// Register commands (called once at app init)
-registerCommands(navigationCommands)
-
-// Get filtered commands (for command palette)
-const commands = getAllCommands(context, searchValue, t)
-
-// Execute by ID (returns success/error result)
-const result = await executeCommand(commandId, context)
-```
-
-**Key Pattern**: Commands use `getState()` in execute functions:
-
-```typescript
-// ✅ Good: Direct store access in execute
-execute: () => {
-  const { leftSidebarVisible, setLeftSidebarVisible } = useUIStore.getState()
-  setLeftSidebarVisible(!leftSidebarVisible)
-}
-
-// ❌ Bad: Hook usage (would cause re-renders)
-const { leftSidebarVisible } = useUIStore()
-execute: () => setLeftSidebarVisible(!leftSidebarVisible)
-```
-
-## Integration Points
-
-### Command Palette
-
-The command palette (`Cmd+K`) displays all available commands with translated labels:
-
-```typescript
-const { t } = useTranslation()
-const commands = getAllCommands(commandContext, search, t)
-
-// Render command with translated text
-<CommandItem onSelect={() => handleCommandSelect(command.id)}>
-  {command.icon && <command.icon />}
-  <span>{t(command.labelKey)}</span>
-</CommandItem>
-```
-
-### Keyboard Shortcuts
-
-Link shortcuts to commands via the command context:
-
-```typescript
-// src/hooks/use-keyboard-shortcuts.ts
-const handleKeyDown = (e: KeyboardEvent) => {
-  if (e.metaKey || e.ctrlKey) {
-    switch (e.key) {
-      case ',': {
-        e.preventDefault()
-        commandContext.openPreferences()
-        break
-      }
-    }
-  }
-}
-```
-
-### Native Menus
-
-Menus are built in JavaScript (`src/lib/menu.ts`), and each item calls its handler directly through the `action` option (e.g. `useUIStore.getState().setPreferencesOpen(true)`). No Tauri event is involved. See [menus.md](./menus.md).
-
-## Adding New Commands
-
-### Step 1: Add Translation Keys
-
-```json
-// locales/en.json
+// src/lib/commands/navigation-commands.ts
 {
-  "commands": {
-    "myAction": {
-      "label": "My Action",
-      "description": "Does something useful"
-    }
-  }
-}
-```
-
-### Step 2: Create Command File
-
-```typescript
-// src/lib/commands/my-feature-commands.ts
-export const myFeatureCommands: AppCommand[] = [
-  {
-    id: 'my-action',
-    labelKey: 'commands.myAction.label',
-    descriptionKey: 'commands.myAction.description',
-    group: 'my-feature',
-
-    execute: context => {
-      // Your logic here
-      context.showToast('Done!')
-    },
+  id: 'show-left-sidebar',
+  labelKey: 'commands.showLeftSidebar.label',
+  descriptionKey: 'commands.showLeftSidebar.description',
+  icon: Sidebar,
+  group: 'navigation',
+  shortcut: '⌘+1',
+  keywords: ['sidebar', 'left', 'panel', 'show'],
+  execute: () => {
+    useUIStore.getState().setLeftSidebarVisible(true)
   },
-]
+  isAvailable: () => !useUIStore.getState().leftSidebarVisible,
+},
 ```
 
-### Step 3: Register in Index
+`shortcut` is display text only. The key itself is handled elsewhere; see [keyboard-shortcuts.md](./keyboard-shortcuts.md).
 
-```typescript
-// src/lib/commands/index.ts
-import { myFeatureCommands } from './my-feature-commands'
+## Adding a Command
 
-export function initializeCommandSystem(): void {
-  registerCommands(navigationCommands)
-  registerCommands(myFeatureCommands) // Add here
-  // ...
-}
-```
+1. Add `commands.<id>.label` and `commands.<id>.description` to `locales/en.json` (keys are flat: `"commands.myAction.label": "My Action"`).
+2. Add the object to the right `*-commands.ts` file, or create a new file and register it in `initializeCommandSystem()`.
+3. Use `getState()` inside `execute` and `isAvailable`, never a store hook.
+4. If commands need a new shared action, add it to `CommandContext` in `types.ts` and to `use-command-context.ts`.
 
-### Step 4: Extend Context (if needed)
+## Groups
 
-```typescript
-// src/hooks/use-command-context.ts
-export function useCommandContext(): CommandContext {
-  return useMemo(
-    () => ({
-      // ... existing actions
-      myNewAction: () => {
-        /* implementation */
-      },
-    }),
-    []
-  )
-}
+`group` sets the palette heading, translated from `commands.group.<name>`. Keys exist for `navigation`, `settings`, `window`, `help` and `other`. The commands in `window-commands.ts` set no group, so they show under `other`.
 
-// Update CommandContext type in types.ts
-```
+## Menus
 
-## Command Groups
-
-Organize commands into logical groups (used in command palette headings):
-
-- **navigation**: Sidebar toggles, view switching
-- **settings**: Preferences, configuration
-- **window**: Label for window management; the commands in `window-commands.ts` set no group yet, so they show under **other**
-- **other**: Fallback for commands without a group
-
-Group labels are translated via `commands.group.{groupName}` keys.
-
-## Best Practices
-
-| Do                                                 | Don't                             |
-| -------------------------------------------------- | --------------------------------- |
-| Use `labelKey` with translation keys               | Hardcode label strings            |
-| Use `getState()` in execute functions              | Use hooks in commands             |
-| Check `isAvailable` for context-dependent commands | Show unavailable commands         |
-| Provide `keywords` for better searchability        | Rely only on label matching       |
-| Use `context.showToast()` for feedback             | Silently execute without feedback |
+The native menu (`src/lib/menu.ts`) does not go through the registry; each item calls its handler directly. See [menus.md](./menus.md).

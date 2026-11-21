@@ -1,13 +1,13 @@
 # Rust Architecture
 
-Module organization and patterns for the Tauri backend.
+Module layout and rules for the Tauri backend in `src-tauri/src/`.
 
-## Module Structure
+## Modules
 
 ```
 src-tauri/src/
-├── main.rs          # Entry point (just calls lib::run())
-├── lib.rs           # App setup, plugins, startup logic
+├── main.rs          # Entry point (calls lib::run())
+├── lib.rs           # Plugins, setup, window close and exit handling
 ├── bindings.rs      # tauri-specta command registration
 ├── config.rs        # AppState: database connection + undo stack
 ├── errors.rs        # AppError / AppResult, the one command error type
@@ -18,152 +18,70 @@ src-tauri/src/
 ├── db/              # Opening SQLite and running migrations
 ├── desktop/         # Tray, Todo Duo windows, monitor thread, background refresh
 ├── providers/       # Swappable data sources (machine monitor)
-├── commands/        # Template commands not yet moved to api/
-│                    # (preferences, quick_pane, recovery, notifications)
+├── commands/        # Older commands: preferences, quick_pane, recovery, notifications
 ├── types.rs         # Preferences types, quick-pane shortcut constant
-└── utils/
-    └── platform.rs  # Platform-specific helpers
+└── utils/platform.rs
 ```
 
 Requests flow `api` → `service` → `entity`/`db`, with `domain` called for rules that need no I/O.
 
-## Adding New Commands
+## Adding a Command
 
-### 1. Put the logic in `service/`
+1. **Logic in `service/<resource>/`.** Take a `&Connection` (or `&mut Connection` for transactions), validate with `service::validate`, return `AppResult<T>`. Real example: `service::ideas::mutation::create`.
+2. **Thin command in `api/<resource>.rs`:**
 
-```rust
-// src-tauri/src/service/widgets/mod.rs
-use rusqlite::Connection;
-use crate::errors::AppResult;
+   ```rust
+   #[tauri::command]
+   #[specta::specta]
+   pub fn create_idea(state: State<'_, AppState>, title: String) -> AppResult<Idea> {
+       mutation::create(&mut state.db(), &title)
+   }
+   ```
 
-pub fn rename(conn: &Connection, id: i64, name: &str) -> AppResult<Widget> {
-    let name = crate::service::validate::clean_name(name)?;
-    // SQL with bound parameters, errors convert into AppError via `?`
-    ...
-}
-```
+   A new file needs `pub mod <name>;` in `api/mod.rs`.
 
-### 2. Add a thin command in `api/`
+3. **Register it** in `collect_commands![...]` in `bindings.rs`.
+4. **Regenerate bindings:** `npm run rust:bindings`.
 
-```rust
-// src-tauri/src/api/widgets.rs
-use tauri::State;
-use crate::config::AppState;
-use crate::errors::AppResult;
+See [tauri-commands.md](./tauri-commands.md) for the TypeScript side.
 
-#[tauri::command]
-#[specta::specta]
-pub fn rename_widget(state: State<'_, AppState>, id: i64, name: String) -> AppResult<Widget> {
-    crate::service::widgets::rename(&state.db(), id, &name)
-}
-```
+## Types
 
-Declare the module in `api/mod.rs` (`pub mod widgets;`).
+- Row types live in `entity/<table>.rs`. Request and filter types live next to the service that uses them (e.g. `service::ideas::query::IdeaFilter`, `service::ideas::mutation::IdeaUpdate`).
+- Anything crossing to TypeScript needs `#[derive(Type)]` (specta) plus `Serialize`/`Deserialize`. Most use `#[serde(rename_all = "camelCase")]`.
 
-### 3. Register in bindings.rs
+## Errors
 
-```rust
-use crate::api::{widgets, /* ... */};
+Commands in `api/` return `AppResult<T>` (`Result<T, AppError>`, `errors.rs`). `AppError` is tagged with `type`:
 
-Builder::<tauri::Wry>::new().commands(collect_commands![
-    widgets::rename_widget,
-    // ... other commands
-])
-```
+| Variant                 | Use                                    |
+| ----------------------- | -------------------------------------- |
+| `NotFound { what, id }` | `AppError::not_found("idea", id)`      |
+| `Invalid { message }`   | `AppError::invalid(..)`, bad input     |
+| `Network { message }`   | `AppError::network(..)`, failed lookup |
+| `Database { message }`  | From `rusqlite::Error` via `?`         |
 
-### 4. Regenerate TypeScript bindings
+Shared input checks are in `service/validate.rs` (`clean_name`, `check_date`, `estimate_minutes`). The older commands in `commands/` still return `Result<T, String>`. See [error-handling.md](./error-handling.md).
 
-```bash
-npm run rust:bindings
-```
+## Platform Code
 
-## Type Patterns
+Use `#[cfg(desktop)]`, `#[cfg(target_os = "windows")]` etc. The `desktop` module is compiled only with `#[cfg(desktop)]`. macOS branches (`tauri-nspanel`, dock reopen) exist in `lib.rs` and `commands/quick_pane.rs` but are not built or tested. See [cross-platform.md](./cross-platform.md).
 
-### Row and Request Types
+## Plugins
 
-Row types live in `entity/<table>.rs`; request/filter types live next to the service that uses them (e.g. `service::ideas::query::IdeaFilter`):
-
-```rust
-use serde::{Deserialize, Serialize};
-use specta::Type;
-
-#[derive(Debug, Clone, Serialize, Deserialize, Type)]
-pub struct MyData {
-    pub field: String,
-}
-```
-
-**Note:** `#[derive(Type)]` from specta is required for TypeScript generation.
-
-### Error Types
-
-Commands in `api/` return `AppResult<T>` (`Result<T, AppError>`, from `errors.rs`). `AppError` has four variants: `NotFound { what, id }`, `Invalid { message }`, `Network { message }`, `Database { message }`. `rusqlite::Error` converts into `Database` with `?`. Use the constructors `AppError::invalid(..)`, `AppError::not_found(..)`, `AppError::network(..)`.
-
-The `#[serde(tag = "type")]` makes errors easy to match in TypeScript:
-
-```typescript
-if (error.type === 'Invalid') {
-  console.log(error.message)
-}
-```
-
-The template commands in `commands/` still return `Result<T, String>`.
-
-### Validation Functions
-
-Shared input checks live in `service/validate.rs` (`clean_name`, `check_date`, `estimate_minutes`) and return `AppError::Invalid`.
-
-## Platform-Specific Code
-
-Use conditional compilation for platform-specific behavior:
-
-```rust
-#[cfg(target_os = "macos")]
-fn macos_specific() { /* ... */ }
-
-#[cfg(desktop)]
-fn desktop_only() { /* ... */ }
-
-#[cfg(not(target_os = "linux"))]
-fn non_linux() { /* ... */ }
-```
-
-Platform utilities live in `utils/platform.rs`.
-
-## Plugin Registration (lib.rs)
-
-Plugins are registered in `lib.rs` during app setup:
-
-```rust
-// Desktop-only plugins
-#[cfg(desktop)]
-{
-    app_builder = app_builder.plugin(tauri_plugin_window_state::Builder::new().build());
-}
-
-// All platforms
-app_builder = app_builder
-    .plugin(tauri_plugin_fs::init())
-    .plugin(tauri_plugin_dialog::init())
-```
-
-**Order matters:** Single-instance plugin must be registered first.
+Registered in `lib.rs`. The single-instance plugin must be registered first. See [tauri-plugins.md](./tauri-plugins.md).
 
 ## Conventions
 
-| Pattern           | Example                                                  |
-| ----------------- | -------------------------------------------------------- |
-| Command naming    | `snake_case` (`load_preferences`, not `loadPreferences`) |
-| Error returns     | `AppResult<T>` (`errors.rs`) for every new command       |
-| Logging           | Use `log::info!`, `log::debug!`, etc.                    |
-| String formatting | `format!("{variable}")` not `format!("{}", variable)`    |
-| App handle        | Pass `AppHandle` not `Window` when possible              |
+| Pattern           | Rule                                                             |
+| ----------------- | ---------------------------------------------------------------- |
+| Command naming    | `snake_case` (`load_preferences`)                                |
+| Error returns     | `AppResult<T>` for every new command                             |
+| SQL               | Bound parameters (`params![..]`), never `format!`                |
+| Logging           | `log::info!`, `log::warn!`, ... (see [logging.md](./logging.md)) |
+| String formatting | `format!("{variable}")`, not `format!("{}", variable)`           |
 
-## Expanding This Architecture
+## New Resource or Table
 
-When adding new features:
-
-1. **New resource?** Add `api/<name>.rs` and a `service/<name>/` folder
-2. **New table?** Add a numbered migration in `src-tauri/migrations/`, list it in `db/mod.rs`, and add `entity/<name>.rs`
-3. **Platform-specific utils?** Add to `utils/platform.rs`
-4. **New plugin?** Register in `lib.rs` setup
+- **New resource:** add `api/<name>.rs` and `service/<name>/`.
+- **New table:** add a numbered migration in `src-tauri/migrations/`, list it in `db/mod.rs`, and add `entity/<name>.rs`. See [data-persistence.md](./data-persistence.md).
