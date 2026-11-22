@@ -34,7 +34,7 @@ pub struct UndoStack(Vec<Change>);
 
 fn rows(conn: &Connection, sql: &str, id: i64) -> AppResult<Rows> {
     let mut stmt = conn.prepare(sql)?;
-    let columns: Vec<String> = stmt.column_names().iter().map(|c| c.to_string()).collect();
+    let columns: Vec<String> = stmt.column_names().map(|c| c.to_string()).collect();
     let n = columns.len();
     let values = stmt
         .query_map(params![id], |r| {
