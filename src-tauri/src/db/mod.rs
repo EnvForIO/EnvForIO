@@ -60,9 +60,11 @@ fn configure(conn: &Connection) -> AppResult<()> {
 }
 
 fn migrate(conn: &mut Connection) -> AppResult<()> {
-    let current: usize = conn.pragma_query_value(None, "user_version", |row| row.get(0))?;
-    for (index, sql) in MIGRATIONS.iter().enumerate().skip(current) {
-        let version = index + 1;
+    // SQLite integers are i64; rusqlite no longer converts them to usize.
+    let current: i64 = conn.pragma_query_value(None, "user_version", |row| row.get(0))?;
+    let done = usize::try_from(current).unwrap_or(0);
+    for (index, sql) in MIGRATIONS.iter().enumerate().skip(done) {
+        let version = i64::try_from(index + 1).expect("migration count fits in i64");
         log::info!("running database migration {version}");
         // One transaction per migration: a failed migration leaves the previous version intact.
         let tx = conn.transaction()?;
@@ -80,10 +82,10 @@ mod tests {
     #[test]
     fn migrations_run_once_and_set_the_version() {
         let mut conn = open_in_memory();
-        let version: usize = conn
+        let version: i64 = conn
             .pragma_query_value(None, "user_version", |row| row.get(0))
             .unwrap();
-        assert_eq!(version, MIGRATIONS.len());
+        assert_eq!(usize::try_from(version).unwrap(), MIGRATIONS.len());
         // Running again is a no-op rather than a "table already exists" error.
         migrate(&mut conn).unwrap();
     }
