@@ -13,10 +13,12 @@ Run `npm run check:all` locally before pushing; it is the same gate.
 
 ## Dependency updates
 
-`.github/dependabot.yml` asks Dependabot once a month for one pull request per ecosystem (npm, Cargo, GitHub Actions) with the minor and patch updates, and one with the major updates. Security updates come separately, as soon as an advisory is published. Two kinds of update are left out and done by hand:
+`.github/dependabot.yml` asks Dependabot every Monday at 09:00 Singapore time for one pull request per ecosystem (npm, Cargo, GitHub Actions) with the minor and patch updates. Merge them once CI passes. Security updates come separately, as soon as an advisory is published, major versions included. These are left out and upgraded by hand, one at a time:
 
-- **Tauri minor and major versions** (`tauri*` crates, `@tauri-apps/*` packages): the crates and the npm packages must move together, and Dependabot would split them into a Cargo and an npm pull request. Patch updates still come.
+- **Major versions**: they can change APIs (rusqlite 0.43 needed code changes, ESLint 10 could not even install with `eslint-plugin-react`), so each gets its own pull request and testing.
+- **Tauri minor versions** (`tauri*` crates, `@tauri-apps/*` packages): the crates and the npm packages must move together, and Dependabot would split them into a Cargo and an npm pull request. Patch updates still come.
 - **specta, tauri-specta, specta-typescript**: release candidates pinned exactly in `src-tauri/Cargo.toml`.
+- **tauri-nspanel**: macOS-only; Windows releases never build it.
 
 ## Building a release
 

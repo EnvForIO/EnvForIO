@@ -1,12 +1,14 @@
-# Dependabot version updates: once a month, one pull request per ecosystem
-# for minor and patch updates, and one for major updates.
+# Dependabot version updates: every Monday morning (Singapore time), one
+# pull request per ecosystem with the minor and patch updates.
 # Security updates are separate: they arrive whenever an advisory is published
-# (repository settings → Advanced Security).
+# (repository settings → Advanced Security), major versions included.
 #
-# Not updated here, upgrade them by hand:
-# - Tauri itself (tauri*, @tauri-apps/*), minor and major: the Rust crates and
-#   their npm packages must move together, and Dependabot opens separate pull
-#   requests for Cargo and npm. Patch updates are fine on their own.
+# Not updated here, upgrade them by hand, one at a time:
+# - Major versions of everything: they can change APIs, so each one gets its
+#   own change and its own testing.
+# - Tauri itself (tauri*, @tauri-apps/*), minor versions too: the Rust crates
+#   and their npm packages must move together, and Dependabot opens separate
+#   pull requests for Cargo and npm. Patch updates are fine on their own.
 # - specta, tauri-specta, specta-typescript: release candidates pinned exactly
 #   (=x.y.z) in src-tauri/Cargo.toml.
 # Not updated at all: tauri-nspanel, a macOS-only git dependency.
@@ -16,37 +18,41 @@ updates:
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
-      interval: 'monthly'
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Asia/Singapore'
     open-pull-requests-limit: 5
     commit-message:
       prefix: 'chore(deps)'
     ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
       - dependency-name: '@tauri-apps/*'
-        update-types:
-          ['version-update:semver-minor', 'version-update:semver-major']
+        update-types: ['version-update:semver-minor']
     groups:
       npm-minor:
         update-types: ['minor', 'patch']
-      npm-major:
-        update-types: ['major']
 
   - package-ecosystem: 'cargo'
     directory: '/src-tauri'
     schedule:
-      interval: 'monthly'
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Asia/Singapore'
     open-pull-requests-limit: 5
     commit-message:
       prefix: 'chore(deps)'
     ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
       - dependency-name: 'tauri'
-        update-types:
-          ['version-update:semver-minor', 'version-update:semver-major']
+        update-types: ['version-update:semver-minor']
       - dependency-name: 'tauri-build'
-        update-types:
-          ['version-update:semver-minor', 'version-update:semver-major']
+        update-types: ['version-update:semver-minor']
       - dependency-name: 'tauri-plugin-*'
-        update-types:
-          ['version-update:semver-minor', 'version-update:semver-major']
+        update-types: ['version-update:semver-minor']
       - dependency-name: 'specta'
       - dependency-name: 'tauri-specta'
       - dependency-name: 'specta-typescript'
@@ -55,13 +61,14 @@ updates:
     groups:
       cargo-minor:
         update-types: ['minor', 'patch']
-      cargo-major:
-        update-types: ['major']
 
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
-      interval: 'monthly'
+      interval: 'weekly'
+      day: 'monday'
+      time: '09:00'
+      timezone: 'Asia/Singapore'
     commit-message:
       prefix: 'chore(deps)'
     groups:
