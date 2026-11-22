@@ -6,7 +6,7 @@ EnvForIO is a desktop app for researchers. It covers tasks, planning back from d
 
 The left sidebar has the task lists (My Day, Important, Tasks) and Calendar; Research (with its Overview, Ideas and Library tabs); then Reader, Monitor and Stats. Your projects are listed below them.
 
-Clicking a task opens its details on the right. Closing the window hides EnvForIO to the tray; to quit, use the tray menu's **Quit EnvForIO**. Preferences → General → **Launch at login** starts EnvForIO hidden in the tray when you sign in.
+Clicking a task opens its details on the right. Closing the window hides EnvForIO to the tray; to quit, use the tray menu's **Quit EnvForIO**. Right-click the tray icon for the tray menu: the running timer with a stop button, **My Day** with its open tasks, **Quick add task**, **Show EnvForIO**, **Mini mode** and **Quit EnvForIO**. Preferences → General → **Launch at login** starts EnvForIO hidden in the tray when you sign in.
 
 | Shortcut     | Action                                                                        |
 | ------------ | ----------------------------------------------------------------------------- |

@@ -31,6 +31,11 @@ async function mount(): Promise<void> {
     renderQuickPane(root)
     return
   }
+  if (windowName === 'tray-menu') {
+    const { renderTrayMenu } = await import('./windows/tray-menu')
+    renderTrayMenu(root)
+    return
+  }
   const { renderMain } = await import('./windows/main')
   renderMain(root)
 }

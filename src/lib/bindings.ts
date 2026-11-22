@@ -1235,6 +1235,25 @@ async openCalendarDay(date: string) : Promise<void> {
     await TAURI_INVOKE("open_calendar_day", { date });
 },
 /**
+ * Bring the main window back on My Day (the tray menu's today row).
+ */
+async openMyDay() : Promise<void> {
+    await TAURI_INVOKE("open_my_day");
+},
+/**
+ * The tray menu page's height in logical px; the window fits it and stays
+ * anchored at the cursor. Does nothing on Linux, which keeps a native menu.
+ */
+async fitTrayMenu(height: number) : Promise<void> {
+    await TAURI_INVOKE("fit_tray_menu", { height });
+},
+/**
+ * Quit EnvForIO (the tray menu's last row); closing the window only hides it.
+ */
+async quitApp() : Promise<void> {
+    await TAURI_INVOKE("quit_app");
+},
+/**
  * Each day's marks for the Todo Duo card's Month tab, `from` to `to` inclusive.
  */
 async monthMarks(from: string, to: string) : Promise<Result<DayMarks[], AppError>> {

@@ -1,0 +1,21 @@
+/* The tray menu: the page is transparent so only the rounded panel shows. */
+@import 'tailwindcss';
+@import '../../theme-variables.css';
+
+@custom-variant dark (&:is(.dark *));
+
+html,
+body,
+#root {
+  background: transparent !important;
+  margin: 0;
+  overflow: hidden;
+  user-select: none;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--foreground);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}

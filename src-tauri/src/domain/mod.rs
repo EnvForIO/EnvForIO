@@ -15,6 +15,7 @@ pub mod feed;
 pub mod feedback;
 pub mod ics;
 pub mod linux_monitor;
+pub mod menu_position;
 pub mod monitor;
 pub mod paper_ref;
 pub mod safety_line;

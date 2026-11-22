@@ -28,7 +28,7 @@ Plugins used only from Rust have no frontend package and no permission in the ca
 
 ## Built In, No Plugin
 
-- **Tray:** `src-tauri/src/desktop/tray.rs` (the `tray-icon` feature). Show EnvForIO, Mini mode (Todo Duo), Quit. Labels are English constants because the tray is built before translations load.
+- **Tray:** `src-tauri/src/desktop/tray.rs` (the `tray-icon` feature). Left click shows the window; right click opens the `tray-menu` window (`desktop/tray_menu.rs`), see [menus.md](./menus.md). Linux keeps a native menu with English labels, as its tray sends no click events.
 - **App menu:** `src/lib/menu.ts`, see [menus.md](./menus.md).
 - **Context menus** are drawn by the app (`src/components/ui/context-menu.tsx`, Radix), not native. Give each item an icon, mark delete `variant="destructive"`, and use `<ContextMenu modal={false}>` when an item opens a dialog or input. The WebView's own browser menu is off outside text fields (`src/lib/browser-menu.ts`).
 

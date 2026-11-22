@@ -56,8 +56,9 @@ Every window loads `index.html?window=<name>`; `src/main.tsx` reads the paramete
 | `main`                    | `tauri.conf.json`                      | `src/windows/main`       |
 | `quick-pane`              | `src-tauri/src/commands/quick_pane.rs` | `src/windows/quick-pane` |
 | `duo-capsule`, `duo-card` | `src-tauri/src/desktop/duo.rs`         | `src/windows/duo`        |
+| `tray-menu`               | `src-tauri/src/desktop/tray_menu.rs`   | `src/windows/tray-menu`  |
 
-The tray icon (`src-tauri/src/desktop/tray.rs`) keeps the app running when the main window is closed: closing `main` hides it, and Quit is in the tray menu.
+The tray icon (`src-tauri/src/desktop/tray.rs`) keeps the app running when the main window is closed: closing `main` hides it, and Quit is in the tray menu. The menu is the `tray-menu` window (`tray_menu.rs`), drawn in the app's own style rather than as a native Win32 menu; Linux keeps a native menu because its tray sends no click events.
 
 Windows talk through Tauri events:
 
@@ -70,7 +71,7 @@ Windows talk through Tauri events:
 
 ## Security
 
-- **Capabilities** are per window in `src-tauri/capabilities/`: `default.json` (main), `desktop.json` (main: window-state, autostart), `quick-pane.json`, `duo.json`. Give a window only the permissions it uses; never `["*"]`.
+- **Capabilities** are per window in `src-tauri/capabilities/`: `default.json` (main), `desktop.json` (main: window-state, autostart), `quick-pane.json`, `duo.json`, `tray-menu.json`. Give a window only the permissions it uses; never `["*"]`.
 - **CSP** is in `src-tauri/tauri.conf.json`. All scripts are bundled; nothing loads from a CDN.
 - **Input validation** happens in the Rust service layer, which returns `AppError::Invalid`. Shared checks are in `src-tauri/src/service/validate.rs`. User values go into SQL as bound parameters (`?1`), never through `format!`.
 - **Atomic writes**: `preferences.json` and recovery files are written to a temp file and renamed (`src-tauri/src/commands/preferences.rs`, `recovery.rs`).
