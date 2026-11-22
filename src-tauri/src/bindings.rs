@@ -148,6 +148,9 @@ pub fn generate_bindings() -> Builder<tauri::Wry> {
         feedback::open_log_folder,
         feedback::check_for_updates,
         windows::open_calendar_day,
+        windows::open_my_day,
+        windows::fit_tray_menu,
+        windows::quit_app,
         calendar::month_marks,
     ])
 }

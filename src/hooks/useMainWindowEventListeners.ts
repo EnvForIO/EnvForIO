@@ -10,6 +10,7 @@ import { useUIStore } from '@/store/ui-store'
  * This hook composes specialized hooks for different event types:
  * - useKeyboardShortcuts: Global keyboard shortcuts (Cmd+, Cmd+1, Cmd+2)
  * - open-calendar-day: the Todo Duo month asks for the calendar at a day
+ * - open-my-day: the tray menu's My Day row
  *
  * The quick pane needs no listener here: it creates the task itself and
  * emits TASKS_CHANGED, which `useTaskSync` (App.tsx) turns into a refetch.
@@ -24,8 +25,13 @@ export function useMainWindowEventListeners() {
     const stop = listen<string>('open-calendar-day', event => {
       useUIStore.getState().openCalendarAt(event.payload)
     })
+    // The tray menu's My Day row.
+    const stopMyDay = listen('open-my-day', () => {
+      useUIStore.getState().selectView('MyDay')
+    })
     return () => {
       void stop.then(unlisten => unlisten())
+      void stopMyDay.then(unlisten => unlisten())
     }
   }, [])
 }

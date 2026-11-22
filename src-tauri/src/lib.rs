@@ -68,7 +68,7 @@ pub fn run() {
                     tauri_plugin_window_state::StateFlags::all()
                         - tauri_plugin_window_state::StateFlags::VISIBLE,
                 )
-                .with_denylist(&["quick-pane", "duo-capsule", "duo-card"])
+                .with_denylist(&["quick-pane", "duo-capsule", "duo-card", "tray-menu"])
                 .build(),
         );
     }

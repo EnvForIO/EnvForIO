@@ -15,7 +15,7 @@ View
 └── Toggle Right Sidebar     (CmdOrCtrl+2)
 ```
 
-The tray icon has its own menu, built in Rust (`src-tauri/src/desktop/tray.rs`).
+The tray icon has its own menu: a small `tray-menu` window (`src-tauri/src/desktop/tray_menu.rs`, page `src/components/tray-menu/TrayMenu.tsx`) opened at the cursor on a right click, with the running timer, My Day, quick add, Show, Mini mode and Quit. It uses the same surface as the app's right-click menus (`components/ui/menu-styles.ts`). On Linux the tray keeps a native menu (`tray.rs`).
 
 ## Adding an Item
 
