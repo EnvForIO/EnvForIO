@@ -1,7 +1,8 @@
 /**
  * Statistics: pick week / month / year and step back through earlier ones.
  * Numbers on top, then trend, time by project, weekly rhythm, the
- * completion heatmap (last 53 weeks) and project progress.
+ * completion heatmap (last 53 weeks) and project progress, in one column
+ * capped at a reading width so wide windows do not stretch the charts.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +13,6 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { formatMinutes } from '@/lib/duration'
 import type { Period } from '@/lib/tauri-bindings'
-import { Heatmap } from '@/pages/duo/Heatmap'
 import { dateLabel } from '@/pages/tasks/dates'
 import { YearReview } from '@/pages/review/YearReview'
 import { Section, Summary } from '@/components/ui/ledger'
@@ -23,6 +23,7 @@ import {
   WeeklyRhythm,
   WhereTimeWent,
 } from './StatsSections'
+import { YearHeatmap } from './YearHeatmap'
 
 const PERIODS: Period[] = ['Week', 'Month', 'Year']
 
@@ -40,8 +41,8 @@ export function StatsPage() {
       : null
 
   return (
-    <div className="flex h-full flex-col gap-3 px-8 pt-6">
-      <header className="flex items-center gap-2">
+    <div className="flex h-full flex-col gap-4 pt-6">
+      <header className="mx-auto flex w-full max-w-5xl items-center gap-2 px-8">
         <h1 className="flex-1 text-[22px] font-semibold tracking-tight">
           {t('stats.title')}
         </h1>
@@ -60,7 +61,7 @@ export function StatsPage() {
           label={t('stats.periodLabel')}
         />
       </header>
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <div className="mx-auto -mt-1 flex w-full max-w-5xl items-center gap-1 px-8 text-sm">
         <Button
           variant="ghost"
           size="icon"
@@ -69,7 +70,7 @@ export function StatsPage() {
         >
           <ChevronLeftIcon className="size-4" />
         </Button>
-        <span className="min-w-48 text-center">
+        <span className="min-w-44 text-center font-medium tabular-nums">
           {stats ? `${dateLabel(stats.from)} – ${dateLabel(stats.to)}` : ''}
         </span>
         <Button
@@ -85,13 +86,17 @@ export function StatsPage() {
 
       <ScrollArea className="min-h-0 flex-1">
         {isLoading && (
-          <p className="text-sm text-muted-foreground">{t('stats.loading')}</p>
+          <p className="mx-auto max-w-5xl px-8 text-sm text-muted-foreground">
+            {t('stats.loading')}
+          </p>
         )}
         {error && (
-          <p className="text-sm text-destructive">{t('stats.loadFailed')}</p>
+          <p className="mx-auto max-w-5xl px-8 text-sm text-destructive">
+            {t('stats.loadFailed')}
+          </p>
         )}
         {stats && (
-          <div className="flex flex-col gap-10 pe-3 pb-6">
+          <div className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-8 pt-2 pb-10">
             <Summary
               items={[
                 {
@@ -111,19 +116,14 @@ export function StatsPage() {
                 },
               ]}
             />
-            <Trend stats={stats} />
-            <div className="grid gap-x-10 gap-y-8 md:grid-cols-2">
+            <Trend stats={stats} today={today} />
+            <div className="grid gap-x-12 gap-y-12 md:grid-cols-2">
               <WhereTimeWent stats={stats} />
               <WeeklyRhythm stats={stats} />
             </div>
             {today && (
               <Section title={t('stats.heatmap')}>
-                <Heatmap
-                  range="year"
-                  today={today}
-                  selected={undefined}
-                  onSelect={() => undefined}
-                />
+                <YearHeatmap today={today} />
               </Section>
             )}
             <ProjectProgress />
