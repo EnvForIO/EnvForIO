@@ -85,7 +85,7 @@
     "cmdk": "^1.1.1",
     "html-to-image": "^1.11.13",
     "i18next": "^25.7.3",
-    "katex": "^0.16.47",
+    "katex": "^0.18.2",
     "lucide-react": "^1.61.0",
     "react": "^19.3.1",
     "react-day-picker": "^9.12.0",
