@@ -16,7 +16,8 @@
   "overrides": {
     "typescript-eslint": {
       "typescript": "$typescript"
-    }
+    },
+    "katex": "$katex"
   },
   "engines": {
     "node": ">=20.0.0"

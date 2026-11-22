@@ -9,6 +9,7 @@
 #   requests for Cargo and npm. Patch updates are fine on their own.
 # - specta, tauri-specta, specta-typescript: release candidates pinned exactly
 #   (=x.y.z) in src-tauri/Cargo.toml.
+# Not updated at all: tauri-nspanel, a macOS-only git dependency.
 
 version: 2
 updates:
@@ -49,6 +50,8 @@ updates:
       - dependency-name: 'specta'
       - dependency-name: 'tauri-specta'
       - dependency-name: 'specta-typescript'
+      # macOS-only (the quick pane); Windows releases never build it.
+      - dependency-name: 'tauri-nspanel'
     groups:
       cargo-minor:
         update-types: ['minor', 'patch']
