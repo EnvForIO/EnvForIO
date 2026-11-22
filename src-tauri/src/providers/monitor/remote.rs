@@ -20,6 +20,13 @@ use crate::entity::monitor::{GpuInfo, MachineInfo, Sample};
 const SCRIPT: &str = include_str!("remote.sh");
 const RETRY: Duration = Duration::from_secs(10);
 
+/// `text` with Unix line endings. A Windows checkout can give the embedded
+/// remote.sh CRLF endings, and the remote `sh` then reads "then" plus a
+/// carriage return as an unknown word ("Syntax error: end of file unexpected").
+fn unix_lines(text: &str) -> String {
+    text.replace("\r\n", "\n")
+}
+
 /// What one session has read so far. A new session gets a new one, so a
 /// dying session's threads cannot write into the next.
 #[derive(Default)]
@@ -93,7 +100,7 @@ impl RemoteSource {
         };
         if let Some(mut stdin) = child.stdin.take() {
             // The script is read whole, then the loop runs; closing stdin is fine.
-            let _ = stdin.write_all(SCRIPT.as_bytes());
+            let _ = stdin.write_all(unix_lines(SCRIPT).as_bytes());
         }
         let last_error = Arc::new(Mutex::new(String::new()));
         if let Some(stderr) = child.stderr.take() {
@@ -230,6 +237,13 @@ impl MonitorSource for RemoteSource {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_script_is_sent_with_unix_line_endings() {
+        let crlf = "if true\r\nthen\r\n  :\r\nfi\r\n";
+        assert_eq!(unix_lines(crlf), "if true\nthen\n  :\nfi\n");
+        assert!(!unix_lines(SCRIPT).contains('\r'));
+    }
 
     /// Runs remote.sh through a local `sh -s` (the same path as ssh and
     /// wsl.exe) and reads two rounds. Ignored: needs a Linux machine.
