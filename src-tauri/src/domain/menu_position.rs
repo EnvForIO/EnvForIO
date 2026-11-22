@@ -1,8 +1,9 @@
 //! Where a popup menu opened at the cursor goes (the tray menu window).
 //!
-//! Up and to the left of the cursor, as Windows opens tray menus; flipped
-//! down or right when that would leave the monitor's work area (a taskbar at
-//! the top or left), then kept inside it. All values are physical pixels.
+//! Up and to the right of the cursor, as Windows 11 opens tray menus;
+//! flipped left near the screen's right edge and down from a taskbar at the
+//! top, then kept inside the monitor's work area. All values are physical
+//! pixels.
 
 /// A rectangle in physical pixels: the monitor's work area, or a menu.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -21,7 +22,7 @@ pub fn menu_origin(at: (i32, i32), width: i32, height: i32, area: Rect) -> (i32,
     let right = area.x + area.width;
     let bottom = area.y + area.height;
 
-    let x = if cx - width >= area.x { cx - width } else { cx };
+    let x = if cx + width <= right { cx } else { cx - width };
     let y = if cy - height >= area.y {
         cy - height
     } else {
@@ -66,18 +67,26 @@ mod tests {
     }
 
     #[test]
-    fn opens_up_and_left_above_a_bottom_taskbar() {
-        // The icon is in the taskbar, below the work area: the menu ends at
+    fn opens_up_and_right_above_a_bottom_taskbar() {
+        // The icon is in the taskbar, below the work area: the menu starts at
         // the cursor's x and sits on the taskbar's top edge.
         assert_eq!(
-            menu_origin((1700, 1060), W, H, screen("bottom")),
-            (1420, 792)
+            menu_origin((1500, 1060), W, H, screen("bottom")),
+            (1500, 792)
+        );
+    }
+
+    #[test]
+    fn flips_left_near_the_right_edge() {
+        assert_eq!(
+            menu_origin((1800, 1060), W, H, screen("bottom")),
+            (1520, 792)
         );
     }
 
     #[test]
     fn opens_down_from_a_top_taskbar() {
-        assert_eq!(menu_origin((1700, 20), W, H, screen("top")), (1420, 48));
+        assert_eq!(menu_origin((1500, 20), W, H, screen("top")), (1500, 48));
     }
 
     #[test]
@@ -104,6 +113,6 @@ mod tests {
             width: 1920,
             height: 200,
         };
-        assert_eq!(menu_origin((1700, 1060), W, H, short), (1420, 0));
+        assert_eq!(menu_origin((1500, 1060), W, H, short), (1500, 0));
     }
 }

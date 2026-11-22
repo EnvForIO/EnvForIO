@@ -3,10 +3,11 @@
 //! plain Win32 popup. The page is `src/windows/tray-menu`.
 //!
 //! The window is made hidden at startup. A right click on the tray icon
-//! remembers where the cursor was and shows the menu with its bottom-right
+//! remembers where the cursor was and shows the menu with its bottom-left
 //! corner there, kept inside the monitor's work area (the rule and its
-//! tests are in `domain/menu_position.rs`). The page reports its height through `fit`, which resizes the window and
-//! places it again; losing focus hides it, like a native menu.
+//! tests are in `domain/menu_position.rs`). The page reports its height
+//! through `fit`, which resizes the window and places it again; losing
+//! focus hides it, like a native menu.
 //!
 //! NOTE: Linux keeps the native menu (see tray.rs): its tray sends no click
 //! events, so this window could never open there.
