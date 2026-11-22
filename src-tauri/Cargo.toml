@@ -42,12 +42,12 @@ reqwest = { version = "0.13", default-features = false, features = ["native-tls"
 specta = { version = "=2.0.0-rc.22", features = ["derive", "serde_json"] }
 tauri-specta = { version = "=2.0.0-rc.21", features = ["typescript"] }
 specta-typescript = "=0.0.9"
-rusqlite = { version = "0.37", features = ["bundled"] }
+rusqlite = { version = "0.43", features = ["bundled"] }
 serde_yaml_ng = "0.10"
 rrule = "0.14"
 chrono-tz = "0.10"
 feed-rs = "3"
-html-escape = "0.2"
+html-escape = "0.3"
 url = "2"
 chrono = { version = "0.4.45", default-features = false, features = ["clock", "std", "serde"] }
 sysinfo = "0.40"

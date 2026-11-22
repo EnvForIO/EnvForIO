@@ -73,14 +73,15 @@ fn range(scope: &ExportScope) -> AppResult<Option<(NaiveDate, NaiveDate)>> {
 
 // An exported row has one date: the planned day, or the due day when the
 // task is not planned. (Unlike the day views, a task is listed once.)
-const COLUMNS: &str = "t.id, coalesce(t.scheduled_date, t.due_date), t.start_time,
+const COLUMNS: &str = "t.id, coalesce(t.scheduled_date, t.due_date) AS day, t.start_time,
      t.end_time, t.title, p.name, m.name, t.estimate_minutes, t.actual_minutes, t.due_date,
      t.done_at IS NOT NULL, t.note";
 
 pub fn export(conn: &Connection, scope: &ExportScope) -> AppResult<Export> {
     let from = "FROM tasks t LEFT JOIN projects p ON p.id = t.project_id
                 LEFT JOIN modules m ON m.id = t.module_id";
-    let order = "ORDER BY 2 IS NULL, 2, t.start_time IS NULL, t.start_time, t.sort_order, t.id";
+    // Undated tasks last. (`ORDER BY 2 IS NULL` would test the constant 2, not column 2.)
+    let order = "ORDER BY day IS NULL, day, t.start_time IS NULL, t.start_time, t.sort_order, t.id";
     let (title, sql, args): (String, String, Vec<String>) = match (scope, range(scope)?) {
         (ExportScope::Project { id }, _) => {
             let name: String = conn
@@ -176,5 +177,23 @@ mod tests {
         .unwrap();
         assert_eq!(month.rows.len(), 2);
         assert!(export(&conn, &ExportScope::Project { id: 9 }).is_err());
+    }
+
+    #[test]
+    fn a_project_export_lists_undated_tasks_last() {
+        let conn = open_in_memory();
+        conn.execute(
+            "INSERT INTO projects (id, name, created_at, updated_at) VALUES (1, 'thesis', '', '')",
+            [],
+        )
+        .unwrap();
+        create(&conn, "undated", TaskView::Tasks, "2026-11-18").unwrap();
+        create_due(&conn, "submit", "2026-11-30").unwrap();
+        create(&conn, "seminar", TaskView::MyDay, "2026-11-18").unwrap();
+        conn.execute("UPDATE tasks SET project_id = 1", []).unwrap();
+
+        let project = export(&conn, &ExportScope::Project { id: 1 }).unwrap();
+        let titles: Vec<&str> = project.rows.iter().map(|r| r.title.as_str()).collect();
+        assert_eq!(titles, ["seminar", "submit", "undated"]);
     }
 }

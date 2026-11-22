@@ -11,6 +11,15 @@ How EnvForIO is checked on every change and how a release is built.
 
 Run `npm run check:all` locally before pushing; it is the same gate.
 
+## Dependency updates
+
+`.github/dependabot.yml` asks Dependabot every Monday at 09:00 Singapore time for one pull request per ecosystem (npm, Cargo, GitHub Actions) with the minor and patch updates. Merge them once CI passes. Security updates come separately, as soon as an advisory is published, major versions included. These are left out and upgraded by hand, one at a time:
+
+- **Major versions**: they can change APIs (rusqlite 0.43 needed code changes, ESLint 10 could not even install with `eslint-plugin-react`), so each gets its own pull request and testing.
+- **Tauri minor versions** (`tauri*` crates, `@tauri-apps/*` packages): the crates and the npm packages must move together, and Dependabot would split them into a Cargo and an npm pull request. Patch updates still come.
+- **specta, tauri-specta, specta-typescript**: release candidates pinned exactly in `src-tauri/Cargo.toml`.
+- **tauri-nspanel**: macOS-only; Windows releases never build it.
+
 ## Building a release
 
 Releases are Windows-only for now. `.github/workflows/release.yml` builds two installers and attaches them to a **draft** GitHub release:

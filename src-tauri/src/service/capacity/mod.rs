@@ -25,9 +25,12 @@ pub struct DayOverride {
 pub fn week(conn: &Connection) -> AppResult<WeekCapacity> {
     let mut week = [None; 7];
     let mut stmt = conn.prepare("SELECT weekday, minutes FROM weekday_capacity")?;
-    for row in stmt.query_map([], |r| Ok((r.get::<_, usize>(0)?, r.get::<_, i64>(1)?)))? {
+    for row in stmt.query_map([], |r| Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?)))? {
         let (weekday, minutes) = row?;
-        week[weekday] = Some(minutes);
+        // weekday is 0..=6 (a CHECK in the schema); anything else is skipped.
+        if let Some(slot) = usize::try_from(weekday).ok().and_then(|i| week.get_mut(i)) {
+            *slot = Some(minutes);
+        }
     }
     Ok(WeekCapacity(week))
 }
