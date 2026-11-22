@@ -7,6 +7,12 @@
   "description": "EnvForIO brings tasks, deadline planning, research ideas and machine monitoring together in one desktop app for researchers.",
   "copyright": "Copyright © 2026 EnvForIO",
   "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EnvForIO/EnvForIO.git"
+  },
+  "homepage": "https://github.com/EnvForIO/EnvForIO",
+  "bugs": "https://github.com/EnvForIO/EnvForIO/issues",
   "overrides": {
     "typescript-eslint": {
       "typescript": "$typescript"
