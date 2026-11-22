@@ -29,18 +29,30 @@ Releases are Windows-only for now. `.github/workflows/release.yml` builds two in
 
 ### Steps
 
+`main` is protected: changes reach it only through a reviewed pull request. So a release takes two steps.
+
+**1. Bump the version in a pull request.**
+
 ```bash
 npm run release:prepare v0.2.0
 ```
 
-The script checks that the working tree is clean, runs `npm run check:all`, sets the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`, updates the lock files, and offers to commit, tag and push. By hand it is:
+From an up-to-date, clean `main`, the script runs `npm run check:all`, creates the branch `release/v0.2.0`, sets the version in `package.json`, `src-tauri/Cargo.toml` and `src-tauri/tauri.conf.json`, refreshes both lock files, commits `chore: release v0.2.0`, and offers to push the branch. Open the pull request from the link it prints and merge it once CI passes and it is approved.
+
+**2. Tag `main`.**
 
 ```bash
-# set the version in the three files, then
-npm run check:all
-git commit -am "chore: release v0.2.0"
-git tag v0.2.0
-git push origin main --tags
+npm run release:tag v0.2.0
+```
+
+The script updates `main`, checks that its version is now 0.2.0, and offers to create the annotated tag `v0.2.0` and push only the tag. Tags are not covered by the `main` rules, so no pull request is needed.
+
+By hand, step 2 is:
+
+```bash
+git switch main && git pull --ff-only
+git tag -a v0.2.0 -m "EnvForIO v0.2.0"
+git push origin v0.2.0
 ```
 
 Pushing the tag starts the workflow. It stops if the tag does not match the version in `tauri.conf.json`. When it finishes, open the draft under Releases, check the installers and the notes, and publish it. The workflow can also be started from the Actions tab with a tag name.
