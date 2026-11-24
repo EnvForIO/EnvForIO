@@ -15,6 +15,16 @@
 | knip       | Unused files, exports, dependencies | `npm run knip`           | No             | `knip.json`                        |
 | jscpd      | Duplicated code                     | `npm run jscpd`          | No             | `.jscpd.json`                      |
 
+## Rust Minimum Version
+
+`npm run rust:version:check` compares the root package's `rust-version` with the requirements declared by every package returned by `cargo metadata --locked`. It checks the locked graph across platforms, including build and development dependencies, without changing `Cargo.lock`. Cargo may download missing dependency metadata on the first run.
+
+The check runs in `npm run check:all`, before compilation, so the Linux CI job also catches dependency updates that exceed the declared minimum. `npm run test:scripts` runs the checker's regression tests using Node's built-in test runner and is also part of `check:all`.
+
+When a dependency needs a newer Rust version, either raise `rust-version` in [src-tauri/Cargo.toml](../../src-tauri/Cargo.toml) or select compatible dependencies. This field is the single source of truth for the minimum version; README and contributing instructions link to it instead of repeating the number. Development and CI continue to use stable Rust via `rust-toolchain.toml` and the workflows.
+
+This is a metadata consistency check, not proof that the app compiles with the minimum toolchain: dependencies may omit their Rust requirements, and application code can use newer language features. Verify compilation with that toolchain when changing the minimum.
+
 ## ast-grep Rules
 
 | Rule                                  | Enforces                                                |

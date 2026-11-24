@@ -4,7 +4,7 @@ Thanks for helping. Bug reports, ideas and pull requests are all welcome; for an
 
 ## Set up
 
-You need [Node.js](https://nodejs.org/) 20 or later, [Rust](https://rustup.rs/) stable, and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) for your system.
+You need [Node.js](https://nodejs.org/) 20 or later, [Rust](https://rustup.rs/) stable, and the [Tauri prerequisites](https://tauri.app/start/prerequisites/) for your system. The minimum supported Rust version is declared by `rust-version` in [src-tauri/Cargo.toml](../src-tauri/Cargo.toml).
 
 ```bash
 git clone <this repository>
