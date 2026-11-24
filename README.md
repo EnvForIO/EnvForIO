@@ -28,7 +28,7 @@ The installers are not code-signed yet, so Windows SmartScreen may warn the firs
 
 ## Build from source
 
-You need Node.js 20 or later, Rust stable and the [Tauri prerequisites](https://tauri.app/start/prerequisites/).
+You need Node.js 20 or later, Rust stable and the [Tauri prerequisites](https://tauri.app/start/prerequisites/). The minimum supported Rust version is declared by `rust-version` in [src-tauri/Cargo.toml](src-tauri/Cargo.toml).
 
 ```bash
 npm install
